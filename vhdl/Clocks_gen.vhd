@@ -55,11 +55,3 @@ clk_3_25m <= int_clk_3_25m;
 
 end Based_on_IP;
 
---
--- Choix de la configuration de la generation des horloges
---
--- configuration first_try of Clocks_gen is
---     for Behavioral
---     end for;
--- end first_try; 
-
