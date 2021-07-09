@@ -95,36 +95,38 @@ begin
         new_line := '0';
     -- Sur chaque front descendant de l'horloge 6.5 MHz
     elsif falling_edge(clk) then
-        -- Generateur de HSYNC
-        porch_gate_and_hsyncn_counter := porch_gate_and_hsyncn_counter + 1;
         -- 384 cycles d'horloge à 6.5 MHz = 59 µs
         -- Duree pulse HSYNC = (414 - 384) @6.5 MHz = 4,6 µs 
         if i_vsync = '1' then
-             -- Compteur de ligne utilisé pour indexé les pattern vdéo en R 
-             line_cntr <= 0;
-        end if;
-
-        -- Back /Front porch OFF
-        if porch_gate_and_hsyncn_counter >= (FB_PORCH_OFF_DURATION + FRONT_PORCH_ON_DURATION + HSYNC_PULSE_ON_DURATION + BACK_PORCH_ON_DURATION) then
+            -- Compteur de ligne utilisé pour indexé les pattern vidéo en Rom 
+            line_cntr <= 0;
+            -- Si VSYNC = 1, il faut resetter le compteur de trame pour garder la synchronisation avec
+            -- le pusle de VSYNC
             porch_gate_and_hsyncn_counter := 0;
-            i_porch_gate <= '1';
-        -- HSYNCn OFF
-        elsif porch_gate_and_hsyncn_counter >= (FB_PORCH_OFF_DURATION + FRONT_PORCH_ON_DURATION + HSYNC_PULSE_ON_DURATION) then
-            i_hsyncn <= '1';
-            new_line := '1';
-        -- HSYNCn ON   
-        elsif porch_gate_and_hsyncn_counter >= (FB_PORCH_OFF_DURATION + FRONT_PORCH_ON_DURATION) then
-            i_hsyncn <= '0';
-            if new_line = '1' then
-                line_cntr <= (line_cntr + 1) mod 8;
-                new_line := '0';
+        else
+            -- Generateur de HSYNC
+            porch_gate_and_hsyncn_counter := porch_gate_and_hsyncn_counter + 1;
+            -- Back /Front porch OFF
+            if porch_gate_and_hsyncn_counter >= (FB_PORCH_OFF_DURATION + FRONT_PORCH_ON_DURATION + HSYNC_PULSE_ON_DURATION + BACK_PORCH_ON_DURATION) then
+                porch_gate_and_hsyncn_counter := 0;
+                i_porch_gate <= '1';
+            -- HSYNCn OFF
+            elsif porch_gate_and_hsyncn_counter >= (FB_PORCH_OFF_DURATION + FRONT_PORCH_ON_DURATION + HSYNC_PULSE_ON_DURATION) then
+                i_hsyncn <= '1';
+                new_line := '1';
+            -- HSYNCn ON   
+            elsif porch_gate_and_hsyncn_counter >= (FB_PORCH_OFF_DURATION + FRONT_PORCH_ON_DURATION) then
+                i_hsyncn <= '0';
+                if new_line = '1' then
+                    line_cntr <= (line_cntr + 1) mod 8;
+                    new_line := '0';
+                end if;
+            -- Back /Front porch ON
+            elsif porch_gate_and_hsyncn_counter >= (FB_PORCH_OFF_DURATION) then
+                i_porch_gate <= '0';                      
             end if;
-        -- Back /Front porch ON
-        elsif porch_gate_and_hsyncn_counter >= (FB_PORCH_OFF_DURATION) then
-            i_porch_gate <= '0';                      
         end if;
     end if;
-
 end process;
 
 -- Processs utilise pour supprimer les pulse parasites de l'entrée MIC

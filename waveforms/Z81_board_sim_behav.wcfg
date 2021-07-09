@@ -13,15 +13,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="793592275423fs"></ZoomStartTime>
-      <ZoomEndTime time="793733175424fs"></ZoomEndTime>
-      <Cursor1Time time="793693375423fs"></Cursor1Time>
+      <ZoomStartTime time="0fs"></ZoomStartTime>
+      <ZoomEndTime time="825905250207fs"></ZoomEndTime>
+      <Cursor1Time time="540042022824fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="134"></NameColumnWidth>
+      <NameColumnWidth column_width="122"></NameColumnWidth>
       <ValueColumnWidth column_width="58"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="30" />
+   <WVObjectSize size="29" />
    <wave_markers>
       <marker time="793654207423" label="" />
    </wave_markers>
@@ -97,9 +97,9 @@
       <obj_property name="CustomSignalColor">#00FFFF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/vid_state_machine_0/line_cntr" type="array">
-      <obj_property name="ElementShortName">line_cntr[2:0]</obj_property>
-      <obj_property name="ObjectShortName">line_cntr[2:0]</obj_property>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/vid_state_machine_0/line_cntr" type="other">
+      <obj_property name="ElementShortName">line_cntr</obj_property>
+      <obj_property name="ObjectShortName">line_cntr</obj_property>
    </wvobject>
    <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_a_vid_pattern" type="array">
       <obj_property name="ElementShortName">i_a_vid_pattern[15:0]</obj_property>
@@ -132,10 +132,6 @@
    <wvobject fp_name="/Z81_board_sim/ZX81_board0/Video" type="logic">
       <obj_property name="ElementShortName">Video</obj_property>
       <obj_property name="ObjectShortName">Video</obj_property>
-   </wvobject>
-   <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/vid_state_machine_0/debug_state_m" type="other">
-      <obj_property name="ElementShortName">debug_state_m</obj_property>
-      <obj_property name="ObjectShortName">debug_state_m</obj_property>
    </wvobject>
    <wvobject fp_name="/Z81_board_sim/ZX81_board0/Debug" type="array">
       <obj_property name="ElementShortName">Debug[5:0]</obj_property>
