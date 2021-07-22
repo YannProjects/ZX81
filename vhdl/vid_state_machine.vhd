@@ -45,7 +45,12 @@ entity vid_state_machine is
            D_cpu_OUT : in STD_LOGIC_VECTOR (7 downto 0); -- CPU data bus OUT. Input from ULA side
            D_ram_in : out STD_LOGIC_VECTOR (7 downto 0); -- RAM input data bus. Output from ULA side
            D_ram_out : in STD_LOGIC_VECTOR (7 downto 0); -- RAM output data bus. Input for ULA side
-           D_rom_out : in STD_LOGIC_VECTOR (7 downto 0); -- ROM ouput data bus. Input for ULA side      
+           D_rom_out : in STD_LOGIC_VECTOR (7 downto 0); -- ROM ouput data bus. Input for ULA side
+           
+           -- Adresse et data vidéo pour le controlleur VGA
+           vga_addr : out std_logic_vector(12 downto 0);
+           vga_data : out std_logic_vector(7 downto 0);  
+           vga_wr_cyc : out STD_LOGIC; 
            
            M1n : in STD_LOGIC;
            RDn : in STD_LOGIC;
@@ -71,10 +76,14 @@ architecture Behavioral of vid_state_machine is
 
     type sm_video_state is (wait_for_new_cpu_cycle, wait_for_m1_read, wait_for_m1_rfrsh, wait_for_m1_mreq);
     signal i_hsyncn, i_vsync, i_nmionn, i_porch_gate: std_logic;
-    signal line_cntr: natural range 0 to 7;
+    signal char_line_cntr: natural;
+    signal line_cntr : natural;
 
     signal debug_state_m : sm_video_state;
-    
+    signal pixel_cnt_line_start, pixel_cnt, i_vga_addr_line_start : natural := 0;
+    signal i_vga_addr : std_logic_vector(15 downto 0);
+
+
 begin
   
 hsync_process: process (clk, RSTn)
@@ -85,7 +94,7 @@ variable new_line : std_logic;
 begin
     if (RSTn = '0') then
         porch_gate_and_hsyncn_counter := 0;
-        line_cntr <= 0;
+        char_line_cntr <= 0;
         i_hsyncn <= '1';
         -- Signal utiliser pour forcer la sortie video au niveau 0
         -- pour les front porch et back porch sur chaque top ligne.
@@ -99,9 +108,11 @@ begin
         -- Duree pulse HSYNC = (414 - 384) @6.5 MHz = 4,6 µs 
         if i_vsync = '1' then
             -- Compteur de ligne utilisé pour indexé les pattern vidéo en Rom 
-            line_cntr <= 0;
+            char_line_cntr <= 0;
+            pixel_cnt_line_start <= 0;
+            pixel_cnt <= 0;
             -- Si VSYNC = 1, il faut resetter le compteur de trame pour garder la synchronisation avec
-            -- le pusle de VSYNC
+            -- le pulse de VSYNC
             porch_gate_and_hsyncn_counter := 0;
         else
             -- Generateur de HSYNC
@@ -117,8 +128,15 @@ begin
             -- HSYNCn ON   
             elsif porch_gate_and_hsyncn_counter >= (FB_PORCH_OFF_DURATION + FRONT_PORCH_ON_DURATION) then
                 i_hsyncn <= '0';
+                if pixel_cnt_line_start = 0 then
+                    pixel_cnt_line_start <= 351;
+                    i_vga_addr_line_start <= 0;
+                else
+                    pixel_cnt_line_start <= pixel_cnt_line_start + 414;
+                    i_vga_addr_line_start <= i_vga_addr_line_start + 32;
+                end if;
                 if new_line = '1' then
-                    line_cntr <= (line_cntr + 1) mod 8;
+                    char_line_cntr <= (char_line_cntr + 1) mod 8;
                     new_line := '0';
                 end if;
             -- Back /Front porch ON
@@ -165,9 +183,11 @@ video_state_machine_process: process (clk, RSTn)
     variable state_m : sm_video_state := wait_for_new_cpu_cycle;
     variable i_nop_detect, invert_video : std_logic := '0';
     variable char_reg, vid_pattern : std_logic_vector(7 downto 0);
-    variable iorq_counter : integer := 0;
+    variable iorq_counter, char_idx : integer := 0;
     variable iorq_heart_beat_tmp : std_logic := '0';
-    
+    variable i_vga_data : std_logic_vector(7 downto 0);
+    variable i_wr_cyc : std_logic := '0';
+
 begin
     if (RSTn = '0') then
         state_m := wait_for_new_cpu_cycle;
@@ -185,6 +205,7 @@ begin
         -- Il est gaté avec le signal de back/front porch qui encadre le signal HSYNCn
         SEROUT <= not (vid_pattern(7)) and i_porch_gate;
         vid_pattern := vid_pattern(6 downto 0) & '0';
+        pixel_cnt <= pixel_cnt + 1;
         case state_m is
              when wait_for_new_cpu_cycle =>
                 -- Identification du cycle CPU en cours:
@@ -195,6 +216,7 @@ begin
                 -- Sinon, c'est un cycle de lecture ou ecriture, on positionne les adresses
                 -- correspondantes en RAM ou RAM en fonction de l'adresse du CPU.  
                 -- Cycle d'execution CPU
+                i_wr_cyc := '0';
                 if M1n = '0' then
                     -- Cycle M1 et que ce n'est pas une sortie de cycle HALT
                     if HALTn = '1' then
@@ -293,6 +315,10 @@ begin
                         else
                             vid_pattern := not D_rom_out;
                         end if;
+
+                        i_vga_addr <= std_logic_vector(to_unsigned(i_vga_addr_line_start + pixel_cnt - pixel_cnt_line_start - 30 - 82, 16));
+                        i_wr_cyc := '1';
+                        i_vga_data := vid_pattern;
                     end if;
                     invert_video := '0';
                     i_nop_detect := '0';
@@ -303,9 +329,14 @@ begin
             end case;
     end if;
     
+    
     NOP_Detect <= i_nop_detect;
     debug_state_m <= state_m;
     iorq_heart_beat <= iorq_heart_beat_tmp;
+    -- Signaux pour le controlleur VGA
+    vga_addr <= i_vga_addr(15 downto 3);
+    vga_data <= i_vga_data;
+    vga_wr_cyc <= i_wr_cyc;
     
 end process;
 

@@ -67,7 +67,7 @@ begin
        Debug => i_debug
    );
    
-   i_board_reset <= '0', '1' after 100 ns, '0' after 1 us;
+   i_board_reset <= '0', '1' after 100 ns, '0' after 100 us;
 
    -- 13 MHz CLK
    clk_process :process
