@@ -42,7 +42,7 @@ constant RAM_ADDRWIDTH : integer := 11;
 --
 -- Nombre d'impulsion correspondant à la durée du pulse de HSYNC 
 constant HSYNC_PULSE_ON_DURATION : natural := 30; -- @ 6,5 MHz
--- Back port to front port pulse duration (entre le début de la zone de back porch et la fin de la zon de front porch
+-- Back port to front port pulse duration (entre le début de la zone de back porch et la fin de la zone de front porch
 -- qui encadre les top lignes)
 constant FB_PORCH_OFF_DURATION : natural := 339;
 

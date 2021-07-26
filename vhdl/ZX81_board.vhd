@@ -50,12 +50,15 @@ entity ZX81_board is
            HSYNC_VGA : out STD_LOGIC;
            VSYNC_VGA : out STD_LOGIC;
            BLANK_VGA : out STD_LOGIC;
-           R_VGA : out STD_LOGIC_vector (7 downto 0);
-           G_VGA : out STD_LOGIC_vector (7 downto 0);
-           B_VGA : out STD_LOGIC_vector (7 downto 0);
+           -- R_VGA : out STD_LOGIC_vector (7 downto 0);
+           -- G_VGA : out STD_LOGIC_vector (7 downto 0);
+           -- B_VGA : out STD_LOGIC_vector (7 downto 0);
+           R_VGA_0 : out STD_LOGIC;
+           G_VGA_0 : out STD_LOGIC;
+           B_VGA_0 : out STD_LOGIC
            
            -- Signaux de debug
-           Debug : out std_logic_vector(5 downto 0)
+           -- Debug : out std_logic_vector(5 downto 0)
                       
            -- LEDs embarquées sur le CMOD S7
            -- LED_1 -> E2 : IORQn_Heart_Beat
@@ -101,6 +104,8 @@ architecture Behavioral of ZX81_board is
     signal i_vga_addr: std_logic_vector(12 downto 0);
     signal i_vga_data: std_logic_vector(7 downto 0);
     signal i_vga_wr_cyc, i_vga_control_init_done : std_logic;
+    
+    signal R_VGA, G_VGA, B_VGA : std_logic_vector(7 downto 0);
     
     -- attribute mark_debug : string;
     -- attribute mark_debug of KBD_C : signal is "true";
@@ -152,7 +157,7 @@ begin
               
     ula0 : entity work.ULA
     port map ( 
-       CLK_6_5_M => i_clk_6_5m,
+       CLK_6_5_M => i_clk_6_5mn,
        A_cpu => i_a_cpu, -- CPU address bus
        A_vid_pattern => i_a_vid_pattern, -- RAM/ROM address bus
        D_cpu_IN => i_d_cpu_in, -- CPU data bus IN. Output from ULA side
@@ -231,7 +236,10 @@ begin
     i_resetn <= not RESET and i_pll_locked and i_vga_control_init_done;
     i_mic <= not MIC;
     
+    R_VGA_0 <= R_VGA(0);
+    G_VGA_0 <= G_VGA(0);
+    B_VGA_0 <= B_VGA(0);
     -- Signaux de debug vers un connecteur externe
-    Debug <= "000000";
+    -- Debug <= "000000";
     
 end Behavioral;

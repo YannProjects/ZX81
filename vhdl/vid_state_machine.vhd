@@ -76,45 +76,48 @@ architecture Behavioral of vid_state_machine is
 
     type sm_video_state is (wait_for_new_cpu_cycle, wait_for_m1_read, wait_for_m1_rfrsh, wait_for_m1_mreq);
     signal i_hsyncn, i_vsync, i_nmionn, i_porch_gate: std_logic;
-    signal char_line_cntr: natural;
-    signal line_cntr : natural;
+    signal char_line_cntr : unsigned(2 downto 0);
 
     signal debug_state_m : sm_video_state;
-    signal pixel_cnt_line_start, pixel_cnt, i_vga_addr_line_start : natural := 0;
-    signal i_vga_addr : std_logic_vector(15 downto 0);
-
+    signal pixel_cnt_line_start, i_vga_addr_line_start : unsigned(12 downto 0);
+    signal i_vga_addr_dbg, byte_offset_dbg, pixel_offset_dbg : unsigned(12 downto 0);
+    
+    signal porch_gate_and_hsyncn_counter: natural;
+    
+    signal porch_gate_and_hsyncn_counter_next_value: natural := 0;
+    signal new_line : std_logic;
 
 begin
   
 hsync_process: process (clk, RSTn)
 
-variable porch_gate_and_hsyncn_counter: natural range 0 to 1023;
+variable porch_gate_and_hsyncn_counter: natural := 0;
 variable new_line : std_logic;
+variable i_porch_gate_next_value, i_hsyncn_next_value : std_logic;
  
 begin
     if (RSTn = '0') then
         porch_gate_and_hsyncn_counter := 0;
-        char_line_cntr <= 0;
+        char_line_cntr <= "000";
         i_hsyncn <= '1';
         -- Signal utiliser pour forcer la sortie video au niveau 0
         -- pour les front porch et back porch sur chaque top ligne.
         -- Le signal i_porch_gate "encadre" le signal HSYNC avant (2 µs) et après le top ligne (5 µs).
         -- Voir http://f5ad.free.fr/ATV-QSP_F5AD_Le_signal_video.htm pour les valeurs
         i_porch_gate <= '1';
-        new_line := '0';
-    -- Sur chaque front descendant de l'horloge 6.5 MHz
-    elsif falling_edge(clk) then
+        new_line := '0';    
+        -- Sur chaque front descendant de l'horloge 6.5 MHz
+    elsif rising_edge(clk) then
         -- 384 cycles d'horloge à 6.5 MHz = 59 µs
-        -- Duree pulse HSYNC = (414 - 384) @6.5 MHz = 4,6 µs 
+      -- Duree pulse HSYNC = (414 - 384) @6.5 MHz = 4,6 µs 
         if i_vsync = '1' then
-            -- Compteur de ligne utilisé pour indexé les pattern vidéo en Rom 
-            char_line_cntr <= 0;
-            pixel_cnt_line_start <= 0;
-            pixel_cnt <= 0;
             -- Si VSYNC = 1, il faut resetter le compteur de trame pour garder la synchronisation avec
             -- le pulse de VSYNC
+            char_line_cntr <= "000";
             porch_gate_and_hsyncn_counter := 0;
+            i_vga_addr_line_start <= (others => '0');
         else
+            pixel_cnt_line_start <= pixel_cnt_line_start + 1;
             -- Generateur de HSYNC
             porch_gate_and_hsyncn_counter := porch_gate_and_hsyncn_counter + 1;
             -- Back /Front porch OFF
@@ -128,15 +131,10 @@ begin
             -- HSYNCn ON   
             elsif porch_gate_and_hsyncn_counter >= (FB_PORCH_OFF_DURATION + FRONT_PORCH_ON_DURATION) then
                 i_hsyncn <= '0';
-                if pixel_cnt_line_start = 0 then
-                    pixel_cnt_line_start <= 351;
-                    i_vga_addr_line_start <= 0;
-                else
-                    pixel_cnt_line_start <= pixel_cnt_line_start + 414;
-                    i_vga_addr_line_start <= i_vga_addr_line_start + 32;
-                end if;
                 if new_line = '1' then
-                    char_line_cntr <= (char_line_cntr + 1) mod 8;
+                    char_line_cntr <= char_line_cntr + 1;
+                    pixel_cnt_line_start <= (others => '0');
+                    i_vga_addr_line_start <= i_vga_addr_line_start + 32;
                     new_line := '0';
                 end if;
             -- Back /Front porch ON
@@ -176,17 +174,16 @@ end process;
 --       prev_tape_in_raw := TAPE_IN;
 --     end if;    
 -- end process;
-  
 
-        
 video_state_machine_process: process (clk, RSTn)
     variable state_m : sm_video_state := wait_for_new_cpu_cycle;
     variable i_nop_detect, invert_video : std_logic := '0';
     variable char_reg, vid_pattern : std_logic_vector(7 downto 0);
-    variable iorq_counter, char_idx : integer := 0;
+    variable iorq_counter : integer := 0;
     variable iorq_heart_beat_tmp : std_logic := '0';
     variable i_vga_data : std_logic_vector(7 downto 0);
     variable i_wr_cyc : std_logic := '0';
+    variable byte_offset, pixel_offset, i_vga_addr : unsigned(12 downto 0);    
 
 begin
     if (RSTn = '0') then
@@ -197,7 +194,7 @@ begin
         iorq_heart_beat <= '0';
         i_vsync <= '1';
     -- Sur chaque front descendant de l'horloge 6.5 MHz
-    elsif falling_edge(clk) then       
+    elsif rising_edge(clk) then       
         -- Shift out most significant bit (video out)
         -- La vidéo est inversé. Sur le schéma du ZX97 Lite, il y a un montage émetteur commun qui
         -- inverse le signal. Pas dans mon cas où c'est un montage collecteur commun non inverseur
@@ -205,7 +202,6 @@ begin
         -- Il est gaté avec le signal de back/front porch qui encadre le signal HSYNCn
         SEROUT <= not (vid_pattern(7)) and i_porch_gate;
         vid_pattern := vid_pattern(6 downto 0) & '0';
-        pixel_cnt <= pixel_cnt + 1;
         case state_m is
              when wait_for_new_cpu_cycle =>
                 -- Identification du cycle CPU en cours:
@@ -303,7 +299,7 @@ begin
                         -- Si c'est un cycle de NOP, on lit le pattern video à partir de la ROM
                         -- en construisant l'adresse à partir du caractère à afficher et du numero
                         -- de ligne en cours.
-                        A_vid_pattern <= A_cpu(15 downto 9) & char_reg(5 downto 0) & std_logic_vector(to_unsigned(line_cntr,3));
+                        A_vid_pattern <= A_cpu(15 downto 9) & char_reg(5 downto 0) & std_logic_vector(char_line_cntr);
                     end if;
                     state_m := wait_for_m1_mreq;
                 end if;
@@ -316,7 +312,9 @@ begin
                             vid_pattern := not D_rom_out;
                         end if;
 
-                        i_vga_addr <= std_logic_vector(to_unsigned(i_vga_addr_line_start + pixel_cnt - pixel_cnt_line_start - 30 - 82, 16));
+                        pixel_offset := pixel_cnt_line_start - 111;
+                        byte_offset := "00000" & pixel_offset(10 downto 3);
+                        i_vga_addr := i_vga_addr_line_start - X"400" + byte_offset;
                         i_wr_cyc := '1';
                         i_vga_data := vid_pattern;
                     end if;
@@ -329,12 +327,14 @@ begin
             end case;
     end if;
     
+    byte_offset_dbg <= byte_offset;
+    pixel_offset_dbg <= pixel_offset;
     
     NOP_Detect <= i_nop_detect;
     debug_state_m <= state_m;
     iorq_heart_beat <= iorq_heart_beat_tmp;
     -- Signaux pour le controlleur VGA
-    vga_addr <= i_vga_addr(15 downto 3);
+    vga_addr <= std_logic_vector(i_vga_addr);
     vga_data <= i_vga_data;
     vga_wr_cyc <= i_wr_cyc;
     

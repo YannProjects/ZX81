@@ -19,7 +19,9 @@
 ----------------------------------------------------------------------------------
 
 library IEEE;
+library unisim;
 use IEEE.STD_LOGIC_1164.ALL;
+use unisim.vcomponents.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -67,41 +69,38 @@ begin
         locked => pll_locked
     );
 
-    clk_divider_1: process (i_clk_52m, reset)
-    begin
-        if reset = '1' then
-            i_clk_26m <= '0';
-        elsif rising_edge(i_clk_52m) then
-            i_clk_26m <= not i_clk_26m;
-        end if;
-    end process;
+    -- Code venant de https://forums.xilinx.com/t5/Other-FPGA-Architecture/How-to-divide-a-clock-by-2-with-a-simple-primitive-without-Clock/td-p/783488
+    clk_divider_1: BUFR
+    generic map ( BUFR_DIVIDE => "2")
+    port map ( 
+        I => i_clk_52m,
+        O => i_clk_26m,
+        CE => '1',
+        CLR => '0');
     
-    clk_divider_2: process (i_clk_26m, reset)
-    begin
-        if reset = '1' then
-            i_clk_13m <= '0';
-        elsif rising_edge(i_clk_26m) then
-            i_clk_13m <= not i_clk_13m;
-        end if;
-    end process;
-    
-    clk_divider_3: process (i_clk_13m, reset)
-    begin
-        if reset = '1' then
-            i_clk_6_5m <= '0';
-        elsif rising_edge(i_clk_13m) then
-            i_clk_6_5m <= not i_clk_6_5m;
-        end if;
-    end process;
-    
-    clk_divider_4: process (i_clk_6_5m, reset)
-    begin
-        if reset = '1' then
-            i_clk_3_25m <= '0';
-        elsif rising_edge(i_clk_6_5m) then
-            i_clk_3_25m <= not i_clk_3_25m;
-        end if;
-    end process;            
+    clk_divider_2: BUFR
+    generic map ( BUFR_DIVIDE => "2")
+    port map ( 
+        I => i_clk_26m,
+        O => i_clk_13m,
+        CE => '1',
+        CLR => '0');
+
+    clk_divider_3: BUFR
+    generic map ( BUFR_DIVIDE => "2")
+    port map ( 
+        I => i_clk_13m,
+        O => i_clk_6_5m,
+        CE => '1',
+        CLR => '0');
+
+    clk_divider_4: BUFR
+    generic map ( BUFR_DIVIDE => "2")
+    port map ( 
+        I => i_clk_6_5m,
+        O => i_clk_3_25m,
+        CE => '1',
+        CLR => '0');       
 
     clk_3_25m <= i_clk_3_25m;
     clk_6_5m <= i_clk_6_5m;

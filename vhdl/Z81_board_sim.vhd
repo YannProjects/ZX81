@@ -21,10 +21,11 @@
 
 library ieee;
 library STD;
+library work;
 use IEEE.STD_LOGIC_1164.ALL;
 use STD.textio.all;
 use ieee.std_logic_textio.all;
-library work;
+use work.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -50,7 +51,8 @@ signal i_kbd_l : std_logic_vector (4 downto 0);
 signal i_debug : std_logic_vector (5 downto 0);
 signal i_kbd_c : std_logic_vector (7 downto 0);
 signal i_mic_in : std_logic := '1';
-
+signal i_hsync_vga, i_vsync_vga, i_blank_vga : std_logic;
+-- signal i_r_vga, i_g_vga, i_b_vga : std_logic_vector(7 downto 0);
 
 begin
    
@@ -64,7 +66,14 @@ begin
        EAR => i_ear,
        Video => i_video,
        CSYNCn => i_csyncn,
-       Debug => i_debug
+       -- Debug => i_debug,
+       HSYNC_VGA => i_hsync_vga,
+       VSYNC_VGA => i_vsync_vga,
+       BLANK_VGA => i_blank_vga
+       -- R_VGA => i_r_vga,
+       -- G_VGA => i_g_vga,
+       -- B_VGA => i_b_vga
+
    );
    
    i_board_reset <= '0', '1' after 100 ns, '0' after 100 us;
