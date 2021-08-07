@@ -25,7 +25,6 @@ library work;
 use IEEE.STD_LOGIC_1164.ALL;
 use STD.textio.all;
 use ieee.std_logic_textio.all;
-use work.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -42,6 +41,31 @@ end Z81_board_sim;
 
 architecture Behavioral of Z81_board_sim is
 
+component ZX81_board is
+port(
+    CLK_12M : in STD_LOGIC; -- Clock from CMOD S7
+    -- Sortie "audio" ZX81 - Entrée "audio" PC
+    MIC : out STD_LOGIC;
+    RESET : in std_logic;
+    KBD_L : in STD_LOGIC_vector (4 downto 0);
+    KBD_C : out STD_LOGIC_vector (7 downto 0);
+    -- Sortie "audio" PC - Entrée "audio" ZX81
+    EAR : in STD_LOGIC;
+    Video : out STD_LOGIC;
+    Iorq_Heart_Beat : out std_logic;
+    CSYNCn : out STD_LOGIC;
+    HSYNC_VGA : out STD_LOGIC;
+    VSYNC_VGA : out STD_LOGIC;
+    BLANK_VGA : out STD_LOGIC;
+    -- R_VGA : out STD_LOGIC_vector (7 downto 0);
+    -- G_VGA : out STD_LOGIC_vector (7 downto 0);
+    -- B_VGA : out STD_LOGIC_vector (7 downto 0);
+    R_VGA_0 : out STD_LOGIC;
+    G_VGA_0 : out STD_LOGIC;
+    B_VGA_0 : out STD_LOGIC
+);
+end component ZX81_board;
+
 constant clk_period : time := 83 ns;
 constant micin_simu_start_time : time := 1000 ms;
 constant vector_file_name :string := "D:\Users\Yann\Documents\Projets_HW\ZX81\Traces oscilloscope\Fichier .P en audio\cHARGEMENT_FICHIER_";
@@ -50,20 +74,22 @@ signal i_board_reset, i_ear, i_video, i_main_clk, i_csyncn : std_logic;
 signal i_kbd_l : std_logic_vector (4 downto 0);
 signal i_debug : std_logic_vector (5 downto 0);
 signal i_kbd_c : std_logic_vector (7 downto 0);
-signal i_mic_in : std_logic := '1';
+signal i_mic_out : std_logic;
+signal i_ear_in : std_logic := '1';
+signal earin_state  : std_logic;
 signal i_hsync_vga, i_vsync_vga, i_blank_vga : std_logic;
 -- signal i_r_vga, i_g_vga, i_b_vga : std_logic_vector(7 downto 0);
 
 begin
    
-   ZX81_board0: entity work.ZX81_board
+   ZX81_board0: ZX81_board
    port map (
        CLK_12M => i_main_clk,
-       MIC => i_mic_in,
+       MIC => i_mic_out,
        RESET => i_board_reset,
        KBD_L => i_kbd_l,
        KBD_C => i_kbd_c,
-       EAR => i_ear,
+       EAR => i_ear_in,
        Video => i_video,
        CSYNCn => i_csyncn,
        -- Debug => i_debug,
@@ -134,7 +160,7 @@ begin
           absolute_time := new_file_start_time + absolute_time_real * 1ms;
           wait for (absolute_time - absolute_time_prev);
           absolute_time_prev := absolute_time;
-          i_mic_in <= not micin_state;
+          i_ear_in <= not earin_state;
         end loop;
         new_file_start_time := absolute_time;
         

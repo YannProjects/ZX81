@@ -23,9 +23,9 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 -- use IEEE.NUMERIC_STD.ALL;
 use IEEE.std_logic_arith.ALL;
-use work.ZX81_pack.all;
 use work.T80_Pack.all;
 use work.VGA_control_pack.all;
+use work.zx81_pack.all;
 
 
 -- Uncomment the following library declaration if using
@@ -39,11 +39,13 @@ use work.VGA_control_pack.all;
 
 entity ZX81_board is
     Port ( CLK_12M : in STD_LOGIC; -- Clock from CMOD S7
-           MIC : in STD_LOGIC;
+           -- Sortie "audio" ZX81 - Entrée "audio" PC
+           MIC : out STD_LOGIC;
            RESET : in std_logic;
            KBD_L : in STD_LOGIC_vector (4 downto 0);
            KBD_C : out STD_LOGIC_vector (7 downto 0);
-           EAR : out STD_LOGIC;
+           -- Sortie "audio" PC - Entrée "audio" ZX81
+           EAR : in STD_LOGIC;
            Video : out STD_LOGIC;
            Iorq_Heart_Beat : out std_logic;
            CSYNCn : out STD_LOGIC;
@@ -92,7 +94,7 @@ architecture Behavioral of ZX81_board is
     
     -- Control signal
     signal i_waitn, i_nmin : std_logic := '1';
-    signal i_busackn, i_m1n, i_mreqn, i_iorqn, i_mic : std_logic;
+    signal i_busackn, i_m1n, i_mreqn, i_iorqn, i_tape_in : std_logic;
     signal i_rdn, i_wrn, i_wrram, i_rfrshn, i_haltn, i_nop_detect : std_logic;
     signal i_a_cpu, i_a_vid_pattern,i_a_rom : std_logic_vector (15 downto 0);
     signal a_ram_addr_2K : std_logic_vector (13 downto 0);
@@ -115,7 +117,7 @@ architecture Behavioral of ZX81_board is
     -- attribute mark_debug of i_d_ram_out : signal is "true";
     -- attribute mark_debug of i_a_cpu : signal is "true";
     -- attribute mark_debug of i_m1n : signal is "true";
-    -- attribute mark_debug of i_mic : signal is "true";
+    -- attribute mark_debug of i_tape_in : signal is "true";
     -- attribute mark_debug of i_d_cpu_in : signal is "true";
     -- attribute mark_debug of i_clk_3_25m : signal is "true";
     
@@ -169,9 +171,9 @@ begin
        vga_data => i_vga_data,    
        vga_wr_cyc => i_vga_wr_cyc, 
        KBDn => KBD_L, -- <<==
-       TAPE_IN => i_mic,
+       TAPE_IN => i_tape_in,
        USA_UK => '0',
-       TAPE => EAR,
+       TAPE_OUT => MIC,
        Video => Video, -- Data video
        Iorq_Heart_Beat => Iorq_Heart_Beat,
        CSYNCn => i_csyncn, -- Composite sync (HSYNC + VSYNC)
@@ -215,7 +217,6 @@ begin
         B => B_VGA
     );
     
-    -- i_wrram <= i_wrn when i_mreqn = '0' else '1';
     -- Ajout d'une condition sur le signal WR Ram suite au problème rencontré sur l'instruction en L1A14 (LD      (DE),A)
     -- avec DE qui vaut 0. Je ne sais pas pourquoi vaut 0 dans ce cas. Mais, on reproduit le problème avec MAME.
     -- => Ajout de la condition sur A14 pour valider l'écriture en RAM.
@@ -234,7 +235,8 @@ begin
     -- Video <= not i_video;
     CSYNCn <= i_csyncn;
     i_resetn <= not RESET and i_pll_locked and i_vga_control_init_done;
-    i_mic <= not MIC;
+
+    i_tape_in <= not EAR;
     
     R_VGA_0 <= R_VGA(0);
     G_VGA_0 <= G_VGA(0);

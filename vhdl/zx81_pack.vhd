@@ -21,6 +21,7 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use ieee.numeric_std.all;
 
 Package ZX81_Pack is
 
@@ -52,7 +53,10 @@ constant BACK_PORCH_ON_DURATION : natural := 32; -- 5 µs @ 6,5 MHz
 -- constant FRONT_TO_BACK_PORCH_ON_DURATION : natural := FRONT_PORCH_ON_DURATION + HSYNC_PULSE_ON_DURATION + BACK_PORCH_ON_DURATION;
 
 -- Pour le heart beat
-constant IORQ_PERIOD : natural := 300;
+constant IORQ_PERIOD : unsigned(15 downto 0) := X"1770";
+
+-- Nombre de pixel non affichés entre le trop ligne et lé début de l'affichage
+constant PIXEL_OFFSET_FROM_LINE_START : unsigned(12 downto 0) := '0' & X"06D"; -- 109
 
 -- constant PULSE_DURATION_THRESHOLD : natural := 400;
 
