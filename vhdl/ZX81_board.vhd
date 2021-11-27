@@ -103,11 +103,11 @@ architecture Behavioral of ZX81_board is
     signal i_busackn, i_m1n, i_mreqn, i_iorqn, i_tape_in : std_logic;
     signal i_rdn, i_wrn, i_wrram, i_rfrshn, i_haltn, i_nop_detect : std_logic;
     signal i_a_cpu, i_a_vid_pattern,i_a_rom : std_logic_vector (15 downto 0);
-    signal i_d_cpu_out, i_d_cpu_in, i_d_ram_in, i_d_ram_out, i_d_ram_out_0, i_d_rom_out : std_logic_vector (7 downto 0);
+    signal i_d_cpu_out, i_d_cpu_in, i_d_ram_in, i_d_ram_out, i_d_rom_out : std_logic_vector (7 downto 0);
     signal i_clk_52m, i_clk_6_5m, i_clk_6_5mn, i_clk_6_5mn_buf, i_clk_3_25m : std_logic;
-    signal i_csyncn, i_video, i_resetn, i_resetn_0 : std_logic;
-    signal ULA_Debug : std_logic_vector(4 downto 0);
+    signal i_resetn : std_logic;
     signal i_kbd_l_swap : std_logic_vector(4 downto 0);
+    -- VGA
     signal i_vga_clock, i_pll_locked : std_logic;
     signal i_vga_addr: std_logic_vector(13 downto 0);
     signal i_vga_data: std_logic_vector(7 downto 0);
