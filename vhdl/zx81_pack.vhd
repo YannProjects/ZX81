@@ -21,11 +21,12 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use ieee.numeric_std.all;
 
 Package ZX81_Pack is
 
 -- 2K
---constant RAM_ADDRWIDTH : integer := 11;
+-- constant RAM_ADDRWIDTH : integer := 11;
 -- 16K
 constant RAM_ADDRWIDTH : integer := 14;
 
@@ -42,7 +43,7 @@ constant RAM_ADDRWIDTH : integer := 14;
 --
 -- Nombre d'impulsion correspondant à la durée du pulse de HSYNC 
 constant HSYNC_PULSE_ON_DURATION : natural := 30; -- @ 6,5 MHz
--- Back port to front port pulse duration (entre le début de la zone de back porch et la fin de la zon de front porch
+-- Back port to front port pulse duration (entre le début de la zone de back porch et la fin de la zone de front porch
 -- qui encadre les top lignes)
 constant FB_PORCH_OFF_DURATION : natural := 339;
 
@@ -52,7 +53,10 @@ constant BACK_PORCH_ON_DURATION : natural := 32; -- 5 µs @ 6,5 MHz
 -- constant FRONT_TO_BACK_PORCH_ON_DURATION : natural := FRONT_PORCH_ON_DURATION + HSYNC_PULSE_ON_DURATION + BACK_PORCH_ON_DURATION;
 
 -- Pour le heart beat
-constant IORQ_PERIOD : natural := 300;
+constant IORQ_PERIOD : unsigned(15 downto 0) := X"1770";
+
+-- Nombre de pixel non affichés entre le trop ligne et lé début de l'affichage
+constant PIXEL_OFFSET_FROM_LINE_START : unsigned(13 downto 0) := B"00" & X"06D"; -- 109
 
 -- constant PULSE_DURATION_THRESHOLD : natural := 400;
 

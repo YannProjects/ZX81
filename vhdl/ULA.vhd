@@ -44,10 +44,15 @@ entity ULA is
            D_ram_in : out STD_LOGIC_VECTOR (7 downto 0); -- RAM input data bus. Output from ULA side
            D_ram_out : in STD_LOGIC_VECTOR (7 downto 0); -- RAM output data bus. Input for ULA side
            D_rom_out : in STD_LOGIC_VECTOR (7 downto 0); -- ROM ouput data bus. Input for ULA side
+           -- Adresse et data vidéo pour le controlleur VGA
+           vga_addr : out std_logic_vector(13 downto 0);
+           vga_data : out std_logic_vector(7 downto 0);
+           vga_wr_cyc : out STD_LOGIC;
+           -- 
            KBDn : in STD_LOGIC_VECTOR (4 downto 0);
            TAPE_IN : in STD_LOGIC;
            USA_UK : in STD_LOGIC;
-           TAPE : out STD_LOGIC;
+           TAPE_OUT : out STD_LOGIC;
            Video : out std_logic; -- Data video
            Iorq_Heart_Beat : out std_logic; -- Heart beat pour la sortie video
            CSYNCn : out std_logic; -- Composite sync (HSYNC + VSYNC)
@@ -82,6 +87,9 @@ port map (
     D_ram_in => D_ram_in,
     D_ram_out => D_ram_out,
     D_rom_out => D_rom_out,
+    vga_addr => vga_addr,
+    vga_data => vga_data,
+    vga_wr_cyc => vga_wr_cyc,
     
     M1n => M1n,
     RDn => RDn,
@@ -92,8 +100,7 @@ port map (
     MREQn => MREQn,
     RFRSHn => RFRSHn,
     NOP_Detect => NOP_Detect,
-    CSYNCn => CSYNCn,
-    SEROUT => Video,
+    SEROUT => TAPE_OUT,
     iorq_heart_beat => Iorq_Heart_Beat,
     
     KBDn => KBDn,

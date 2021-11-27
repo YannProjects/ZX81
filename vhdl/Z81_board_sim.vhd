@@ -21,10 +21,10 @@
 
 library ieee;
 library STD;
+library work;
 use IEEE.STD_LOGIC_1164.ALL;
 use STD.textio.all;
 use ieee.std_logic_textio.all;
-library work;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -41,33 +41,75 @@ end Z81_board_sim;
 
 architecture Behavioral of Z81_board_sim is
 
+component ZX81_board is
+port(
+    CLK_12M : in STD_LOGIC; -- Clock from CMOD S7
+    -- Sortie "audio" ZX81 - Entrée "audio" PC
+    MIC : out STD_LOGIC;
+    RESET : in std_logic;
+    PUSH_BUTTON : in std_logic;
+    KBD_L : in STD_LOGIC_vector (4 downto 0);
+    KBD_C : out STD_LOGIC_vector (7 downto 0);
+    -- Sortie "audio" PC - Entrée "audio" ZX81
+    EAR : in STD_LOGIC;
+    HSYNC_VGA : out STD_LOGIC;
+    VSYNC_VGA : out STD_LOGIC;
+    -- R_VGA : out STD_LOGIC_vector (7 downto 0);
+    -- G_VGA : out STD_LOGIC_vector (7 downto 0);
+    -- B_VGA : out STD_LOGIC_vector (7 downto 0);
+    R_VGA_0 : out STD_LOGIC;
+    R_VGA_1 : out STD_LOGIC;
+    R_VGA_2 : out STD_LOGIC;
+    
+    G_VGA_0 : out STD_LOGIC;
+    G_VGA_1 : out STD_LOGIC;
+    G_VGA_2 : out STD_LOGIC;
+    
+    B_VGA_0 : out STD_LOGIC;
+    B_VGA_1 : out STD_LOGIC;
+    B_VGA_2 : out STD_LOGIC;
+    
+    Iorq_Heart_Beat : out std_logic
+    
+);
+end component ZX81_board;
+
 constant clk_period : time := 83 ns;
+constant clk_period_52m : time := 19 ns;
 constant micin_simu_start_time : time := 1000 ms;
 constant vector_file_name :string := "D:\Users\Yann\Documents\Projets_HW\ZX81\Traces oscilloscope\Fichier .P en audio\cHARGEMENT_FICHIER_";
 
 signal i_board_reset, i_ear, i_video, i_main_clk, i_csyncn : std_logic;
-signal i_kbd_l : std_logic_vector (4 downto 0);
+signal i_kbd_l : std_logic_vector (4 downto 0) := B"11111";
 signal i_debug : std_logic_vector (5 downto 0);
 signal i_kbd_c : std_logic_vector (7 downto 0);
-signal i_mic_in : std_logic := '1';
-
+signal i_mic_out : std_logic;
+signal i_ear_in : std_logic := '1';
+signal earin_state, i_push_button  : std_logic := '0';
+signal i_hsync_vga, i_vsync_vga, i_blank_vga : std_logic;
+-- signal i_r_vga, i_g_vga, i_b_vga : std_logic_vector(7 downto 0);
 
 begin
    
-   ZX81_board0: entity work.ZX81_board
+   ZX81_board0: ZX81_board
    port map (
        CLK_12M => i_main_clk,
-       MIC => i_mic_in,
+       MIC => i_mic_out,
        RESET => i_board_reset,
+       PUSH_BUTTON => i_push_button,
        KBD_L => i_kbd_l,
        KBD_C => i_kbd_c,
-       EAR => i_ear,
-       Video => i_video,
-       CSYNCn => i_csyncn,
-       Debug => i_debug
+       EAR => i_ear_in,
+       -- Debug => i_debug,
+       HSYNC_VGA => i_hsync_vga,
+       VSYNC_VGA => i_vsync_vga
+       -- R_VGA => i_r_vga,
+       -- G_VGA => i_g_vga,
+       -- B_VGA => i_b_vga
+
    );
    
-   i_board_reset <= '0', '1' after 100 ns, '0' after 1 us;
+   i_board_reset <= '1', '0' after 100 us;
 
    -- 13 MHz CLK
    clk_process :process
@@ -77,7 +119,7 @@ begin
         i_main_clk <= '1';
         wait for clk_period / 2;
    end process;
-   
+
    simu_micin: process
    variable start_simu_micin : time := now;
    variable absolute_time_prev, absolute_time : time;
@@ -125,7 +167,7 @@ begin
           absolute_time := new_file_start_time + absolute_time_real * 1ms;
           wait for (absolute_time - absolute_time_prev);
           absolute_time_prev := absolute_time;
-          i_mic_in <= not micin_state;
+          i_ear_in <= not earin_state;
         end loop;
         new_file_start_time := absolute_time;
         
@@ -134,34 +176,61 @@ begin
         
    end process;
    
-   simu_clavier: process(i_kbd_c) 
-   variable start_simu_time : time := now;   
-   begin
+   -- simu_clavier: process(i_kbd_c) 
+   -- variable start_simu_time : time := now;   
+   -- begin
         -- Si 18-15 = 0xFFFE ou 0xFFF7, on retourne 0x1E pour simuler l'appui sift + 0 (RUBOUT) qui ne fonctionne pas
         -- sur la cible...
         -- KBD_C => A15 A14 A13 A12 A11 A10 A9 A8
         -- KDB_L => KBD0 KBD1 KBD2 KBD3 KBD4
         -- J (=LOAD)  
-        if ((i_kbd_c = B"10111111") and ((now - start_simu_time) > 300 ms and (now - start_simu_time) < 350 ms)) then
-            i_kbd_l <= B"11101";
+   --      if ((i_kbd_c = B"10111111") and ((now - start_simu_time) > 300 ms and (now - start_simu_time) < 350 ms)) then
+   --          i_kbd_l <= B"11101";
         -- " (SHIFT)
-        elsif (((i_kbd_c = B"11111110")) and ((now - start_simu_time) > 400 ms and (now - start_simu_time) < 450 ms)) then
-            i_kbd_l <= B"01111";
+   --      elsif (((i_kbd_c = B"11111110")) and ((now - start_simu_time) > 400 ms and (now - start_simu_time) < 450 ms)) then
+   --          i_kbd_l <= B"01111";
         -- " (SHIFT + P)
-        elsif (((i_kbd_c = B"11011111") or (i_kbd_c = B"11111110")) and ((now - start_simu_time) > 500 ms and (now - start_simu_time) < 550 ms)) then
-            i_kbd_l <= B"01111";
+   --      elsif (((i_kbd_c = B"11011111") or (i_kbd_c = B"11111110")) and ((now - start_simu_time) > 500 ms and (now - start_simu_time) < 550 ms)) then
+   --          i_kbd_l <= B"01111";
         -- " (SHIFT)
-        elsif (((i_kbd_c = B"11111110")) and ((now - start_simu_time) > 600 ms and (now - start_simu_time) < 650 ms)) then
-            i_kbd_l <= B"01111";                        
+   --      elsif (((i_kbd_c = B"11111110")) and ((now - start_simu_time) > 600 ms and (now - start_simu_time) < 650 ms)) then
+   --          i_kbd_l <= B"01111";                        
         -- " (SHIFT + P)
-        elsif (((i_kbd_c = B"11011111") or (i_kbd_c = B"11111110")) and ((now - start_simu_time) > 700 ms and (now - start_simu_time) < 750 ms)) then
-            i_kbd_l <= B"01111";
+   --      elsif (((i_kbd_c = B"11011111") or (i_kbd_c = B"11111110")) and ((now - start_simu_time) > 700 ms and (now - start_simu_time) < 750 ms)) then
+   --          i_kbd_l <= B"01111";
         -- N/L
-        elsif ((i_kbd_c = B"10111111") and ((now - start_simu_time) > 900 ms and (now - start_simu_time) < 1000 ms)) then
-            i_kbd_l <= B"01111";
-        else
-            i_kbd_l <= B"11111";
-        end if;
-   end process;	
+   --      elsif ((i_kbd_c = B"10111111") and ((now - start_simu_time) > 900 ms and (now - start_simu_time) < 1000 ms)) then
+   --          i_kbd_l <= B"01111";
+   --      else
+   --          i_kbd_l <= B"11111";
+   --      end if;
+   -- end process;	
+   
+   -- Simulation du clavier avec le bouton pousssoir à cause des problèmes de clavier du PCB v3
+   -- Si appui sur le bouton PUSH_BUTTON = '1'
+   -- simu_clavier: process(i_main_clk)
+   -- variable start_simu_time : time := now; 
+   -- begin
+   --      if ((now - start_simu_time) > 260 ms and (now - start_simu_time) < 310 ms) then
+   --          i_push_button <= '1';
+   --      elsif ((now - start_simu_time) >= 310 ms and (now - start_simu_time) < 360 ms) then
+   --          i_push_button <= '0';
+   --      elsif ((now - start_simu_time) >= 360 ms and (now - start_simu_time) < 410 ms) then
+   --          i_push_button <= '1';
+   --      elsif ((now - start_simu_time) >= 410 ms and (now - start_simu_time) < 460 ms) then
+   --          i_push_button <= '0';
+   --      elsif ((now - start_simu_time) >= 460 ms and (now - start_simu_time) < 510 ms) then
+   --          i_push_button <= '1';
+   --      elsif ((now - start_simu_time) >= 510 ms and (now - start_simu_time) < 560 ms) then
+   --          i_push_button <= '0';
+   --      elsif ((now - start_simu_time) >= 560 ms and (now - start_simu_time) < 610 ms) then
+   --          i_push_button <= '1';
+   --      elsif ((now - start_simu_time) >= 610 ms and (now - start_simu_time) < 660 ms) then
+   --          i_push_button <= '0';
+   --      else
+   --          i_push_button <= '0';
+   --      end if;
+   -- end process;	
+      
    
 end Behavioral;
