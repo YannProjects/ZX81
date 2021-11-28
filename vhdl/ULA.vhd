@@ -22,6 +22,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
+use work.ZX81_Pack.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -53,9 +54,7 @@ entity ULA is
            TAPE_IN : in STD_LOGIC;
            USA_UK : in STD_LOGIC;
            TAPE_OUT : out STD_LOGIC;
-           Video : out std_logic; -- Data video
            Iorq_Heart_Beat : out std_logic; -- Heart beat pour la sortie video
-           CSYNCn : out std_logic; -- Composite sync (HSYNC + VSYNC)
            RDn : in STD_LOGIC;
            WRn : in STD_LOGIC;
            HALTn : in STD_LOGIC;
@@ -74,14 +73,13 @@ architecture Behavioral of ULA is
 
     type sm_video_state is (wait_for_nop_detection, wait_for_m1_rfrsh, wait_for_vid_data);
     
-    signal i_hsyncn, i_vsync, i_nmionn, i_porch_gate: std_logic;
+    signal i_hsyncn, i_vsync, i_nmionn: std_logic;
     signal char_line_cntr : unsigned(2 downto 0);
     signal char_reg : std_logic_vector(7 downto 0);
 
-    signal debug_state_m : sm_video_state;
     signal pixel_cnt_line_start, i_vga_addr_line_start, pixel_offset_dbg : unsigned(13 downto 0);
     
-    signal porch_gate_and_hsyncn_counter: natural;
+    signal hsyncn_counter: natural;
     
     signal iorqn_0, iorqn_1, i_nmin : std_logic;
     signal i_nop_detect, i_nop_trigger_0, i_nop_trigger_1 : std_logic;
@@ -99,19 +97,13 @@ begin
 ---------------------------------------------------------------------
 hsync_and_gate_process: process (CLK_6_5_M, RESETn)
 
-variable porch_gate_and_hsyncn_counter: natural := 0;
-variable i_porch_gate_next_value, i_hsyncn_next_value : std_logic;
+variable hsyncn_counter: natural := 0;
  
 begin
     if (RESETn = '0') then
-        porch_gate_and_hsyncn_counter := 0;
+        hsyncn_counter := 0;
         char_line_cntr <= "000";
         i_hsyncn <= '1';
-        -- Signal utiliser pour forcer la sortie video au niveau 0
-        -- pour les front porch et back porch sur chaque top ligne.
-        -- Le signal i_porch_gate "encadre" le signal HSYNC avant (2 µs) et après le top ligne (5 µs).
-        -- Voir http://f5ad.free.fr/ATV-QSP_F5AD_Le_signal_video.htm pour les valeurs
-        i_porch_gate <= '1';
     -- Sur chaque front descendant de l'horloge 6.5 MHz
     elsif rising_edge(CLK_6_5_M) then
         -- 384 cycles d'horloge à 6.5 MHz = 59 µs
@@ -120,30 +112,24 @@ begin
             -- Si VSYNC = 1, il faut resetter le compteur de lignes pour garder la synchronisation avec
             -- le pulse de VSYNC
             char_line_cntr <= "000";
-            porch_gate_and_hsyncn_counter := 0;
+            hsyncn_counter := 0;
             i_vga_addr_line_start <= (others => '0');
         else
             pixel_cnt_line_start <= pixel_cnt_line_start + 1;
             -- Generateur de HSYNC
-            porch_gate_and_hsyncn_counter := porch_gate_and_hsyncn_counter + 1;
-            case porch_gate_and_hsyncn_counter is
-                -- Back /Front porch ON
-                when FB_PORCH_OFF_DURATION =>
-                    i_porch_gate <= '0';
+            hsyncn_counter := hsyncn_counter + 1;
+            case hsyncn_counter is
                 -- HSYNCn ON 
-                when FB_PORCH_OFF_DURATION + FRONT_PORCH_ON_DURATION =>
+                when FB_PORCH_OFF_DURATION =>
                     i_hsyncn <= '0';
                     char_line_cntr <= char_line_cntr + 1;
                     pixel_cnt_line_start <= (others => '0');
                     -- i_vga_addr_line_start <= i_vga_addr_line_start + 64;
                     i_vga_addr_line_start <= i_vga_addr_line_start + X"20";
                 -- HSYNCn OFF
-                when FB_PORCH_OFF_DURATION + FRONT_PORCH_ON_DURATION + HSYNC_PULSE_ON_DURATION => 
+                when FB_PORCH_OFF_DURATION + HSYNC_PULSE_ON_DURATION =>
                     i_hsyncn <= '1';
-                -- Back /Front porch OFF
-                when FB_PORCH_OFF_DURATION + FRONT_PORCH_ON_DURATION + HSYNC_PULSE_ON_DURATION + BACK_PORCH_ON_DURATION =>
-                    porch_gate_and_hsyncn_counter := 0;
-                    i_porch_gate <= '1';
+                    hsyncn_counter := 0;
                 when others =>
                     null;
             end case;
@@ -236,7 +222,9 @@ i_nop_detect <= '1' when (M1n = '0' and MREQn = '0' and RDn = '0' and HALTn = '1
 -- Set/Reset pour VSYNC
 p_vsync : process(CLK_6_5_M)
 begin
-    if rising_edge(CLK_6_5_M) then
+    if (RESETn = '0') then
+        i_vsync <= '0';
+    elsif rising_edge(CLK_6_5_M) then
         -- Enable VSYNC (IN FE)
         if A_cpu(0) = '0' and RDn = '0' and IORQn = '0' and i_nmionn = '1' then
             i_vsync <= '1';
@@ -249,7 +237,9 @@ end process;
 
 p_nmi : process(CLK_6_5_M)
 begin
-    if rising_edge(CLK_6_5_M) then
+    if (RESETn = '0') then
+        i_nmionn <= '1';
+    elsif rising_edge(CLK_6_5_M) then
         -- Clear NMIn (OUT FD)
         if IORQn = '0' and WRn = '0' and A_cpu(1) = '0' then
             i_nmionn <= '1';
@@ -304,8 +294,6 @@ begin
         state_m <= wait_for_nop_detection;
     -- Sur chaque front descendant de l'horloge 6.5 MHz
     elsif rising_edge(CLK_6_5_M) then       
-        vid_pattern := vid_pattern(6 downto 0) & '0';
-
         case state_m is
              when wait_for_nop_detection =>
                 vga_wr_cyc <= '0';
@@ -334,9 +322,9 @@ begin
              when wait_for_vid_data =>
                 -- Lecture pattern vidéo
                 if (char_reg(7) = '0') then
-                    vid_pattern := not D_rom_out;
-                else
                     vid_pattern := D_rom_out;
+                else
+                    vid_pattern := not D_rom_out;
                 end if;
 
                 -- 109 pixel par rapport au début de la ligne
@@ -360,7 +348,6 @@ begin
 
 end process;
 
-NMIn <= i_nmionn or i_hsyncn;
 D_ram_in <= D_cpu_out;
 TAPE_OUT <= not i_vsync;
 
@@ -375,6 +362,7 @@ TAPE_OUT <= not i_vsync;
 -- C'est la fonction de la porte OR ci-dessous.
 -- Si on sort de HALTn et que NMIn = 0 (NMI pulse en court), on insère des cycles de WAIT afin d'attendre la fin du pulse de NMI
 -- et relacher le CPU sur le cycle T3 (après les cycles de WAIT) et charger le registre à décalage vidéo sur le cycle T4 juste après...
+i_nmin <= i_nmionn or i_hsyncn;
 NMIn <= i_nmin;
 WAITn <= not HALTn or i_nmin;
 

@@ -115,6 +115,7 @@ architecture Behavioral of ZX81_board is
     
     signal R_VGA, G_VGA, B_VGA : std_logic_vector(7 downto 0);
     signal BLANK_VGA : std_logic;
+    signal i_hsync, i_vsync : std_logic;
     
     -- attribute mark_debug : string;
     -- attribute mark_debug of KBD_C : signal is "true";
@@ -325,9 +326,11 @@ architecture Behavioral of ZX81_board is
        D_ram_in => i_d_ram_in, -- RAM input data bus. Output from ULA side
        D_ram_out => i_d_ram_out, -- RAM output data bus. Input for ULA side
        D_rom_out => i_d_rom_out, -- ROM ouput data bus. Input for ULA side 
+       
        vga_addr => i_vga_addr,
        vga_data => i_vga_data,    
        vga_wr_cyc => i_vga_wr_cyc, 
+       
        KBDn => i_kbd_l_swap, -- <<==
        TAPE_IN => i_tape_in,
        USA_UK => '0',
@@ -364,8 +367,8 @@ architecture Behavioral of ZX81_board is
         VIDEO_DATA => i_vga_data,
         WR_CYC => i_vga_wr_cyc,
         VGA_CONTROL_INIT_DONE => i_vga_control_init_done,
-        HSYNC => HSYNC_VGA,
-        VSYNC => VSYNC_VGA,
+        HSYNC => i_hsync,
+        VSYNC => i_vsync,
         BLANK => BLANK_VGA,
         R => R_VGA,
         G => G_VGA,
@@ -423,6 +426,9 @@ architecture Behavioral of ZX81_board is
     B_VGA_0 <= B_VGA(5) and not BLANK_VGA;
     B_VGA_1 <= B_VGA(6) and not BLANK_VGA;
     B_VGA_2 <= B_VGA(7) and not BLANK_VGA;
+    
+    HSYNC_VGA <= i_hsync;
+    VSYNC_VGA <= i_vsync;
     
     -- i_kbd_l_swap(4) <= KBD_L(4);
     -- i_kbd_l_swap(3) <= KBD_L(3);
