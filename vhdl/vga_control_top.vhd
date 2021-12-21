@@ -176,21 +176,21 @@ architecture Behavioral of vga_control_top is
         -- est de 800 pixels en 640 x 480
         -- => hsync pulse = 96 pixels (25.175 MMHz)
         -- => active time = 512 pixels
-        -- => back porch =  128 pixels (pour respecter le ratio front porch / back porch de la doc.).
-        -- => front porch = 64 pixels
-        (HTIM_REG_ADDR,x"5F7F01FF", '0'), -- program horizontal timing register
-        -- Pour les lignes, il y a en tout 525 lignes mais seulement 24*8*2 = 384 lignes utilisées
+        -- => back porch =  112 pixels (pour respecter le ratio front porch / back porch de la doc.).
+        -- => front porch = 80 pixels
+        (HTIM_REG_ADDR,x"5F6F01FF", '0'), -- program horizontal timing register
+        -- Pour les lignes, il y a en tout 525 lignes
         -- => Sync pulse = 2 lignes
-        -- => active time = 384 lignes
-        -- => back porch = 93
-        -- => front porch = 46
-        (VTIM_REG_ADDR,x"015C017F", '0'), --   program vertical timing register
-        (HVLEN_REG_ADDR,x"031F020B", '0'), --   program horizontal/vertical length register (800 x (525- 1)).
+        -- => active time = 480 lignes
+        -- => back porch = 112
+        -- => front porch = 73
+        (VTIM_REG_ADDR,x"011D01DF", '0'), --   program vertical timing register
+        (HVLEN_REG_ADDR,x"031F020C", '0'), --   program horizontal/vertical length register (800 x (525- 1)).
                                           --   avec 525 lignes il y a une ligne en trop...			
         
         -- On n'utilise que 2 couleurs: la première en index 0 et la dernière en index 255 sur la CLUT 0 (CLUT 1 pas utilisée)
-        (CLUT_REG_ADDR_1,x"00007000", '0'), --   Rouge
-        (CLUT_REG_ADDR_2,x"00700070", '0'), --   Bleu
+        (CLUT_REG_ADDR_1,x"00707070", '0'),
+        (CLUT_REG_ADDR_2,x"00000000", '0'),
         (CTRL_REG_ADDR,x"00000901", '0'), --   program control register (VEN=1 (video enabled), PC=1 (pseudo-color), CD=11 (32 bits))                                                
         -- end list
         (x"00000000",x"00000000", '1')  --38 stop testbench

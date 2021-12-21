@@ -26,9 +26,9 @@ use ieee.numeric_std.all;
 Package ZX81_Pack is
 
 -- 2K
-constant RAM_ADDRWIDTH : integer := 11;
+-- constant RAM_ADDRWIDTH : integer := 11;
 -- 16K
--- constant RAM_ADDRWIDTH : integer := 14;
+constant RAM_ADDRWIDTH : integer := 14;
 
 --- Constantes pour la generation du HSYNC e back/front porch:
 --- Pulse front / back porch:
@@ -51,6 +51,9 @@ constant IORQ_PERIOD : unsigned(15 downto 0) := X"1770";
 
 -- Nombre de pixel non affichés entre le trop ligne et lé début de l'affichage
 constant PIXEL_OFFSET_FROM_LINE_START : unsigned(13 downto 0) := B"00" & X"06D"; -- 109
+
+-- Nombre de ligne de marge à partir du signal
+constant SYSTEM_MARGIN : unsigned(7 downto 0) := X"1F"; -- 31 ou 55
 
 end;
 

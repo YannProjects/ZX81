@@ -112,7 +112,7 @@ architecture Behavioral of ZX81_board is
     signal BLANK_VGA : std_logic;
     signal i_hsync, i_vsync : std_logic;
     
-    attribute mark_debug : string;
+    -- attribute mark_debug : string;
     -- attribute mark_debug of KBD_C : signal is "true";
     -- attribute mark_debug of KBD_L : signal is "true";
     -- attribute mark_debug of i_iorqn : signal is "true";
@@ -122,6 +122,11 @@ architecture Behavioral of ZX81_board is
     -- attribute mark_debug of i_m1n : signal is "true";
     -- attribute mark_debug of i_tape_in : signal is "true";
     -- attribute mark_debug of i_d_cpu_in : signal is "true";
+    -- attribute mark_debug of i_nmin : signal is "true";
+    -- attribute mark_debug of i_vga_addr : signal is "true";
+    -- attribute mark_debug of i_vga_data : signal is "true";
+    -- attribute mark_debug of i_vga_wr_cyc : signal is "true";     
+        
     -- attribute mark_debug of i_clk_3_25m : signal is "true";
     
     type sm_input_kbd is (debounce_push_button, envoi_code_clavier);
@@ -145,142 +150,62 @@ architecture Behavioral of ZX81_board is
         -- Process temporaire utilisé pour remplacer le clavier du PCB v3 qui ne fonctionne pas
         -- A chauqe appui détecté sur le bouton B1, on simulé l'appui d'un touche qui correspond
         -- à un mot clé prédéfini
-        -- p_push_button: process (i_clk_6_5m, i_resetn, PUSH_BUTTON, i_a_cpu, i_iorqn, i_rdn)
+        p_push_button: process (i_clk_6_5m, i_resetn, PUSH_BUTTON, i_a_cpu, i_iorqn, i_rdn)
         
-        -- variable compteur_debounce, code_index : integer; 
+        variable compteur_debounce, code_index : integer; 
         
-        -- begin
-        --    if i_resetn = '0' then
-        --         compteur_debounce := 0;
-        --         code_index := 0;
-        --         push_button_state_m <= debounce_push_button;
-        --         i_kbd_l_swap <= B"11111";
-        --    elsif rising_edge(i_clk_6_5m) then
-        --         i_kbd_l_swap <= B"11111";
-        --         case push_button_state_m is
-        --             when debounce_push_button =>                        
-        --                 -- Appui sur bouton 1 détecté et lecture clavier
-        --                 if PUSH_BUTTON = '1' and i_iorqn = '0' and i_rdn = '0' then
-        --                     compteur_debounce := compteur_debounce + 1;
-        --                     if compteur_debounce = 5 then
-        --                         compteur_debounce := 0;
-        --                         push_button_state_m <= envoi_code_clavier;
-        --                     end if;
-        --                 end if;
-        --             when envoi_code_clavier =>
-        --                 if PUSH_BUTTON = '1' then
-        --                     if i_iorqn = '0' and i_rdn = '0' then
-        --                         -- J (=LOAD)
-        --                         if code_index = 0 and i_a_cpu = X"BFFE" then
-        --                             i_kbd_l_swap <= B"11101";
-        --                         -- "
-        --                         elsif code_index = 1 and ((i_a_cpu = X"DFFE") or (i_a_cpu = X"FEFE")) then
-        --                             i_kbd_l_swap <= B"01111";
-        --                         -- "
-        --                         elsif code_index = 2 and ((i_a_cpu = X"DFFE") or (i_a_cpu = X"FEFE")) then
-        --                             i_kbd_l_swap <= B"01111";
+        begin
+           if i_resetn = '0' then
+                compteur_debounce := 0;
+                code_index := 0;
+                push_button_state_m <= debounce_push_button;
+                i_kbd_l_swap <= B"11111";
+           elsif rising_edge(i_clk_6_5m) then
+                i_kbd_l_swap <= B"11111";
+                case push_button_state_m is
+                    when debounce_push_button =>                        
+                        -- Appui sur bouton 1 détecté et lecture clavier
+                        if PUSH_BUTTON = '1' and i_iorqn = '0' and i_rdn = '0' then
+                            compteur_debounce := compteur_debounce + 1;
+                            if compteur_debounce = 5 then
+                                compteur_debounce := 0;
+                                push_button_state_m <= envoi_code_clavier;
+                            end if;
+                        end if;
+                    when envoi_code_clavier =>
+                        if PUSH_BUTTON = '1' then
+                            if i_iorqn = '0' and i_rdn = '0' then
+                                -- J (=LOAD)
+                                if code_index = 0 and i_a_cpu = X"BFFE" then
+                                    i_kbd_l_swap <= B"11101";
+                                -- "
+                                elsif code_index = 1 and ((i_a_cpu = X"DFFE") or (i_a_cpu = X"FEFE")) then
+                                    i_kbd_l_swap <= B"01111";
+                                -- "
+                                elsif code_index = 2 and ((i_a_cpu = X"DFFE") or (i_a_cpu = X"FEFE")) then
+                                    i_kbd_l_swap <= B"01111";
                                 -- N/L
-        --                         elsif code_index = 3 and i_a_cpu = X"BFFE" then
-        --                             i_kbd_l_swap <= B"01111";
+                                elsif code_index = 3 and i_a_cpu = X"BFFE" then
+                                    i_kbd_l_swap <= B"01111";
                                 -------------------------------------------------
-                                -- LIST
-        --                         elsif code_index = 4 and i_a_cpu = X"BFFE" then
-        --                             i_kbd_l_swap <= B"11011";
+                                -- 1
+                                elsif code_index = 4 and i_a_cpu = X"F7FE" then
+                                    i_kbd_l_swap <= B"01111";
                                 -- N/L
-        --                         elsif code_index = 5 and i_a_cpu = X"BFFE" then
-        --                             i_kbd_l_swap <= B"01111";
-                                -------------------------------------------------
-                                -- SAVE
-         --                        elsif code_index = 6 and i_a_cpu = X"FDFE" then
-         --                            i_kbd_l_swap <= B"10111";
-                                -- "
-         --                        elsif code_index = 7 and ((i_a_cpu = X"DFFE") or (i_a_cpu = X"FEFE")) then
-         --                            i_kbd_l_swap <= B"01111";
-                                -- A
-         --                        elsif code_index = 8 and i_a_cpu = X"FDFE" then
-         --                            i_kbd_l_swap <= B"01111";
-                                -- "
-         --                        elsif code_index = 9 and ((i_a_cpu = X"DFFE") or (i_a_cpu = X"FEFE")) then
-         --                            i_kbd_l_swap <= B"01111";
-                                -- N/L
-         --                        elsif code_index = 10 and i_a_cpu = X"BFFE" then
-         --                            i_kbd_l_swap <= B"01111";                                                                                                
-                                -------------------------------------------------
-                                -- SAVE
-         --                        elsif code_index = 11 and i_a_cpu = X"FDFE" then
-         --                            i_kbd_l_swap <= B"10111";
-                                -- "
-         --                        elsif code_index = 12 and ((i_a_cpu = X"DFFE") or (i_a_cpu = X"FEFE")) then
-         --                            i_kbd_l_swap <= B"01111";
-                                -- A
-         --                        elsif code_index = 13 and i_a_cpu = X"FDFE" then
-         --                            i_kbd_l_swap <= B"01111";
-                                -- "
-         --                        elsif code_index = 14 and ((i_a_cpu = X"DFFE") or (i_a_cpu = X"FEFE")) then
-         --                            i_kbd_l_swap <= B"01111";
-                                -- N/L
-         --                        elsif code_index = 15 and i_a_cpu = X"BFFE" then
-         --                            i_kbd_l_swap <= B"01111";                                                                                                
-                                -------------------------------------------------
-                                -- SAVE
-         --                        elsif code_index = 16 and i_a_cpu = X"FDFE" then
-         --                            i_kbd_l_swap <= B"10111";
-                                -- "
-         --                        elsif code_index = 17 and ((i_a_cpu = X"DFFE") or (i_a_cpu = X"FEFE")) then
-         --                            i_kbd_l_swap <= B"01111";
-                                -- A
-         --                        elsif code_index = 18 and i_a_cpu = X"FDFE" then
-         --                            i_kbd_l_swap <= B"01111";
-                                -- "
-         --                        elsif code_index = 19 and ((i_a_cpu = X"DFFE") or (i_a_cpu = X"FEFE")) then
-         --                            i_kbd_l_swap <= B"01111";
-                                -- N/L
-         --                        elsif code_index = 20 and i_a_cpu = X"BFFE" then
-         --                            i_kbd_l_swap <= B"01111";                                                                                                
-                                -------------------------------------------------
-                                -- SAVE
-         --                        elsif code_index = 21 and i_a_cpu = X"FDFE" then
-         --                            i_kbd_l_swap <= B"10111";
-                                -- "
-         --                        elsif code_index = 22 and ((i_a_cpu = X"DFFE") or (i_a_cpu = X"FEFE")) then
-         --                            i_kbd_l_swap <= B"01111";
-                                -- A
-         --                        elsif code_index = 23 and i_a_cpu = X"FDFE" then
-         --                            i_kbd_l_swap <= B"01111";
-                                -- "
-         --                        elsif code_index = 24 and ((i_a_cpu = X"DFFE") or (i_a_cpu = X"FEFE")) then
-         --                            i_kbd_l_swap <= B"01111";
-                                -- N/L
-         --                        elsif code_index = 25 and i_a_cpu = X"BFFE" then
-         --                            i_kbd_l_swap <= B"01111";                                                                                                
-                                -------------------------------------------------
-                                -- SAVE
-         --                        elsif code_index = 26 and i_a_cpu = X"FDFE" then
-         --                            i_kbd_l_swap <= B"10111";
-                                -- "
-         --                        elsif code_index = 27 and ((i_a_cpu = X"DFFE") or (i_a_cpu = X"FEFE")) then
-         --                            i_kbd_l_swap <= B"01111";
-                                -- A
-         --                        elsif code_index = 28 and i_a_cpu = X"FDFE" then
-         --                            i_kbd_l_swap <= B"01111";
-                                -- "
-         --                        elsif code_index = 29 and ((i_a_cpu = X"DFFE") or (i_a_cpu = X"FEFE")) then
-         --                            i_kbd_l_swap <= B"01111";
-                                -- N/L
-         --                        elsif code_index = 30 and i_a_cpu = X"BFFE" then
-         --                            i_kbd_l_swap <= B"01111";                                                                                                
-         --                        end if;
+                                elsif code_index = 5 and i_a_cpu = X"BFFE" then
+                                    i_kbd_l_swap <= B"01111";                                                                   
+                                end if;
                                 
-         --                    end if;
-         --                else
-         --                    code_index := code_index + 1;
-         --                    push_button_state_m <= debounce_push_button;
-         --                end if;
-         --            when others =>
-         --                push_button_state_m <= debounce_push_button;
-         --        end case;
-         --   end if;
-         -- end process;
+                            end if;
+                        else
+                            code_index := code_index + 1;
+                            push_button_state_m <= debounce_push_button;
+                        end if;
+                    when others =>
+                        push_button_state_m <= debounce_push_button;
+                end case;
+           end if;
+         end process;
     
     ---------------------------------------------------------------------
     -- Gestion du reset (à resynbchroniser avec une horloge pour éviter les
@@ -326,7 +251,7 @@ architecture Behavioral of ZX81_board is
        vga_data => i_vga_data,    
        vga_wr_cyc => i_vga_wr_cyc, 
        
-       KBDn => KBD_L, -- <<==
+       KBDn => i_kbd_l_swap, -- <<==
        TAPE_IN => i_tape_in,
        USA_UK => '0',
        TAPE_OUT => MIC,

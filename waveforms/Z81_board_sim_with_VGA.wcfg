@@ -14,12 +14,12 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="548,815.556576 us"></ZoomStartTime>
-      <ZoomEndTime time="549,127.556577 us"></ZoomEndTime>
-      <Cursor1Time time="548,946.156576 us"></Cursor1Time>
+      <ZoomStartTime time="10,857.727275 us"></ZoomStartTime>
+      <ZoomEndTime time="11,488.068741 us"></ZoomEndTime>
+      <Cursor1Time time="11,383.011830 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="210"></NameColumnWidth>
+      <NameColumnWidth column_width="206"></NameColumnWidth>
       <ValueColumnWidth column_width="58"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="35" />
@@ -145,7 +145,6 @@
    <wvobject fp_name="group537" type="group">
       <obj_property name="label">ULA</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/CLK_6_5_M" type="logic">
          <obj_property name="ElementShortName">CLK_6_5_M</obj_property>
          <obj_property name="ObjectShortName">CLK_6_5_M</obj_property>
@@ -1067,9 +1066,9 @@
          <obj_property name="ElementShortName">i_vga_line_counter[12:0]</obj_property>
          <obj_property name="ObjectShortName">i_vga_line_counter[12:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_new_frame_start" type="logic">
-         <obj_property name="ElementShortName">i_new_frame_start</obj_property>
-         <obj_property name="ObjectShortName">i_new_frame_start</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_video_lines_from_vsync" type="array">
+         <obj_property name="ElementShortName">i_video_lines_from_vsync[7:0]</obj_property>
+         <obj_property name="ObjectShortName">i_video_lines_from_vsync[7:0]</obj_property>
       </wvobject>
    </wvobject>
 </wave_config>

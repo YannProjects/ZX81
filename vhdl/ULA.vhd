@@ -72,22 +72,19 @@ end ULA;
 architecture Behavioral of ULA is
 
     type sm_video_state is (wait_for_nop_detection, wait_for_m1_rfrsh, wait_for_vid_data);
-    type sm_frame_detect_state is (wait_for_vsync, wait_for_vid_ram_access);
     
     signal i_hsyncn, i_vsync, i_nmionn: std_logic;
     signal i_hsyncn_detect_0, i_hsyncn_detect_1 : std_logic;
     signal char_line_cntr : unsigned(2 downto 0);
     signal char_reg : std_logic_vector(7 downto 0);
     
-    signal i_nop_detect_0, i_nop_detect_1, i_new_frame_start : std_logic;
-    signal i_vid_ram_detect, i_vid_ram_detect_0, i_vid_ram_detect_1 : std_logic;
+    signal i_nop_detect, i_nop_detect_0, i_nop_detect_1 : std_logic;
     signal i_vga_line_counter, i_vga_char_offset : std_logic_vector(12 downto 0);
     
     signal iorqn_0, iorqn_1, i_nmin : std_logic;
-    signal i_nop_detect, i_nop_trigger_0, i_nop_trigger_1 : std_logic;
+    signal i_nop_trigger_0, i_nop_trigger_1 : std_logic;
     
     signal state_m : sm_video_state := wait_for_nop_detection;
-    signal state_m_frame_det : sm_frame_detect_state;
     signal i_vga_data : std_logic_vector(7 downto 0);
     signal i_wr_cyc : std_logic := '0';
    
@@ -133,38 +130,7 @@ begin
         end if;
     end if;
 end process;
-
--- Processs utilise pour supprimer les pulse parasites de l'entrée MIC
--- Si le niveau du pulse reste le même pendant plus de 100 µs, on valide le niveau, sinon, on ne fait rien.
--- 100 µs @ 6,5 Mhz =  650
--- mic_cleaner: process (clk, RSTn)
--- 
--- variable pulse_duration: natural range 0 to 1023;
--- variable prev_tape_in_raw: std_logic := '0';
--- 
--- begin
---     if (RSTn = '0') then
---         CLEAN_TAPE_IN <= '0';
---         pulse_duration := 0;
---         prev_tape_in_raw := '0';
---     -- Sur chaque front descendant de l'horloge 6.5 MHz
---     elsif falling_edge(clk) then
---       if TAPE_IN /= prev_tape_in_raw then
---         -- The input just changed.  Reset the timeout.
---         pulse_duration := PULSE_DURATION_THRESHOLD;
---       elsif pulse_duration /= 0 then
---         -- Input stable, but timer not yet expired.  Keep timing.
---         pulse_duration := pulse_duration - 1;
---       else
---         -- Input stable, and counter has expired.  Update the output.
---         CLEAN_TAPE_IN <= prev_tape_in_raw;
---       end if;
---       -- Keep track of the most recent input.
---       prev_tape_in_raw := TAPE_IN;
---     end if;    
--- end process;
-
-    
+   
 -- Nouvelle version utilisant des fonctions combinatoires pour
 -- le décodage des adresses.
 p_cpu_data_in : process (A_cpu, RDn, MREQn, IORQn, M1n)
@@ -199,7 +165,6 @@ end process;
 
 -- Detection NOP
 i_nop_detect <= '1' when (M1n = '0' and MREQn = '0' and RDn = '0' and HALTn = '1' and A_cpu(15 downto 14) = "11" and D_ram_out(6) = '0') else '0';
-i_vid_ram_detect <= '1' when (M1n = '0' and MREQn = '0' and RDn = '0' and HALTn = '1' and A_cpu(15 downto 14) = "11") else '0';
 
 ----------------------------------------
 -- Process combinatoire pour la génération ed NIMONn et VSYNC
@@ -248,37 +213,29 @@ begin
     end if;
 end process;
 
-
--- Process pour la detection du début de l'afficaheg d'une nouvelle trame vidéo
-p_vga_start_frame_detect : process(CLK_6_5_M)
+-- Process pour le comptage des ligne pour l'affichage VGA
+p_vga_line_counter : process(CLK_6_5_M, i_hsyncn, i_vsync)
 begin
     if (RESETn = '0' or i_vsync = '1') then
-        i_new_frame_start <= '0';
-    -- Sur chaque front descendant de l'horloge 6.5 MHz
-    elsif rising_edge(CLK_6_5_M) then
-        if i_vid_ram_detect = '1' then
-            i_new_frame_start <= '1';
-        end if;
-    end if;
-end process;
-
--- Process pour le comptage des ligne pour l'affichage VGA
-p_vga_line_counter : process(CLK_6_5_M, i_hsyncn)
-begin
-    if (RESETn = '0' or i_new_frame_start = '0') then
         i_vga_line_counter <= (others => '0');
     -- Sur chaque front montant de l'horloge 6.5 MHz
     elsif rising_edge(CLK_6_5_M) then
         i_hsyncn_detect_0 <= i_hsyncn;
         i_hsyncn_detect_1 <= i_hsyncn_detect_0;
-        -- if i_hsyncn_detect_0 = '1' and i_hsyncn_detect_1 = '0' and i_vga_line_counter < 24*8*32 then
-        if i_hsyncn_detect_0 = '1' and i_hsyncn_detect_1 = '0' and i_vga_line_counter < 24*8*32 then
+        -- Transition HSYNC 0 -> 1
+        -- On compte tous les plulses de synchro horizontale à partir de la fin du A_cpu
+        -- L'écran est en fait plus grand que la taille nécessaire (512 x 480 au lieu 512 x 384 avec les lignes et colonnes doublées).
+        -- Ca permet de tenir compte du mode "FAST" et des variations du nombre de pulses de HSYNC avant l'affichage qui paraît varier
+        -- en fonction des logiciels utilisés...
+        -- Cette solution fonctionnne bien. Il faudrait juste rajouter un rafraichissement de l'écran au cas où un logiciel
+        -- utilisant un nombre de HSYNC est utilisé après un autre utilisant une autre valeur. Mai, bon, on verra...
+        if i_hsyncn_detect_0 = '1' and i_hsyncn_detect_1 = '0' then
             i_vga_line_counter <= i_vga_line_counter + X"20";
         end if;
     end if;
 end process;
 
--- Process pour le comptage des pixels entre le début de la synchro ligne et lé dbut de l'exécution en RAM A_cpu
+-- Process pour le comptage des pixels entre le début de la synchro ligne et le début de l'exécution en RAM A_cpu
 -- (devrait correspondre au nombre de pixel entre la synchro ligne et lé début de l'afficahge...
 p_vga_char_counter : process(CLK_6_5_M, i_hsyncn)
 begin
