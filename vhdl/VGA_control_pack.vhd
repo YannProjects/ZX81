@@ -45,24 +45,6 @@ constant VBARb_REG_ADDR : std_logic_vector(31 downto 0) := X"00000018";
 constant CLUT_REG_ADDR_1 : std_logic_vector(31 downto 0) := X"00000800";
 constant CLUT_REG_ADDR_2 : std_logic_vector(31 downto 0) := X"00000804";
 
-component vga_control_top is
-    Port ( 
-        RESET : in STD_LOGIC;
-        CLK_52M : in std_logic;
-        VGA_CLK : in std_logic;
-        VIDEO_ADDR : in std_logic_vector(13 downto 0);
-        VIDEO_DATA : in std_logic_vector(7 downto 0);
-        WR_CYC : in std_logic;
-        VGA_CONTROL_INIT_DONE : out std_logic;
-        HSYNC : out std_logic;
-        VSYNC : out std_logic;
-        CSYNC : out std_logic;
-        BLANK : out std_logic;
-        R,G,B : out std_logic_vector(7 downto 0)        -- RGB color signals
-    );
-end component;
-
-
 end VGA_control_pack;
 
 package body VGA_control_pack is

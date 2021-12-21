@@ -46,7 +46,7 @@ entity ULA is
            D_ram_out : in STD_LOGIC_VECTOR (7 downto 0); -- RAM output data bus. Input for ULA side
            D_rom_out : in STD_LOGIC_VECTOR (7 downto 0); -- ROM ouput data bus. Input for ULA side
            -- Adresse et data vidéo pour le controlleur VGA
-           vga_addr : out std_logic_vector(13 downto 0);
+           vga_addr : out std_logic_vector(12 downto 0);
            vga_data : out std_logic_vector(7 downto 0);
            vga_wr_cyc : out STD_LOGIC;
            -- 
@@ -72,22 +72,24 @@ end ULA;
 architecture Behavioral of ULA is
 
     type sm_video_state is (wait_for_nop_detection, wait_for_m1_rfrsh, wait_for_vid_data);
+    type sm_frame_detect_state is (wait_for_vsync, wait_for_vid_ram_access);
     
     signal i_hsyncn, i_vsync, i_nmionn: std_logic;
+    signal i_hsyncn_detect_0, i_hsyncn_detect_1 : std_logic;
     signal char_line_cntr : unsigned(2 downto 0);
     signal char_reg : std_logic_vector(7 downto 0);
-
-    signal pixel_cnt_line_start, i_vga_addr_line_start, pixel_offset_dbg : unsigned(13 downto 0);
     
-    signal hsyncn_counter: natural;
+    signal i_nop_detect_0, i_nop_detect_1, i_new_frame_start : std_logic;
+    signal i_vid_ram_detect, i_vid_ram_detect_0, i_vid_ram_detect_1 : std_logic;
+    signal i_vga_line_counter, i_vga_char_offset : std_logic_vector(12 downto 0);
     
     signal iorqn_0, iorqn_1, i_nmin : std_logic;
     signal i_nop_detect, i_nop_trigger_0, i_nop_trigger_1 : std_logic;
     
     signal state_m : sm_video_state := wait_for_nop_detection;
+    signal state_m_frame_det : sm_frame_detect_state;
     signal i_vga_data : std_logic_vector(7 downto 0);
     signal i_wr_cyc : std_logic := '0';
-    signal i_vga_addr : unsigned(12 downto 0);
    
 begin
 
@@ -107,15 +109,13 @@ begin
     -- Sur chaque front descendant de l'horloge 6.5 MHz
     elsif rising_edge(CLK_6_5_M) then
         -- 384 cycles d'horloge à 6.5 MHz = 59 µs
-      -- Duree pulse HSYNC = (414 - 384) @6.5 MHz = 4,6 µs 
+        -- Duree pulse HSYNC = (414 - 384) @6.5 MHz = 4,6 µs 
         if i_vsync = '1' then
             -- Si VSYNC = 1, il faut resetter le compteur de lignes pour garder la synchronisation avec
             -- le pulse de VSYNC
             char_line_cntr <= "000";
             hsyncn_counter := 0;
-            i_vga_addr_line_start <= (others => '0');
         else
-            pixel_cnt_line_start <= pixel_cnt_line_start + 1;
             -- Generateur de HSYNC
             hsyncn_counter := hsyncn_counter + 1;
             case hsyncn_counter is
@@ -123,9 +123,6 @@ begin
                 when FB_PORCH_OFF_DURATION =>
                     i_hsyncn <= '0';
                     char_line_cntr <= char_line_cntr + 1;
-                    pixel_cnt_line_start <= (others => '0');
-                    -- i_vga_addr_line_start <= i_vga_addr_line_start + 64;
-                    i_vga_addr_line_start <= i_vga_addr_line_start + X"20";
                 -- HSYNCn OFF
                 when FB_PORCH_OFF_DURATION + HSYNC_PULSE_ON_DURATION =>
                     i_hsyncn <= '1';
@@ -202,6 +199,7 @@ end process;
 
 -- Detection NOP
 i_nop_detect <= '1' when (M1n = '0' and MREQn = '0' and RDn = '0' and HALTn = '1' and A_cpu(15 downto 14) = "11" and D_ram_out(6) = '0') else '0';
+i_vid_ram_detect <= '1' when (M1n = '0' and MREQn = '0' and RDn = '0' and HALTn = '1' and A_cpu(15 downto 14) = "11") else '0';
 
 ----------------------------------------
 -- Process combinatoire pour la génération ed NIMONn et VSYNC
@@ -226,7 +224,7 @@ begin
         i_vsync <= '0';
     elsif rising_edge(CLK_6_5_M) then
         -- Enable VSYNC (IN FE)
-        if A_cpu(0) = '0' and RDn = '0' and IORQn = '0' and i_nmionn = '1' then
+        if IORQn = '0' and A_cpu(0) = '0' and RDn = '0' and i_nmionn = '1' then
             i_vsync <= '1';
         -- Clear VSYNC (OUT NN)
         elsif IORQn = '0' and WRn = '0' then
@@ -250,6 +248,53 @@ begin
     end if;
 end process;
 
+
+-- Process pour la detection du début de l'afficaheg d'une nouvelle trame vidéo
+p_vga_start_frame_detect : process(CLK_6_5_M)
+begin
+    if (RESETn = '0' or i_vsync = '1') then
+        i_new_frame_start <= '0';
+    -- Sur chaque front descendant de l'horloge 6.5 MHz
+    elsif rising_edge(CLK_6_5_M) then
+        if i_vid_ram_detect = '1' then
+            i_new_frame_start <= '1';
+        end if;
+    end if;
+end process;
+
+-- Process pour le comptage des ligne pour l'affichage VGA
+p_vga_line_counter : process(CLK_6_5_M, i_hsyncn)
+begin
+    if (RESETn = '0' or i_new_frame_start = '0') then
+        i_vga_line_counter <= (others => '0');
+    -- Sur chaque front montant de l'horloge 6.5 MHz
+    elsif rising_edge(CLK_6_5_M) then
+        i_hsyncn_detect_0 <= i_hsyncn;
+        i_hsyncn_detect_1 <= i_hsyncn_detect_0;
+        -- if i_hsyncn_detect_0 = '1' and i_hsyncn_detect_1 = '0' and i_vga_line_counter < 24*8*32 then
+        if i_hsyncn_detect_0 = '1' and i_hsyncn_detect_1 = '0' and i_vga_line_counter < 24*8*32 then
+            i_vga_line_counter <= i_vga_line_counter + X"20";
+        end if;
+    end if;
+end process;
+
+-- Process pour le comptage des pixels entre le début de la synchro ligne et lé dbut de l'exécution en RAM A_cpu
+-- (devrait correspondre au nombre de pixel entre la synchro ligne et lé début de l'afficahge...
+p_vga_char_counter : process(CLK_6_5_M, i_hsyncn)
+begin
+    if (RESETn = '0' or i_hsyncn = '0') then
+        i_vga_char_offset <= (others => '0');
+    -- Sur chaque front descendant de l'horloge 6.5 MHz
+    elsif rising_edge(CLK_6_5_M) then
+        i_nop_detect_0 <= i_nop_detect;
+        i_nop_detect_1 <= i_nop_detect_0;
+        if i_nop_detect_0 = '1' and i_nop_detect_1 = '0' then
+             i_vga_char_offset <= i_vga_char_offset + 1;
+        end if;
+    end if;
+end process;
+
+
 ----------------------------------------
 -- Process pour le heart beat IORQn
 ----------------------------------------
@@ -267,7 +312,7 @@ begin
     elsif rising_edge(CLK_6_5_M) then
         iorqn_0 <= IORQn;
         iorqn_1 <= iorqn_0;
-        -- IORQ heart beat qui inclut le VSYCN et aussi les lectures clavier + load cassette
+        -- IORQ heart beat qui inclut le VSYNC et aussi les lectures clavier + load cassette
         -- Compteur de heart beat pour faire clignoter la LED sur le CMOD S7. 
         -- Détection transtion 1 -> 0
         if iorqn_1 = '1' and iorqn_0 = '0' then
@@ -292,8 +337,9 @@ variable byte_offset, pixel_offset : unsigned(13 downto 0);
 begin
     if (RESETn = '0') then
         state_m <= wait_for_nop_detection;
+        vga_addr <= (others => '0');
     -- Sur chaque front descendant de l'horloge 6.5 MHz
-    elsif rising_edge(CLK_6_5_M) then       
+    elsif rising_edge(CLK_6_5_M) then
         case state_m is
              when wait_for_nop_detection =>
                 vga_wr_cyc <= '0';
@@ -327,11 +373,9 @@ begin
                     vid_pattern := not D_rom_out;
                 end if;
 
-                -- 109 pixel par rapport au début de la ligne
-                pixel_offset := pixel_cnt_line_start - PIXEL_OFFSET_FROM_LINE_START;
                 byte_offset := "000000" & pixel_offset(10 downto 3);
                 -- Signaux pour le controlleur VGA
-                vga_addr <= std_logic_vector(i_vga_addr_line_start - X"400" + byte_offset);
+                vga_addr <= i_vga_line_counter - X"20" + i_vga_char_offset - X"1";
                 vga_wr_cyc <= '1';
                 vga_data <= vid_pattern;
                 state_m <= wait_for_nop_detection;

@@ -176,35 +176,53 @@ begin
         
    end process;
    
-   -- simu_clavier: process(i_kbd_c) 
-   -- variable start_simu_time : time := now;   
-   -- begin
+   simu_clavier: process(i_kbd_c) 
+   variable start_simu_time : time := now;   
+   begin
         -- Si 18-15 = 0xFFFE ou 0xFFF7, on retourne 0x1E pour simuler l'appui sift + 0 (RUBOUT) qui ne fonctionne pas
         -- sur la cible...
         -- KBD_C => A15 A14 A13 A12 A11 A10 A9 A8
         -- KDB_L => KBD0 KBD1 KBD2 KBD3 KBD4
         -- J (=LOAD)  
-   --      if ((i_kbd_c = B"10111111") and ((now - start_simu_time) > 300 ms and (now - start_simu_time) < 350 ms)) then
-   --          i_kbd_l <= B"11101";
+        -- if ((i_kbd_c = B"10111111") and ((now - start_simu_time) > 300 ms and (now - start_simu_time) < 350 ms)) then
+        --     i_kbd_l <= B"11101";
         -- " (SHIFT)
-   --      elsif (((i_kbd_c = B"11111110")) and ((now - start_simu_time) > 400 ms and (now - start_simu_time) < 450 ms)) then
-   --          i_kbd_l <= B"01111";
+        -- elsif (((i_kbd_c = B"11111110")) and ((now - start_simu_time) > 400 ms and (now - start_simu_time) < 450 ms)) then
+        --     i_kbd_l <= B"01111";
         -- " (SHIFT + P)
-   --      elsif (((i_kbd_c = B"11011111") or (i_kbd_c = B"11111110")) and ((now - start_simu_time) > 500 ms and (now - start_simu_time) < 550 ms)) then
-   --          i_kbd_l <= B"01111";
+        -- elsif (((i_kbd_c = B"11011111") or (i_kbd_c = B"11111110")) and ((now - start_simu_time) > 500 ms and (now - start_simu_time) < 550 ms)) then
+        --     i_kbd_l <= B"01111";
         -- " (SHIFT)
-   --      elsif (((i_kbd_c = B"11111110")) and ((now - start_simu_time) > 600 ms and (now - start_simu_time) < 650 ms)) then
-   --          i_kbd_l <= B"01111";                        
+        -- elsif (((i_kbd_c = B"11111110")) and ((now - start_simu_time) > 600 ms and (now - start_simu_time) < 650 ms)) then
+        --     i_kbd_l <= B"01111";                        
         -- " (SHIFT + P)
-   --      elsif (((i_kbd_c = B"11011111") or (i_kbd_c = B"11111110")) and ((now - start_simu_time) > 700 ms and (now - start_simu_time) < 750 ms)) then
-   --          i_kbd_l <= B"01111";
+        -- elsif (((i_kbd_c = B"11011111") or (i_kbd_c = B"11111110")) and ((now - start_simu_time) > 700 ms and (now - start_simu_time) < 750 ms)) then
+        --     i_kbd_l <= B"01111";
         -- N/L
-   --      elsif ((i_kbd_c = B"10111111") and ((now - start_simu_time) > 900 ms and (now - start_simu_time) < 1000 ms)) then
-   --          i_kbd_l <= B"01111";
-   --      else
-   --          i_kbd_l <= B"11111";
-   --      end if;
-   -- end process;	
+        -- elsif ((i_kbd_c = B"10111111") and ((now - start_simu_time) > 900 ms and (now - start_simu_time) < 1000 ms)) then
+        --     i_kbd_l <= B"01111";
+        -- else
+        --     i_kbd_l <= B"11111";
+        -- end if;
+        
+        -- (SHIFT + F) => FAST
+        if ((i_kbd_c = B"11111110") and ((now - start_simu_time) > 300 ms and (now - start_simu_time) < 350 ms)) then
+            i_kbd_l <= B"01111";
+        elsif ((i_kbd_c = B"11111101") and ((now - start_simu_time) > 300 ms and (now - start_simu_time) < 350 ms)) then
+            i_kbd_l <= B"11101";
+        -- N/L
+        elsif ((i_kbd_c = B"10111111") and ((now - start_simu_time) > 500 ms and (now - start_simu_time) < 600 ms)) then
+            i_kbd_l <= B"01111";
+        -- ' ' => BREAK
+        elsif (((i_kbd_c = B"01111111")) and ((now - start_simu_time) > 800 ms and (now - start_simu_time) < 900 ms)) then
+            i_kbd_l <= B"01111";
+        -- N/L
+        elsif ((i_kbd_c = B"10111111") and ((now - start_simu_time) > 1000 ms and (now - start_simu_time) < 1110 ms)) then
+            i_kbd_l <= B"01111";
+        else
+            i_kbd_l <= B"11111";
+        end if;
+   end process;	
    
    -- Simulation du clavier avec le bouton pousssoir à cause des problèmes de clavier du PCB v3
    -- Si appui sur le bouton PUSH_BUTTON = '1'
@@ -230,7 +248,6 @@ begin
    --      else
    --          i_push_button <= '0';
    --      end if;
-   -- end process;	
-      
+   -- end process;
    
 end Behavioral;

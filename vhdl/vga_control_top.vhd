@@ -40,7 +40,7 @@ entity vga_control_top is
         RESET : in STD_LOGIC;
         CLK_52M : in std_logic;
         VGA_CLK : in std_logic;
-        VIDEO_ADDR : in std_logic_vector(13 downto 0);
+        VIDEO_ADDR : in std_logic_vector(12 downto 0);
         VIDEO_DATA : in std_logic_vector(7 downto 0);
         WR_CYC : in std_logic;
         VGA_CONTROL_INIT_DONE : out std_logic;
@@ -111,7 +111,7 @@ architecture Behavioral of vga_control_top is
         stb_i_vga_c : in std_logic;
         ack_o_vga_c : out std_logic;
         dat_o_vga_c : out std_logic_vector(31 downto 0);
-        adr_vid_i : in std_logic_vector (13 downto 0);
+        adr_vid_i : in std_logic_vector (12 downto 0);
         dat_vid_i : in std_logic_vector(7 downto 0);
         wr_i : in std_logic	
     );
@@ -148,7 +148,7 @@ architecture Behavioral of vga_control_top is
 	signal vga_sel_o                       : std_logic_vector(3 downto 0);
 	signal vga_we_o                        : std_logic;
 	
-	signal i_video_addr_0, i_video_addr_1 : std_logic_vector(13 downto 0);
+	signal i_video_addr_0, i_video_addr_1 : std_logic_vector(12 downto 0);
     signal i_video_data_0, i_video_data_1 : std_logic_vector(7 downto 0);
     signal i_wr_cyc_0, i_wr_cyc_1 : std_logic;
     
@@ -319,7 +319,7 @@ entity vid_mem is
 		-- Donnée RAM vidéo pour le controlleur VGA
 		dat_o_vga_c : out std_logic_vector(31 downto 0);
 		-- Adresse en écriture côté host
-		adr_vid_i : std_logic_vector (13 downto 0);
+		adr_vid_i : std_logic_vector (12 downto 0);
 		-- Données en entrées pour la RAM vidéo côté host
 		dat_vid_i : in std_logic_vector(7 downto 0);
 		-- Ecriture en RAM vidéo côté host
@@ -334,10 +334,10 @@ architecture behavioral of vid_mem is
       port (
         clka : in std_logic;
         wea : in std_logic_vector(0 DOWNTO 0);
-        addra : in std_logic_vector(13 downto 0);
+        addra : in std_logic_vector(12 downto 0);
         dina : in std_logic_vector(7 downto 0);
         clkb : in std_logic;
-        addrb : in std_logic_vector(13 downto 0);
+        addrb : in std_logic_vector(12 downto 0);
         doutb : out std_logic_vector(7 downto 0)
       );
     end component;
@@ -345,7 +345,7 @@ architecture behavioral of vid_mem is
     -- Données vidéo ZX81 (8 bits, 1 pixel par bit)
     signal dat_o_ram_vga: std_logic_vector(7 downto 0);
     -- Données controlleur VGA (32 bits, 8 bits par pixel).
-    signal adr_i_ram_vga: std_logic_vector(13 downto 0);
+    signal adr_i_ram_vga: std_logic_vector(12 downto 0);
 	
 begin
 
@@ -374,7 +374,7 @@ begin
     -- On duplique également chaque ligne en enlevant 1 bit de l'adresse des données:
     -- Il faut enlever le bit quand on passe à une ligne suivante: 256 bits par lignes et 2 pixels par mot lu de 32 bits
     -- => il faut enlever le bit 8 de l'adresse adr_i_vga_c. 
-    adr_i_ram_vga <= '0' & adr_i_vga_c(17 downto 10) & adr_i_vga_c(8 downto 4);
+    adr_i_ram_vga <= adr_i_vga_c(17 downto 10) & adr_i_vga_c(8 downto 4);
     
     with adr_i_vga_c(3 downto 2) select
         dat_o_vga_c <= 
