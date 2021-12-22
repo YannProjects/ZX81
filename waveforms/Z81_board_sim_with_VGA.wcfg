@@ -14,17 +14,18 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="10,857.727275 us"></ZoomStartTime>
-      <ZoomEndTime time="11,488.068741 us"></ZoomEndTime>
-      <Cursor1Time time="11,383.011830 us"></Cursor1Time>
+      <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
+      <ZoomEndTime time="126.800000001 ms"></ZoomEndTime>
+      <Cursor1Time time="33.383945991 ms"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="206"></NameColumnWidth>
+      <NameColumnWidth column_width="202"></NameColumnWidth>
       <ValueColumnWidth column_width="58"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="35" />
    <wave_markers>
       <marker time="548929699037" label="" />
+      <marker time="16775707777" label="" />
    </wave_markers>
    <wvobject fp_name="/Z81_board_sim/ZX81_board0/CLK_12M" type="logic">
       <obj_property name="ElementShortName">CLK_12M</obj_property>
@@ -309,6 +310,7 @@
    <wvobject fp_name="group2464" type="group">
       <obj_property name="label">vga_control_top</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/RESET" type="logic">
          <obj_property name="ElementShortName">RESET</obj_property>
          <obj_property name="ObjectShortName">RESET</obj_property>

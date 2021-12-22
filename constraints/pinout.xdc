@@ -165,3 +165,4 @@ connect_debug_port u_ila_0/probe7 [get_nets [list ula0/i_vid_ram_detect]]
 
 
 
+

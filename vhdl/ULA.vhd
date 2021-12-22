@@ -214,7 +214,7 @@ begin
 end process;
 
 -- Process pour le comptage des ligne pour l'affichage VGA
-p_vga_line_counter : process(CLK_6_5_M, i_hsyncn, i_vsync)
+p_vga_line_counter : process(CLK_6_5_M)
 begin
     if (RESETn = '0' or i_vsync = '1') then
         i_vga_line_counter <= (others => '0');
@@ -236,7 +236,7 @@ begin
 end process;
 
 -- Process pour le comptage des pixels entre le début de la synchro ligne et le début de l'exécution en RAM A_cpu
--- (devrait correspondre au nombre de pixel entre la synchro ligne et lé début de l'afficahge...
+-- (devrait correspondre au nombre de pixel entre la synchro ligne et le début de l'afficahge...
 p_vga_char_counter : process(CLK_6_5_M, i_hsyncn)
 begin
     if (RESETn = '0' or i_hsyncn = '0') then

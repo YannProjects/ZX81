@@ -92,6 +92,62 @@ architecture Behavioral of ZX81_board is
        spo : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
      );
      end component;
+     
+    type keyboard_map_type is 
+    record
+        kbd_col     : std_logic_vector(7 downto 0);
+        kbd_line    : std_logic_vector(4 downto 0);
+    end record;
+    
+    -- kbd_col: A15 A14 A13 A12 A11 A10 A9 A8
+    -- kbd_line : KBD0 KBD1 KBD2 KBD3 KBD4
+    constant key_6 : keyboard_map_type := (B"11101111", B"11110");
+    constant key_7 : keyboard_map_type := (B"11101111", B"11101");
+    constant key_8 : keyboard_map_type := (B"11101111", B"11011");
+    constant key_9 : keyboard_map_type := (B"11101111", B"10111");
+    constant key_0 : keyboard_map_type := (B"11101111", B"01111");
+
+    constant key_y : keyboard_map_type := (B"11011111", B"11110");
+    constant key_u : keyboard_map_type := (B"11011111", B"11101");
+    constant key_i : keyboard_map_type := (B"11011111", B"11011");
+    constant key_o : keyboard_map_type := (B"11011111", B"10111");
+    constant key_p : keyboard_map_type := (B"11011111", B"01111");
+
+    constant key_h : keyboard_map_type := (B"10111111", B"11110");
+    constant key_j : keyboard_map_type := (B"10111111", B"11101");
+    constant key_k : keyboard_map_type := (B"10111111", B"11011");
+    constant key_l : keyboard_map_type := (B"10111111", B"10111");
+    constant key_n_l : keyboard_map_type := (B"10111111", B"01111");
+
+    constant key_b : keyboard_map_type := (B"01111111", B"11110");
+    constant key_n : keyboard_map_type := (B"01111111", B"11101");
+    constant key_m : keyboard_map_type := (B"01111111", B"11011");
+    constant key_point : keyboard_map_type := (B"01111111", B"10111");
+    constant key_space : keyboard_map_type := (B"01111111", B"01111");
+
+    constant key_5 : keyboard_map_type := (B"11110111", B"11110");
+    constant key_4 : keyboard_map_type := (B"11110111", B"11101");
+    constant key_3 : keyboard_map_type := (B"11110111", B"11011");
+    constant key_2 : keyboard_map_type := (B"11110111", B"10111");
+    constant key_1 : keyboard_map_type := (B"11110111", B"01111");
+
+    constant key_t : keyboard_map_type := (B"11111011", B"11110");
+    constant key_r : keyboard_map_type := (B"11111011", B"11101");
+    constant key_e : keyboard_map_type := (B"11111011", B"11011");
+    constant key_w : keyboard_map_type := (B"11111011", B"10111");
+    constant key_q : keyboard_map_type := (B"11111011", B"01111");
+
+    constant key_g : keyboard_map_type := (B"11111101", B"11110");
+    constant key_f : keyboard_map_type := (B"11111101", B"11101");
+    constant key_d : keyboard_map_type := (B"11111101", B"11011");
+    constant key_s : keyboard_map_type := (B"11111101", B"10111");
+    constant key_a : keyboard_map_type := (B"11111101", B"01111");
+
+    constant key_v : keyboard_map_type := (B"11111110", B"11110");
+    constant key_c : keyboard_map_type := (B"11111110", B"11101");
+    constant key_x : keyboard_map_type := (B"11111110", B"11011");
+    constant key_z : keyboard_map_type := (B"11111110", B"10111");
+    constant key_shift : keyboard_map_type := (B"11111110", B"01111");
     
     -- Control signal
     signal i_waitn, i_nmin : std_logic := '1';
@@ -111,6 +167,9 @@ architecture Behavioral of ZX81_board is
     signal R_VGA, G_VGA, B_VGA : std_logic_vector(7 downto 0);
     signal BLANK_VGA : std_logic;
     signal i_hsync, i_vsync : std_logic;
+
+    type sm_input_kbd is (debounce_push_button, envoi_code_clavier);
+    signal push_button_state_m : sm_input_kbd := debounce_push_button;    
     
     -- attribute mark_debug : string;
     -- attribute mark_debug of KBD_C : signal is "true";
@@ -128,10 +187,10 @@ architecture Behavioral of ZX81_board is
     -- attribute mark_debug of i_vga_wr_cyc : signal is "true";     
         
     -- attribute mark_debug of i_clk_3_25m : signal is "true";
-    
-    type sm_input_kbd is (debounce_push_button, envoi_code_clavier);
-    
-    signal push_button_state_m : sm_input_kbd := debounce_push_button;
+    -- attribute mark_debug of i_kbd_l_swap : signal is "true";
+    -- attribute mark_debug of i_iorqn : signal is "true";
+    -- attribute mark_debug of i_rdn : signal is "true";
+    -- attribute mark_debug of push_button_state_m : signal is "true";
     
     begin
         
@@ -167,7 +226,7 @@ architecture Behavioral of ZX81_board is
                         -- Appui sur bouton 1 détecté et lecture clavier
                         if PUSH_BUTTON = '1' and i_iorqn = '0' and i_rdn = '0' then
                             compteur_debounce := compteur_debounce + 1;
-                            if compteur_debounce = 5 then
+                            if compteur_debounce = 10 then
                                 compteur_debounce := 0;
                                 push_button_state_m <= envoi_code_clavier;
                             end if;
@@ -175,40 +234,44 @@ architecture Behavioral of ZX81_board is
                     when envoi_code_clavier =>
                         if PUSH_BUTTON = '1' then
                             if i_iorqn = '0' and i_rdn = '0' then
-                                -- J (=LOAD)
-                                if code_index = 0 and i_a_cpu = X"BFFE" then
-                                    i_kbd_l_swap <= B"11101";
-                                -- "
-                                elsif code_index = 1 and ((i_a_cpu = X"DFFE") or (i_a_cpu = X"FEFE")) then
-                                    i_kbd_l_swap <= B"01111";
-                                -- "
-                                elsif code_index = 2 and ((i_a_cpu = X"DFFE") or (i_a_cpu = X"FEFE")) then
-                                    i_kbd_l_swap <= B"01111";
+                                -- J = (LOAD)
+                                if code_index = 0 and i_a_cpu = key_j.kbd_col & X"FE" then
+                                    i_kbd_l_swap <= key_j.kbd_line;
+                                -- " (shift + P)
+                                elsif code_index = 1 and ((i_a_cpu = key_shift.kbd_col & X"FE") or (i_a_cpu = key_p.kbd_col & X"FE")) then
+                                    i_kbd_l_swap <= key_shift.kbd_line;
+                                -- " (shift + P)
+                                elsif code_index = 2 and ((i_a_cpu = key_shift.kbd_col & X"FE") or (i_a_cpu = key_p.kbd_col & X"FE")) then
+                                    i_kbd_l_swap <= key_shift.kbd_line;
                                 -- N/L
-                                elsif code_index = 3 and i_a_cpu = X"BFFE" then
-                                    i_kbd_l_swap <= B"01111";
+                                elsif code_index = 3 and i_a_cpu = key_n_l.kbd_col & X"FE" then
+                                    i_kbd_l_swap <= key_n_l.kbd_line;
                                 -------------------------------------------------
+                                -- P
+                                elsif code_index = 4 and i_a_cpu = key_p.kbd_col & X"FE" then
+                                    i_kbd_l_swap <= key_p.kbd_line;
                                 -- 1
-                                elsif code_index = 4 and i_a_cpu = X"F7FE" then
-                                    i_kbd_l_swap <= B"01111";
-                                -- N/L
-                                elsif code_index = 5 and i_a_cpu = X"BFFE" then
-                                    i_kbd_l_swap <= B"01111";                                                                   
+                                elsif code_index = 5 and i_a_cpu = key_1.kbd_col & X"FE" then
+                                    i_kbd_l_swap <= key_1.kbd_line;
+                                -- 1
+                                elsif code_index = 6 and i_a_cpu = key_1.kbd_col & X"FE" then
+                                    i_kbd_l_swap <= key_1.kbd_line;
                                 end if;
-                                
                             end if;
                         else
                             code_index := code_index + 1;
                             push_button_state_m <= debounce_push_button;
+                            compteur_debounce := 0;                            
                         end if;
                     when others =>
                         push_button_state_m <= debounce_push_button;
+                        compteur_debounce := 0;
                 end case;
            end if;
          end process;
     
     ---------------------------------------------------------------------
-    -- Gestion du reset (à resynbchroniser avec une horloge pour éviter les
+    -- Gestion du reset (à resynchroniser avec une horloge pour éviter les
     -- métastabilités ?
     ---------------------------------------------------------------------
     i_resetn <= not RESET and i_pll_locked and i_vga_control_init_done;
@@ -306,6 +369,8 @@ architecture Behavioral of ZX81_board is
         a => i_a_rom (12 downto 0),
         spo => i_d_rom_out
     );
+    -- Dans le cas où il y a une détection de NOP, l'adresse à utiliser est celle construite pour accéder au pattern video.
+    -- Dans le autres cas c'est une adresse utilisée par le Z80.
     i_a_rom <= i_a_vid_pattern when i_nop_detect = '1' else i_a_cpu;
    
     KBD_C <= i_a_cpu(15 downto 8);
