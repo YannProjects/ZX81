@@ -246,7 +246,8 @@ begin
         i_nop_detect_0 <= i_nop_detect;
         i_nop_detect_1 <= i_nop_detect_0;
         if i_nop_detect_0 = '1' and i_nop_detect_1 = '0' then
-             i_vga_char_offset <= i_vga_char_offset + 1;
+            -- Incrémentation de la position du caractère dans la RAM
+            i_vga_char_offset <= i_vga_char_offset + 1;
         end if;
     end if;
 end process;
