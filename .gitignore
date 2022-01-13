@@ -1,2 +1,6 @@
 *.pdf
 *.xlsx
+*.docx
+*.svg
+LTSpice/
+Traces oscilloscope/
