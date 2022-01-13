@@ -4,3 +4,6 @@
 *.svg
 LTSpice/
 Traces oscilloscope/
+software/
+wdb/
+rom/
