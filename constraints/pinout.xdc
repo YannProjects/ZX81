@@ -47,41 +47,41 @@ set_property PACKAGE_PIN N13 [get_ports {KBD_L[3]}]
 set_property PACKAGE_PIN N15 [get_ports {KBD_L[4]}]
 
 # Video VGA
-set_property IOSTANDARD LVCMOS33 [get_ports R_VGA_0]
-set_property IOSTANDARD LVCMOS33 [get_ports R_VGA_1]
-set_property IOSTANDARD LVCMOS33 [get_ports R_VGA_2]
+set_property IOSTANDARD LVCMOS33 [get_ports {R_VGA_H[0]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {R_VGA_H[1]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {R_VGA_H[2]}]
 
-set_property IOSTANDARD LVCMOS33 [get_ports G_VGA_0]
-set_property IOSTANDARD LVCMOS33 [get_ports G_VGA_1]
-set_property IOSTANDARD LVCMOS33 [get_ports G_VGA_2]
+set_property IOSTANDARD LVCMOS33 [get_ports {G_VGA_H[0]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {G_VGA_H[1]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {G_VGA_H[2]}]
 
-set_property IOSTANDARD LVCMOS33 [get_ports B_VGA_0]
-set_property IOSTANDARD LVCMOS33 [get_ports B_VGA_1]
-set_property IOSTANDARD LVCMOS33 [get_ports B_VGA_2]
+set_property IOSTANDARD LVCMOS33 [get_ports {B_VGA_H[0]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {B_VGA_H[1]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {B_VGA_H[2]}]
 
 set_property IOSTANDARD LVCMOS33 [get_ports HSYNC_VGA]
 set_property IOSTANDARD LVCMOS33 [get_ports VSYNC_VGA]
 
 # PIN 48
-set_property PACKAGE_PIN A4 [get_ports R_VGA_0]
+set_property PACKAGE_PIN A4 [get_ports {R_VGA_H[0]}]
 # PIN 47
-set_property PACKAGE_PIN A3 [get_ports R_VGA_1]
+set_property PACKAGE_PIN A3 [get_ports {R_VGA_H[1]}]
 # PIN 46
-set_property PACKAGE_PIN B4 [get_ports R_VGA_2]
+set_property PACKAGE_PIN B4 [get_ports {R_VGA_H[2]}]
 
 # PIN 45
-set_property PACKAGE_PIN B3 [get_ports G_VGA_0]
+set_property PACKAGE_PIN B3 [get_ports {G_VGA_H[0]}]
 # PIN 44
-set_property PACKAGE_PIN C1 [get_ports G_VGA_1]
+set_property PACKAGE_PIN C1 [get_ports {G_VGA_H[1]}]
 # PIN 43
-set_property PACKAGE_PIN B1 [get_ports G_VGA_2]
+set_property PACKAGE_PIN B1 [get_ports {G_VGA_H[2]}]
 
 # PIN 42
-set_property PACKAGE_PIN B2 [get_ports B_VGA_0]
+set_property PACKAGE_PIN B2 [get_ports {B_VGA_H[0]}]
 # PIN 41
-set_property PACKAGE_PIN A2 [get_ports B_VGA_1]
+set_property PACKAGE_PIN A2 [get_ports {B_VGA_H[1]}]
 # PIN 40
-set_property PACKAGE_PIN C5 [get_ports B_VGA_2]
+set_property PACKAGE_PIN C5 [get_ports {B_VGA_H[2]}]
 
 # PIN 30
 set_property PACKAGE_PIN M13 [get_ports VSYNC_VGA]
@@ -89,12 +89,6 @@ set_property PACKAGE_PIN M13 [get_ports VSYNC_VGA]
 set_property PACKAGE_PIN J11 [get_ports HSYNC_VGA]
 
 # Divers
-#set_property IOSTANDARD LVCMOS33 [get_ports {Debug[0]}]
-#set_property IOSTANDARD LVCMOS33 [get_ports {Debug[1]}]
-#set_property IOSTANDARD LVCMOS33 [get_ports {Debug[2]}]
-#set_property IOSTANDARD LVCMOS33 [get_ports {Debug[3]}]
-#set_property IOSTANDARD LVCMOS33 [get_ports {Debug[4]}]
-#set_property IOSTANDARD LVCMOS33 [get_ports {Debug[5]}]
 set_property IOSTANDARD LVCMOS33 [get_ports CLK_12M]
 set_property IOSTANDARD LVCMOS33 [get_ports EAR]
 set_property IOSTANDARD LVCMOS33 [get_ports MIC]
@@ -121,13 +115,6 @@ set_property IOSTANDARD LVCMOS33 [get_ports {Dbg[3]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {Dbg[2]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {Dbg[1]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {Dbg[0]}]
-#set_property IOSTANDARD LVCMOS33 [get_ports Dbg(6)]
-#set_property IOSTANDARD LVCMOS33 [get_ports Dbg(5)]
-#set_property IOSTANDARD LVCMOS33 [get_ports Dbg(4)]
-#set_property IOSTANDARD LVCMOS33 [get_ports Dbg(3)]
-#set_property IOSTANDARD LVCMOS33 [get_ports Dbg(2)]
-#set_property IOSTANDARD LVCMOS33 [get_ports Dbg(1)]
-#set_property IOSTANDARD LVCMOS33 [get_ports Dbg(0)]
 
 set_property PACKAGE_PIN F4 [get_ports {Dbg[7]}]
 set_property PACKAGE_PIN G1 [get_ports {Dbg[6]}]
@@ -144,25 +131,9 @@ set_property CFGBVS VCCO [current_design]
 
 set_clock_groups -asynchronous -group [get_clocks CLK_52M] -group [get_clocks -of_objects [get_pins clk_gen_0/clk_divider_3/O]]
 
-set_false_path -to [get_ports B_VGA_*]
-
-
-
-
-
-
-connect_debug_port u_ila_0/probe3 [get_nets [list ula0/i_vid_ram_detect]]
-
-
-
-connect_debug_port u_ila_0/probe5 [get_nets [list ula0/i_new_frame_start]]
-connect_debug_port u_ila_0/probe7 [get_nets [list ula0/i_vid_ram_detect]]
-
-
-
-
-
-
+set_false_path -to [get_ports R_VGA_H*]
+set_false_path -to [get_ports G_VGA_H*]
+set_false_path -to [get_ports B_VGA_H*]
 
 
 

@@ -75,7 +75,7 @@ architecture Behavioral of ULA is
     
     signal i_hsyncn, i_vsync, i_nmionn: std_logic;
     signal i_hsyncn_detect_0, i_hsyncn_detect_1 : std_logic;
-    signal char_line_cntr : unsigned(2 downto 0);
+    signal char_line_cntr : unsigned(7 downto 0);
     signal char_reg : std_logic_vector(7 downto 0);
     
     signal i_nop_detect, i_nop_detect_0, i_nop_detect_1 : std_logic;
@@ -99,35 +99,28 @@ hsync_and_gate_process: process (CLK_6_5_M, RESETn)
 variable hsyncn_counter: natural := 0;
  
 begin
-    if (RESETn = '0') then
+    if (RESETn = '0' or i_vsync = '1') then
         hsyncn_counter := 0;
-        char_line_cntr <= "000";
+        char_line_cntr <= (others => '0');
         i_hsyncn <= '1';
     -- Sur chaque front descendant de l'horloge 6.5 MHz
     elsif rising_edge(CLK_6_5_M) then
         -- 384 cycles d'horloge à 6.5 MHz = 59 µs
         -- Duree pulse HSYNC = (414 - 384) @6.5 MHz = 4,6 µs 
-        if i_vsync = '1' then
-            -- Si VSYNC = 1, il faut resetter le compteur de lignes pour garder la synchronisation avec
-            -- le pulse de VSYNC
-            char_line_cntr <= "000";
-            hsyncn_counter := 0;
-        else
-            -- Generateur de HSYNC
-            hsyncn_counter := hsyncn_counter + 1;
-            case hsyncn_counter is
-                -- HSYNCn ON 
-                when FB_PORCH_OFF_DURATION =>
-                    i_hsyncn <= '0';
-                    char_line_cntr <= char_line_cntr + 1;
-                -- HSYNCn OFF
-                when FB_PORCH_OFF_DURATION + HSYNC_PULSE_ON_DURATION =>
-                    i_hsyncn <= '1';
-                    hsyncn_counter := 0;
-                when others =>
-                    null;
-            end case;
-        end if;
+        -- Generateur de HSYNC
+        hsyncn_counter := hsyncn_counter + 1;
+        case hsyncn_counter is
+            -- HSYNCn ON 
+            when FB_PORCH_OFF_DURATION =>
+                i_hsyncn <= '0';
+                char_line_cntr <= char_line_cntr + 1;
+            -- HSYNCn OFF
+            when FB_PORCH_OFF_DURATION + HSYNC_PULSE_ON_DURATION =>
+                i_hsyncn <= '1';
+                hsyncn_counter := 0;
+            when others =>
+                null;
+        end case;
     end if;
 end process;
    
@@ -185,59 +178,29 @@ i_nop_detect <= '1' when (M1n = '0' and MREQn = '0' and RDn = '0' and HALTn = '1
 -- Set/Reset pour VSYNC
 p_vsync : process(CLK_6_5_M)
 begin
-    if (RESETn = '0') then
+    -- Enable VSYNC (IN FE)
+    if IORQn = '0' and A_cpu(0) = '0' and RDn = '0' and i_nmionn = '1' then
+        i_vsync <= '1';
+    -- Clear VSYNC (OUT NN)
+    elsif RESETn = '0' or (IORQn = '0' and WRn = '0') then
         i_vsync <= '0';
-    elsif rising_edge(CLK_6_5_M) then
-        -- Enable VSYNC (IN FE)
-        if IORQn = '0' and A_cpu(0) = '0' and RDn = '0' and i_nmionn = '1' then
-            i_vsync <= '1';
-        -- Clear VSYNC (OUT NN)
-        elsif IORQn = '0' and WRn = '0' then
-            i_vsync <= '0';
-        end if;
     end if;
 end process;
 
-p_nmi : process(CLK_6_5_M)
+p_nmi : process(RESETn, IORQn, A_cpu, RDn, i_nmionn)
 begin
-    if (RESETn = '0') then
+    -- Clear NMIn (OUT FD)
+    if RESETn = '0' or (IORQn = '0' and WRn = '0' and A_cpu(1) = '0') then
         i_nmionn <= '1';
-    elsif rising_edge(CLK_6_5_M) then
-        -- Clear NMIn (OUT FD)
-        if IORQn = '0' and WRn = '0' and A_cpu(1) = '0' then
-            i_nmionn <= '1';
-        -- Enable NMIn (OUT FE)
-        elsif IORQn = '0' and WRn = '0' and A_cpu(0) = '0' then
-            i_nmionn <= '0';
-        end if;
+    -- Enable NMIn (OUT FE)
+    elsif IORQn = '0' and WRn = '0' and A_cpu(0) = '0' then
+        i_nmionn <= '0';
     end if;
 end process;
 
--- Process pour le comptage des ligne pour l'affichage VGA
-p_vga_line_counter : process(CLK_6_5_M)
-begin
-    if (RESETn = '0' or i_vsync = '1') then
-        i_vga_line_counter <= (others => '0');
-    -- Sur chaque front montant de l'horloge 6.5 MHz
-    elsif rising_edge(CLK_6_5_M) then
-        i_hsyncn_detect_0 <= i_hsyncn;
-        i_hsyncn_detect_1 <= i_hsyncn_detect_0;
-        -- Transition HSYNC 0 -> 1
-        -- On compte tous les plulses de synchro horizontale à partir de la fin du A_cpu
-        -- L'écran est en fait plus grand que la taille nécessaire (512 x 480 au lieu 512 x 384 avec les lignes et colonnes doublées).
-        -- Ca permet de tenir compte du mode "FAST" et des variations du nombre de pulses de HSYNC avant l'affichage qui paraît varier
-        -- en fonction des logiciels utilisés...
-        -- Cette solution fonctionnne bien. Il faudrait juste rajouter un rafraichissement de l'écran au cas où un logiciel
-        -- utilisant un nombre de HSYNC est utilisé après un autre utilisant une autre valeur. Mai, bon, on verra...
-        if i_hsyncn_detect_0 = '1' and i_hsyncn_detect_1 = '0' then
-            i_vga_line_counter <= i_vga_line_counter + X"20";
-        end if;
-    end if;
-end process;
-
--- Process pour le comptage des pixels entre le début de la synchro ligne et le début de l'exécution en RAM A_cpu
--- (devrait correspondre au nombre de pixel entre la synchro ligne et le début de l'afficahge...
-p_vga_char_counter : process(CLK_6_5_M, i_hsyncn)
+-- Process pour le comptage des lignes et des pixels pour le contrôleur VGA 
+-- L'horloge clk_8_pixels encadre 8 pixels (6,6 MHz / 8)
+p_vga_char_counter : process(RESETn, CLK_6_5_M, i_hsyncn)
 begin
     if (RESETn = '0' or i_hsyncn = '0') then
         i_vga_char_offset <= (others => '0');
@@ -246,7 +209,7 @@ begin
         i_nop_detect_0 <= i_nop_detect;
         i_nop_detect_1 <= i_nop_detect_0;
         if i_nop_detect_0 = '1' and i_nop_detect_1 = '0' then
-            -- Incrémentation de la position du caractère dans la RAM
+            -- Incr<E9>mentation de la position du caract<E8>re dans la RAM
             i_vga_char_offset <= i_vga_char_offset + 1;
         end if;
     end if;
@@ -289,7 +252,7 @@ end process;
 video_state_machine_process: process (CLK_6_5_M, RESETn)
 
 variable vid_pattern : std_logic_vector(7 downto 0);
-variable byte_offset, pixel_offset : unsigned(13 downto 0); 
+variable byte_offset, pixel_offset : unsigned(13 downto 0);
 
 
 begin
@@ -317,7 +280,7 @@ begin
                     -- Si c'est un cycle de NOP, on lit le pattern video à partir de la ROM
                     -- en construisant l'adresse à partir du caractère à afficher et du numero
                     -- de ligne en cours.
-                    A_vid_pattern <= A_cpu(15 downto 9) & char_reg(5 downto 0) & std_logic_vector(char_line_cntr);
+                    A_vid_pattern <= A_cpu(15 downto 9) & char_reg(5 downto 0) & std_logic_vector(char_line_cntr(2 downto 0));
                     state_m <= wait_for_vid_data;
                 else
                     state_m <= wait_for_m1_rfrsh;
@@ -330,10 +293,12 @@ begin
                 else
                     vid_pattern := not D_rom_out;
                 end if;
-
+                
                 byte_offset := "000000" & pixel_offset(10 downto 3);
+
                 -- Signaux pour le controlleur VGA
-                vga_addr <= i_vga_line_counter - X"20" + i_vga_char_offset - X"1";
+
+                vga_addr <= std_logic_vector(char_line_cntr) & "00000" + i_vga_char_offset - X"1";
                 vga_wr_cyc <= '1';
                 vga_data <= vid_pattern;
                 state_m <= wait_for_nop_detection;

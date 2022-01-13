@@ -3,7 +3,7 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="Z81_board_sim_behav.wdb" id="1">
+      <db_ref path="C:/Users/yannv/Documents/Projets_HW/ZX81/ZX81_full_FPGA_v7/ZX81_spartan7/ZX81_spartan7.sim/sim_1/behav/xsim/Z81_board_sim_behav.wdb" id="1">
          <top_modules>
             <top_module name="Z81_board_sim" />
             <top_module name="glbl" />
@@ -14,18 +14,19 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
-      <ZoomEndTime time="126.800000001 ms"></ZoomEndTime>
-      <Cursor1Time time="33.383945991 ms"></Cursor1Time>
+      <ZoomStartTime time="244,829,976.666 ns"></ZoomStartTime>
+      <ZoomEndTime time="244,836,821.667 ns"></ZoomEndTime>
+      <Cursor1Time time="244,831,117.499 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="202"></NameColumnWidth>
+      <NameColumnWidth column_width="174"></NameColumnWidth>
       <ValueColumnWidth column_width="58"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="35" />
+   <WVObjectSize size="36" />
    <wave_markers>
-      <marker time="548929699037" label="" />
-      <marker time="16775707777" label="" />
+      <marker time="235616508576" label="" />
+      <marker time="231117040268" label="" />
+      <marker time="244872796268" label="" />
    </wave_markers>
    <wvobject fp_name="/Z81_board_sim/ZX81_board0/CLK_12M" type="logic">
       <obj_property name="ElementShortName">CLK_12M</obj_property>
@@ -54,6 +55,10 @@
    <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_clk_3_25m" type="logic">
       <obj_property name="ElementShortName">i_clk_3_25m</obj_property>
       <obj_property name="ObjectShortName">i_clk_3_25m</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/clk_gen_0/clk_8_pix" type="logic">
+      <obj_property name="ElementShortName">clk_8_pix</obj_property>
+      <obj_property name="ObjectShortName">clk_8_pix</obj_property>
    </wvobject>
    <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_a_cpu" type="array">
       <obj_property name="ElementShortName">i_a_cpu[15:0]</obj_property>
@@ -146,6 +151,7 @@
    <wvobject fp_name="group537" type="group">
       <obj_property name="label">ULA</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/CLK_6_5_M" type="logic">
          <obj_property name="ElementShortName">CLK_6_5_M</obj_property>
          <obj_property name="ObjectShortName">CLK_6_5_M</obj_property>
@@ -310,7 +316,6 @@
    <wvobject fp_name="group2464" type="group">
       <obj_property name="label">vga_control_top</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/RESET" type="logic">
          <obj_property name="ElementShortName">RESET</obj_property>
          <obj_property name="ObjectShortName">RESET</obj_property>
@@ -1067,10 +1072,6 @@
       <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_vga_line_counter" type="array">
          <obj_property name="ElementShortName">i_vga_line_counter[12:0]</obj_property>
          <obj_property name="ObjectShortName">i_vga_line_counter[12:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_video_lines_from_vsync" type="array">
-         <obj_property name="ElementShortName">i_video_lines_from_vsync[7:0]</obj_property>
-         <obj_property name="ObjectShortName">i_video_lines_from_vsync[7:0]</obj_property>
       </wvobject>
    </wvobject>
 </wave_config>

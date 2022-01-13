@@ -47,17 +47,9 @@ entity ZX81_board is
            HSYNC_VGA : out STD_LOGIC;
            VSYNC_VGA : out STD_LOGIC;
            
-           R_VGA_0 : out STD_LOGIC;
-           R_VGA_1 : out STD_LOGIC;
-           R_VGA_2 : out STD_LOGIC;
-
-           G_VGA_0 : out STD_LOGIC;
-           G_VGA_1 : out STD_LOGIC;
-           G_VGA_2 : out STD_LOGIC;
-           
-           B_VGA_0 : out STD_LOGIC;
-           B_VGA_1 : out STD_LOGIC;
-           B_VGA_2 : out STD_LOGIC;
+           R_VGA_H : out std_logic_vector (2 downto 0);
+           G_VGA_H : out std_logic_vector (2 downto 0);
+           B_VGA_H : out std_logic_vector (2 downto 0);
            
            -- Signaux de debug
            -- Debug : out std_logic_vector(5 downto 0)
@@ -92,62 +84,6 @@ architecture Behavioral of ZX81_board is
        spo : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
      );
      end component;
-     
-    type keyboard_map_type is 
-    record
-        kbd_col     : std_logic_vector(7 downto 0);
-        kbd_line    : std_logic_vector(4 downto 0);
-    end record;
-    
-    -- kbd_col: A15 A14 A13 A12 A11 A10 A9 A8
-    -- kbd_line : KBD0 KBD1 KBD2 KBD3 KBD4
-    constant key_6 : keyboard_map_type := (B"11101111", B"11110");
-    constant key_7 : keyboard_map_type := (B"11101111", B"11101");
-    constant key_8 : keyboard_map_type := (B"11101111", B"11011");
-    constant key_9 : keyboard_map_type := (B"11101111", B"10111");
-    constant key_0 : keyboard_map_type := (B"11101111", B"01111");
-
-    constant key_y : keyboard_map_type := (B"11011111", B"11110");
-    constant key_u : keyboard_map_type := (B"11011111", B"11101");
-    constant key_i : keyboard_map_type := (B"11011111", B"11011");
-    constant key_o : keyboard_map_type := (B"11011111", B"10111");
-    constant key_p : keyboard_map_type := (B"11011111", B"01111");
-
-    constant key_h : keyboard_map_type := (B"10111111", B"11110");
-    constant key_j : keyboard_map_type := (B"10111111", B"11101");
-    constant key_k : keyboard_map_type := (B"10111111", B"11011");
-    constant key_l : keyboard_map_type := (B"10111111", B"10111");
-    constant key_n_l : keyboard_map_type := (B"10111111", B"01111");
-
-    constant key_b : keyboard_map_type := (B"01111111", B"11110");
-    constant key_n : keyboard_map_type := (B"01111111", B"11101");
-    constant key_m : keyboard_map_type := (B"01111111", B"11011");
-    constant key_point : keyboard_map_type := (B"01111111", B"10111");
-    constant key_space : keyboard_map_type := (B"01111111", B"01111");
-
-    constant key_5 : keyboard_map_type := (B"11110111", B"11110");
-    constant key_4 : keyboard_map_type := (B"11110111", B"11101");
-    constant key_3 : keyboard_map_type := (B"11110111", B"11011");
-    constant key_2 : keyboard_map_type := (B"11110111", B"10111");
-    constant key_1 : keyboard_map_type := (B"11110111", B"01111");
-
-    constant key_t : keyboard_map_type := (B"11111011", B"11110");
-    constant key_r : keyboard_map_type := (B"11111011", B"11101");
-    constant key_e : keyboard_map_type := (B"11111011", B"11011");
-    constant key_w : keyboard_map_type := (B"11111011", B"10111");
-    constant key_q : keyboard_map_type := (B"11111011", B"01111");
-
-    constant key_g : keyboard_map_type := (B"11111101", B"11110");
-    constant key_f : keyboard_map_type := (B"11111101", B"11101");
-    constant key_d : keyboard_map_type := (B"11111101", B"11011");
-    constant key_s : keyboard_map_type := (B"11111101", B"10111");
-    constant key_a : keyboard_map_type := (B"11111101", B"01111");
-
-    constant key_v : keyboard_map_type := (B"11111110", B"11110");
-    constant key_c : keyboard_map_type := (B"11111110", B"11101");
-    constant key_x : keyboard_map_type := (B"11111110", B"11011");
-    constant key_z : keyboard_map_type := (B"11111110", B"10111");
-    constant key_shift : keyboard_map_type := (B"11111110", B"01111");
     
     -- Control signal
     signal i_waitn, i_nmin : std_logic := '1';
@@ -167,14 +103,10 @@ architecture Behavioral of ZX81_board is
     signal R_VGA, G_VGA, B_VGA : std_logic_vector(7 downto 0);
     signal BLANK_VGA : std_logic;
     signal i_hsync, i_vsync : std_logic;
-
-    type sm_input_kbd is (debounce_push_button, envoi_code_clavier);
-    signal push_button_state_m : sm_input_kbd := debounce_push_button;    
     
     -- attribute mark_debug : string;
     -- attribute mark_debug of KBD_C : signal is "true";
     -- attribute mark_debug of KBD_L : signal is "true";
-    -- attribute mark_debug of i_iorqn : signal is "true";
     -- attribute mark_debug of i_wrram : signal is "true";
     -- attribute mark_debug of i_d_ram_out : signal is "true";
     -- attribute mark_debug of i_a_cpu : signal is "true";
@@ -190,7 +122,6 @@ architecture Behavioral of ZX81_board is
     -- attribute mark_debug of i_kbd_l_swap : signal is "true";
     -- attribute mark_debug of i_iorqn : signal is "true";
     -- attribute mark_debug of i_rdn : signal is "true";
-    -- attribute mark_debug of push_button_state_m : signal is "true";
     
     begin
         
@@ -204,71 +135,6 @@ architecture Behavioral of ZX81_board is
             rst => RESET,
             pll_locked => i_pll_locked
         );
-        
-        --
-        -- Process temporaire utilisé pour remplacer le clavier du PCB v3 qui ne fonctionne pas
-        -- A chauqe appui détecté sur le bouton B1, on simulé l'appui d'un touche qui correspond
-        -- à un mot clé prédéfini
-        p_push_button: process (i_clk_6_5m, i_resetn, PUSH_BUTTON, i_a_cpu, i_iorqn, i_rdn)
-        
-        variable compteur_debounce, code_index : integer; 
-        
-        begin
-           if i_resetn = '0' then
-                compteur_debounce := 0;
-                code_index := 0;
-                push_button_state_m <= debounce_push_button;
-                i_kbd_l_swap <= B"11111";
-           elsif rising_edge(i_clk_6_5m) then
-                i_kbd_l_swap <= B"11111";
-                case push_button_state_m is
-                    when debounce_push_button =>                        
-                        -- Appui sur bouton 1 détecté et lecture clavier
-                        if PUSH_BUTTON = '1' and i_iorqn = '0' and i_rdn = '0' then
-                            compteur_debounce := compteur_debounce + 1;
-                            if compteur_debounce = 10 then
-                                compteur_debounce := 0;
-                                push_button_state_m <= envoi_code_clavier;
-                            end if;
-                        end if;
-                    when envoi_code_clavier =>
-                        if PUSH_BUTTON = '1' then
-                            if i_iorqn = '0' and i_rdn = '0' then
-                                -- J = (LOAD)
-                                if code_index = 0 and i_a_cpu = key_j.kbd_col & X"FE" then
-                                    i_kbd_l_swap <= key_j.kbd_line;
-                                -- " (shift + P)
-                                elsif code_index = 1 and ((i_a_cpu = key_shift.kbd_col & X"FE") or (i_a_cpu = key_p.kbd_col & X"FE")) then
-                                    i_kbd_l_swap <= key_shift.kbd_line;
-                                -- " (shift + P)
-                                elsif code_index = 2 and ((i_a_cpu = key_shift.kbd_col & X"FE") or (i_a_cpu = key_p.kbd_col & X"FE")) then
-                                    i_kbd_l_swap <= key_shift.kbd_line;
-                                -- N/L
-                                elsif code_index = 3 and i_a_cpu = key_n_l.kbd_col & X"FE" then
-                                    i_kbd_l_swap <= key_n_l.kbd_line;
-                                -------------------------------------------------
-                                -- P
-                                elsif code_index = 4 and i_a_cpu = key_p.kbd_col & X"FE" then
-                                    i_kbd_l_swap <= key_p.kbd_line;
-                                -- 1
-                                elsif code_index = 5 and i_a_cpu = key_1.kbd_col & X"FE" then
-                                    i_kbd_l_swap <= key_1.kbd_line;
-                                -- 1
-                                elsif code_index = 6 and i_a_cpu = key_1.kbd_col & X"FE" then
-                                    i_kbd_l_swap <= key_1.kbd_line;
-                                end if;
-                            end if;
-                        else
-                            code_index := code_index + 1;
-                            push_button_state_m <= debounce_push_button;
-                            compteur_debounce := 0;                            
-                        end if;
-                    when others =>
-                        push_button_state_m <= debounce_push_button;
-                        compteur_debounce := 0;
-                end case;
-           end if;
-         end process;
     
     ---------------------------------------------------------------------
     -- Gestion du reset (à resynchroniser avec une horloge pour éviter les
@@ -385,29 +251,17 @@ architecture Behavioral of ZX81_board is
        I => i_clk_6_5mn
      );
 
-    i_tape_in <= not EAR;
+    i_tape_in <= EAR;
     
     -- On ne garde que 3 bits sur les 8
-    R_VGA_0 <= R_VGA(5) and not BLANK_VGA;
-    R_VGA_1 <= R_VGA(6) and not BLANK_VGA;
-    R_VGA_2 <= R_VGA(7) and not BLANK_VGA;
-    -- On ne garde que 3 bits sur les 8
-    G_VGA_0 <= G_VGA(5) and not BLANK_VGA;
-    G_VGA_1 <= G_VGA(6) and not BLANK_VGA;
-    G_VGA_2 <= G_VGA(7) and not BLANK_VGA;
-    -- On ne garde que 3 bits sur les 8
-    B_VGA_0 <= B_VGA(5) and not BLANK_VGA;
-    B_VGA_1 <= B_VGA(6) and not BLANK_VGA;
-    B_VGA_2 <= B_VGA(7) and not BLANK_VGA;
+    R_VGA_H(2 downto 0) <= R_VGA(7 downto 5) and (not BLANK_VGA & not BLANK_VGA & not BLANK_VGA);
+    G_VGA_H(2 downto 0) <= G_VGA(7 downto 5) and (not BLANK_VGA & not BLANK_VGA & not BLANK_VGA);
+    B_VGA_H(2 downto 0) <= B_VGA(7 downto 5) and (not BLANK_VGA & not BLANK_VGA & not BLANK_VGA);
     
     HSYNC_VGA <= i_hsync;
     VSYNC_VGA <= i_vsync;
     
-    -- i_kbd_l_swap(4) <= KBD_L(4);
-    -- i_kbd_l_swap(3) <= KBD_L(3);
-    -- i_kbd_l_swap(2) <= KBD_L(2);
-    -- i_kbd_l_swap(1) <= KBD_L(1);
-    -- i_kbd_l_swap(0) <= KBD_L(0);
+    i_kbd_l_swap <= KBD_L;
     
     -- Debug
     Dbg(0) <= i_iorqn or i_rdn;

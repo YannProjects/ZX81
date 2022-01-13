@@ -41,39 +41,6 @@ end Z81_board_sim;
 
 architecture Behavioral of Z81_board_sim is
 
-component ZX81_board is
-port(
-    CLK_12M : in STD_LOGIC; -- Clock from CMOD S7
-    -- Sortie "audio" ZX81 - Entrée "audio" PC
-    MIC : out STD_LOGIC;
-    RESET : in std_logic;
-    PUSH_BUTTON : in std_logic;
-    KBD_L : in STD_LOGIC_vector (4 downto 0);
-    KBD_C : out STD_LOGIC_vector (7 downto 0);
-    -- Sortie "audio" PC - Entrée "audio" ZX81
-    EAR : in STD_LOGIC;
-    HSYNC_VGA : out STD_LOGIC;
-    VSYNC_VGA : out STD_LOGIC;
-    -- R_VGA : out STD_LOGIC_vector (7 downto 0);
-    -- G_VGA : out STD_LOGIC_vector (7 downto 0);
-    -- B_VGA : out STD_LOGIC_vector (7 downto 0);
-    R_VGA_0 : out STD_LOGIC;
-    R_VGA_1 : out STD_LOGIC;
-    R_VGA_2 : out STD_LOGIC;
-    
-    G_VGA_0 : out STD_LOGIC;
-    G_VGA_1 : out STD_LOGIC;
-    G_VGA_2 : out STD_LOGIC;
-    
-    B_VGA_0 : out STD_LOGIC;
-    B_VGA_1 : out STD_LOGIC;
-    B_VGA_2 : out STD_LOGIC;
-    
-    Iorq_Heart_Beat : out std_logic
-    
-);
-end component ZX81_board;
-
 constant clk_period : time := 83 ns;
 constant clk_period_52m : time := 19 ns;
 constant micin_simu_start_time : time := 1000 ms;
@@ -91,7 +58,7 @@ signal i_hsync_vga, i_vsync_vga, i_blank_vga : std_logic;
 
 begin
    
-   ZX81_board0: ZX81_board
+   ZX81_board0: entity work.ZX81_board
    port map (
        CLK_12M => i_main_clk,
        MIC => i_mic_out,

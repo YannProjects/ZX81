@@ -26,9 +26,9 @@ use ieee.numeric_std.all;
 Package ZX81_Pack is
 
 -- 2K
-constant RAM_ADDRWIDTH : integer := 11;
+-- constant RAM_ADDRWIDTH : integer := 11;
 -- 16K
--- constant RAM_ADDRWIDTH : integer := 14;
+constant RAM_ADDRWIDTH : integer := 14;
 
 --- Constantes pour la generation du HSYNC et back/front porch:
 constant HSYNC_PULSE_ON_DURATION : natural := 30; -- @ 6,5 MHz
