@@ -84,14 +84,24 @@ architecture Behavioral of ZX81_board is
        spo : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
      );
      end component;
+     
+    component blk_mem_gen_0 IS
+      PORT (
+        clka : IN STD_LOGIC;
+        wea : IN STD_LOGIC;
+        addra : IN STD_LOGIC_VECTOR(RAM_ADDRWIDTH - 1 DOWNTO 0);
+        dina : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+        douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
+      );
+    end component;     
     
     -- Control signal
     signal i_waitn, i_nmin : std_logic := '1';
-    signal i_busackn, i_m1n, i_mreqn, i_iorqn, i_tape_in : std_logic;
-    signal i_rdn, i_wrn, i_wrram, i_rfrshn, i_haltn, i_nop_detect : std_logic;
-    signal i_a_cpu, i_a_vid_pattern,i_a_rom : std_logic_vector (15 downto 0);
-    signal i_d_cpu_out, i_d_cpu_in, i_d_ram_in, i_d_ram_out, i_d_rom_out : std_logic_vector (7 downto 0);
-    signal i_clk_52m, i_clk_6_5m, i_clk_6_5mn, i_clk_6_5mn_buf, i_clk_3_25m : std_logic;
+    signal i_m1n, i_mreqn, i_iorqn, i_tape_in : std_logic;
+    signal i_rdn, i_wrn, i_wrram, i_rfrshn, i_haltn, i_cs_for_video_pattern : std_logic;
+    signal i_a_cpu, i_a_vid_pattern, i_a_rom : std_logic_vector (15 downto 0);
+    signal i_d_cpu_out, i_d_cpu_in, i_d_ram_out, i_d_rom_out : std_logic_vector (7 downto 0);
+    signal i_clk_52m, i_clk_3_25m : std_logic;
     signal i_resetn : std_logic;
     signal i_kbd_l_swap : std_logic_vector(4 downto 0);
     -- VGA
@@ -125,16 +135,15 @@ architecture Behavioral of ZX81_board is
     
     begin
         
-        clk_gen_0 : entity work.Clocks_gen
-        port map (
-            main_clk => CLK_12M,
-            clk_52m => i_clk_52m,
-            clk_3_25m => i_clk_3_25m,
-            clk_6_5m => i_clk_6_5m,
-            vga_clk => i_vga_clock,
-            rst => RESET,
-            pll_locked => i_pll_locked
-        );
+    clk_gen_0 : entity work.Clocks_gen
+    port map (
+        main_clk => CLK_12M,
+        clk_52m => i_clk_52m,
+        clk_3_25m => i_clk_3_25m,
+        vga_clk => i_vga_clock,
+        rst => RESET,
+        pll_locked => i_pll_locked
+    );
     
     ---------------------------------------------------------------------
     -- Gestion du reset (à resynchroniser avec une horloge pour éviter les
@@ -159,7 +168,6 @@ architecture Behavioral of ZX81_board is
 	 	WR_n => i_wrn,
 	 	RFSH_n => i_rfrshn,
 	 	HALT_n => i_haltn,
-	 	BUSAK_n => i_busackn,
 	 	A => i_a_cpu,
 	 	DI => i_d_cpu_in,
 	 	DO => i_d_cpu_out
@@ -167,12 +175,10 @@ architecture Behavioral of ZX81_board is
               
     ula0 : entity work.ULA
     port map ( 
-       CLK_6_5_M => i_clk_6_5mn_buf,
+       CLK_3_25_M => i_clk_3_25m,
        A_cpu => i_a_cpu, -- CPU address bus
        A_vid_pattern => i_a_vid_pattern, -- RAM/ROM address bus
        D_cpu_IN => i_d_cpu_in, -- CPU data bus IN. Output from ULA side
-       D_cpu_OUT => i_d_cpu_out, -- CPU data bus OUT. Input from ULA side
-       D_ram_in => i_d_ram_in, -- RAM input data bus. Output from ULA side
        D_ram_out => i_d_ram_out, -- RAM output data bus. Input for ULA side
        D_rom_out => i_d_rom_out, -- ROM ouput data bus. Input for ULA side 
        
@@ -192,19 +198,19 @@ architecture Behavioral of ZX81_board is
        NMIn => i_nmin,
        MREQn => i_mreqn,
        RFRSHn => i_rfrshn,
-       NOP_Detect => i_nop_detect,
+       ROM_ADDR_ENBL_FOR_VID_PATTERN => i_cs_for_video_pattern,
        M1n => i_m1n,
        WAITn => i_waitn,
        RESETn => i_resetn
     );
 
-    ram1 : dist_mem_gen_1
+    ram1 : blk_mem_gen_0
     port map (
-       a => i_a_cpu (RAM_ADDRWIDTH - 1 downto 0),
-       d => i_d_cpu_out,
-       clk => i_clk_6_5mn_buf,
-       we => i_wrram,     -- Write actif sur niveau haut...
-       spo => i_d_ram_out
+       addra => i_a_cpu (RAM_ADDRWIDTH - 1 downto 0),
+       dina => i_d_cpu_out,
+       douta => i_d_ram_out,       
+       clka => i_clk_3_25m,
+       wea => i_wrram     -- Write actif sur niveau haut...
     );
     
     vga_control0 : entity work.vga_control_top
@@ -235,21 +241,13 @@ architecture Behavioral of ZX81_board is
         a => i_a_rom (12 downto 0),
         spo => i_d_rom_out
     );
+    
     -- Dans le cas où il y a une détection de NOP, l'adresse à utiliser est celle construite pour accéder au pattern video.
     -- Dans le autres cas c'est une adresse utilisée par le Z80.
-    i_a_rom <= i_a_vid_pattern when i_nop_detect = '1' else i_a_cpu;
+    i_a_rom <= i_a_vid_pattern when i_cs_for_video_pattern = '1' else i_a_cpu;
    
+    -- Les 5 lignes du clavier
     KBD_C <= i_a_cpu(15 downto 8);
-    i_clk_6_5mn <= not i_clk_6_5m;
-    
-    --------------------------------------
-    -- Output 6_5 M buffering
-    -----------------------------------
-    clk_buf : BUFG
-    port map (
-       O => i_clk_6_5mn_buf,
-       I => i_clk_6_5mn
-     );
 
     i_tape_in <= EAR;
     

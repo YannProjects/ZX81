@@ -129,7 +129,7 @@ set_property PACKAGE_PIN J2 [get_ports {Dbg[0]}]
 set_property CONFIG_VOLTAGE 3.3 [current_design]
 set_property CFGBVS VCCO [current_design]
 
-set_clock_groups -asynchronous -group [get_clocks CLK_52M] -group [get_clocks -of_objects [get_pins clk_gen_0/clk_divider_3/O]]
+set_clock_groups -asynchronous -group [get_clocks CLK_52M] -group [get_clocks -of_objects [get_pins clk_gen_0/clk_divider_4/O]]
 
 set_false_path -to [get_ports R_VGA_H*]
 set_false_path -to [get_ports G_VGA_H*]

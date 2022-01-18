@@ -172,11 +172,11 @@ architecture Behavioral of vga_control_top is
         (VBARa_REG_ADDR,x"00000000", '0'), --   program video base address 0 register (VBARa)
         (VBARb_REG_ADDR,x"00100000", '0'), --   program video base address 0 register (VBARb). Pas utilisé
         -- Pour le cas du ZX81, on a un affichage de:
-        -- 32*8 = 256 pixel par lignes qui sont dupliqués par 2 => 512 pixels. La longueur totale de ligne
+        -- 34*8 = 272 pixel par lignes qui sont dupliqués par 2 => 544 pixels. La longueur totale de ligne
         -- est de 800 pixels en 640 x 480
-        -- => hsync pulse = 96 pixels (25.175 MMHz)
-        -- => active time = 512 pixels
-        -- => back porch =  112 pixels (pour respecter le ratio front porch / back porch de la doc.).
+        -- => hsync pulse = 96 pixels (25.175 MMHz) = Thsync
+        -- => back porch =  112 pixels (pour respecter le ratio front porch / back porch de la doc.) = Thdel        
+        -- => active time = 512 pixels = Thgate 
         -- => front porch = 80 pixels
         (HTIM_REG_ADDR,x"5F6F01FF", '0'), -- program horizontal timing register
         -- Pour les lignes, il y a en tout 525 lignes
