@@ -189,8 +189,18 @@ architecture Behavioral of vga_control_top is
                                           --   avec 525 lignes il y a une ligne en trop...			
         
         -- On n'utilise que 2 couleurs: la première en index 0 et la dernière en index 255 sur la CLUT 0 (CLUT 1 pas utilisée)
-        (CLUT_REG_ADDR_1,x"00707070", '0'),
-        (CLUT_REG_ADDR_2,x"00000000", '0'),
+        -- CLUT_REG_ADDR_1: Couleur de fond
+        -- CLUT_REG_ADDR_2: Couleur de premier plan
+        -- 0x00E0E0E0 : R G B sur un octet. Par rapport au circuit, seuls les 3 bits de poids fort sont utilisés:
+        -- Blanc:  0x00E0E0E0
+        -- Noir:   0x00000000
+        -- Bleu:   0x000000E0
+        -- Vert:   0x0000E000
+        -- Rouge:  0x00E00000
+        -- Violet: 0x00800080
+        -- Jaune:  0x00e0e000
+        (CLUT_REG_ADDR_1,x"00E0E0E0", '0'),
+        (CLUT_REG_ADDR_2,x"000000E0", '0'),
         (CTRL_REG_ADDR,x"00000901", '0'), --   program control register (VEN=1 (video enabled), PC=1 (pseudo-color), CD=11 (32 bits))                                                
         -- end list
         (x"00000000",x"00000000", '1')  --38 stop testbench
