@@ -30,8 +30,8 @@ use work.ZX81_Pack.all;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
--- library UNISIM;
--- use UNISIM.VComponents.all;
+library UNISIM;
+use UNISIM.VComponents.all;
 use work.ZX81_Pack.all;
 
 entity ULA is
@@ -60,7 +60,7 @@ entity ULA is
            NMIn : out STD_LOGIC;
            MREQn : in STD_LOGIC;
            RFRSHn : in std_logic;
-           ROM_ADDR_ENBL_FOR_VID_PATTERN : out std_logic;
+           VID_PATTERN_ROM_ADDR_SELECT : out std_logic;
            M1n : in STD_LOGIC;
            WAITn : out std_logic;
            RESETn : in STD_LOGIC
@@ -69,22 +69,38 @@ end ULA;
 
 architecture Behavioral of ULA is
 
-    type sm_video_state is (wait_for_nop_detection, wait_for_m1_rfrsh, wait_for_vid_data);
+    type sm_video_state is (video_sm_reset, wait_for_video_exec, wait_for_m1_rfrsh, wait_for_vid_data);
     
-    signal i_hsyncn, i_vsync, i_nmionn, char_valid: std_logic;
-    signal i_hsyncn_detect_0, i_hsyncn_detect_1 : std_logic;
-    signal char_line_cntr : unsigned(7 downto 0);
-    signal char_reg : std_logic_vector(7 downto 0);
+    signal i_hsyncn : std_logic;
+    signal i_vsync  : std_logic;
+    signal i_nmionn : std_logic;
+    signal char_line_cntr : unsigned(2 downto 0);
+    signal i_vsync_pulse_duration : unsigned(11 downto 0);
+    signal char_reg, vga_line_cntr, vga_line_start_offset, vga_line_start_offset_current, i_vga_data : std_logic_vector(7 downto 0);
     
     signal i_nop_detect, i_halt_detect: std_logic; 
-    signal i_vga_line_counter, i_vga_char_offset : std_logic_vector(12 downto 0);
+    signal i_vga_char_offset, i_vga_addr, i_vga_rfrsh_addr : std_logic_vector(12 downto 0);
+    signal i_vga_wr : std_logic;
     
     signal iorqn_0, iorqn_1, i_nmin : std_logic;
+    signal i_wr_rfrsh, i_vga_rfrsh_cs : std_logic;
     
     signal state_m : sm_video_state;
-    signal i_vga_data, vid_pattern : std_logic_vector(7 downto 0);
-    signal i_wr_cyc : std_logic;
-    signal i_rom_addr_enable_for_vid_pattern : std_logic;
+    signal vid_pattern : std_logic_vector(7 downto 0);
+    signal i_rom_addr_enable_for_vid_pattern, i_vsync_pulse_valid : std_logic;
+    
+    type sm_vga_screen_rfsh is (wait_for_screen_rfrsh_needed, rfrsh_screen_step_1, rfrsh_screen_step_2);
+    signal screen_rfrsh_state_m : sm_vga_screen_rfsh;
+    signal vga_line_offset_update_needed : std_logic;
+    
+    -- attribute mark_debug : string;
+    -- attribute mark_debug of i_vsync : signal is "true";
+    -- attribute mark_debug of i_vsync_pulse_valid : signal is "true";
+    -- attribute mark_debug of i_hsyncn : signal is "true";
+    -- attribute mark_debug of vga_addr : signal is "true";
+    -- attribute mark_debug of vga_data : signal is "true";
+    -- attribute mark_debug of vga_wr_cyc : signal is "true";
+    -- attribute mark_debug of vga_line_start_offset : signal is "true";
    
 begin
 
@@ -94,11 +110,14 @@ begin
 ---------------------------------------------------------------------
 hsync_and_gate_process: process (CLK_3_25_M, RESETn)
 
-variable hsyncn_counter: natural := 0;
+variable hsyncn_counter: unsigned(7 downto 0);
  
 begin
     if (RESETn = '0' or i_vsync = '1') then
-        hsyncn_counter := 0;
+        hsyncn_counter := X"00";
+        if RESETn = '0' or i_vsync_pulse_valid = '1' then
+             vga_line_cntr <= (others => '0');
+        end if;
         char_line_cntr <= (others => '0');
         i_hsyncn <= '1';
     -- Sur chaque front descendant de l'horloge 6.5 MHz
@@ -112,10 +131,11 @@ begin
             when FB_PORCH_OFF_DURATION =>
                 i_hsyncn <= '0';
                 char_line_cntr <= char_line_cntr + 1;
+                vga_line_cntr <= vga_line_cntr + 1;           
             -- HSYNCn OFF
             when FB_PORCH_OFF_DURATION + HSYNC_PULSE_ON_DURATION =>
                 i_hsyncn <= '1';
-                hsyncn_counter := 0;
+                hsyncn_counter := X"00";
             when others =>
                 null;
         end case;
@@ -124,7 +144,7 @@ end process;
    
 -- Nouvelle version utilisant des fonctions combinatoires pour
 -- le décodage des adresses.
-p_cpu_data_in : process (A_cpu, RDn, MREQn, IORQn, M1n)
+p_cpu_data_in : process (A_cpu, RDn, MREQn, IORQn, D_ram_out, D_rom_out, TAPE_IN, USA_UK, KBDn)
 begin
     if (MREQn = '0' and RDn = '0') then
         -- Cycle de lecture RAM / ROM
@@ -192,6 +212,20 @@ begin
     end if;    
 end process;
 
+p_vsync_pulse_duration_counter : process(RESETn, CLK_3_25_M)
+begin
+    if RESETn = '0' or i_vsync = '0' then
+        i_vsync_pulse_duration <= X"000";
+        i_vsync_pulse_valid <= '0';
+    -- On compte la durée du pulse de VSYNC pour savoir si c'est uyne vraie synchro trame ou pas 
+    elsif rising_edge(CLK_3_25_M) then
+        i_vsync_pulse_duration <= i_vsync_pulse_duration + 1;
+        if i_vsync_pulse_duration >= MIN_VSYNC_PULSE_DURATION then
+            i_vsync_pulse_valid <= '1';
+        end if;
+    end if;
+end process;
+
 p_nmi : process(RESETn, CLK_3_25_M)
 begin
     if RESETn = '0' then
@@ -257,80 +291,140 @@ begin
     iorq_heart_beat <= i_iorq_heart_beat;
     
 end process;
-    
+
+p_clear_screen : process  (RESETn, CLK_3_25_M, vga_line_start_offset)
+begin
+    if RESETn = '0' then
+        screen_rfrsh_state_m <= wait_for_screen_rfrsh_needed;
+        vga_line_start_offset_current <= (others => '0');
+    elsif rising_edge(CLK_3_25_M) then
+        case  screen_rfrsh_state_m is
+            when wait_for_screen_rfrsh_needed =>
+                i_vga_rfrsh_addr <= '1' & X"DFF";
+                if (vga_line_start_offset /= vga_line_start_offset_current) then
+                    screen_rfrsh_state_m <= rfrsh_screen_step_1;
+                end if;
+            when rfrsh_screen_step_1 =>
+                if i_vsync_pulse_valid = '1' then
+                    i_wr_rfrsh <= '1';
+                    screen_rfrsh_state_m <= rfrsh_screen_step_2;
+                end if;
+            when rfrsh_screen_step_2 =>
+                if i_vga_rfrsh_addr = X"00" then
+                    vga_line_start_offset_current <= vga_line_start_offset;
+                    screen_rfrsh_state_m <= wait_for_screen_rfrsh_needed;
+                else
+                    i_vga_rfrsh_addr <= i_vga_rfrsh_addr - 1;
+                    screen_rfrsh_state_m <= rfrsh_screen_step_1;
+                end if;
+                i_wr_rfrsh <= '0';
+            when others =>
+                screen_rfrsh_state_m <= wait_for_screen_rfrsh_needed;
+        end case;
+    end if;
+end process;
+        
+
 video_state_machine_process: process (CLK_3_25_M, RESETn)
 
 begin
-    if (RESETn = '0') then
-        state_m <= wait_for_nop_detection;
-        i_rom_addr_enable_for_vid_pattern <= '0';
-    -- Sur chaque front descendant de l'horloge 6.5 MHz
-    elsif rising_edge(CLK_3_25_M) then
-        case state_m is
-             when wait_for_nop_detection =>
-                i_rom_addr_enable_for_vid_pattern <= '0';
-                vga_wr_cyc <= '0';
-                -- Signal indiquant si on doit lire ("NOP") ou pas ("HALT") un pattern dans la ROM
-                char_valid <= '0';
-                -- Detection front montant i_nop_detect
-                if i_nop_detect = '1' then
-                    -- Char reg contient le caractère à afficher présent dans la RAM vidéo.
-                    char_reg <= D_ram_out;
-                    char_valid <= '1';
-                    state_m <= wait_for_m1_rfrsh;
-                -- Si c'est un HALT, pas besoin de lire le pattern dans la ROM
-                elsif i_halt_detect = '1' then
-                    state_m <= wait_for_vid_data;
-                end if;
-                
-             when wait_for_m1_rfrsh =>
-                if RFRSHn = '0' then
-                    -- Si c'est un cycle de NOP, on lit le pattern video à partir de la ROM
-                    -- en construisant l'adresse à partir du caractère à afficher et du numero
-                    -- de ligne en cours.
-                    A_vid_pattern <= A_cpu(15 downto 9) & char_reg(5 downto 0) & std_logic_vector(char_line_cntr(2 downto 0));
-                    i_rom_addr_enable_for_vid_pattern <= '1';
-                    state_m <= wait_for_vid_data;
-                end if;
-                   
-             when wait_for_vid_data =>
-                -- Lecture pattern vidéo
-                if char_valid = '1' then
-                    -- Caractere en inversion video ?
-                    if (char_reg(7) = '0') then
-                        vid_pattern <= D_rom_out;
-                    else
-                        vid_pattern <= not D_rom_out;
-                    end if;
-                else
-                    -- Si le CPU est en HALT, on remplit l'adresse en RAM VGA avec des 0
-                    vid_pattern <= (others => '0');
-                end if;
-                
-                -- Signaux pour le controlleur VGA
-                -- Sur la totalite de la ligne, il y a 34 caractères en tenant compte de la detection
-                -- de l'interruption de find de ligne (A_cpu(6) = 0)
-                -- Comme la RAM ne contient que 32 caractères par ligne, on , n'ecrit pas les 2 dernier
-                -- caracteres 
-                if i_vga_char_offset <= 32 then
-                    vga_wr_cyc <= '1';
-                end if;
-                state_m <= wait_for_nop_detection;
-                
-             when others =>
-                state_m <= wait_for_nop_detection;
+        if RESETn = '0' then
+            state_m <= video_sm_reset;
+        -- Sur chaque front descendant de l'horloge 6.5 MHz
+        elsif rising_edge(CLK_3_25_M) then
+            case state_m is
+                    when video_sm_reset =>
+                        i_rom_addr_enable_for_vid_pattern <= '0';
+                        vga_line_start_offset <= (others => '0');
+                        vga_line_offset_update_needed <= '0';
+                        state_m <= wait_for_video_exec;
+
+                     when wait_for_video_exec =>
+                        i_rom_addr_enable_for_vid_pattern <= '0';
+                        i_vga_wr <= '0';
+                        -- Char reg contient le caractère à afficher présent dans la RAM vidéo.
+                        -- Invalide en cas de HALT mais non utilisé (cas i_rom_addr_enable_for_vid_pattern = 0)
+                        char_reg <= D_ram_out;
+                        
+                        if i_vsync = '1' and i_vsync_pulse_valid = '1' then
+                             vga_line_offset_update_needed <= '1';
+                        end if;
+
+                        -- Detection front montant i_nop_detect
+                        if i_nop_detect = '1' then
+                            state_m <= wait_for_m1_rfrsh;
+                        -- Si c'est un HALT, pas besoin de lire le pattern dans la ROM
+                        elsif i_halt_detect = '1' then
+                            state_m <= wait_for_vid_data;
+                        end if;
+                        
+                     when wait_for_m1_rfrsh =>
+                        if vga_line_offset_update_needed = '1' then
+                            vga_line_offset_update_needed <= '0';
+                            vga_line_start_offset <= vga_line_cntr;
+                        end if;                  
+                     
+                        if RFRSHn = '0' then
+                            -- Si c'est un cycle de NOP, on lit le pattern video à partir de la ROM
+                            -- en construisant l'adresse à partir du caractère à afficher et du numero
+                            -- de ligne en cours.
+                            A_vid_pattern <= A_cpu(15 downto 9) & char_reg(5 downto 0) & std_logic_vector(char_line_cntr(2 downto 0));
+                            i_rom_addr_enable_for_vid_pattern <= '1';
+                            state_m <= wait_for_vid_data;
+                        end if;
+                           
+                     when wait_for_vid_data =>
+                        if vga_line_offset_update_needed = '1' then
+                            vga_line_offset_update_needed <= '0';
+                            vga_line_start_offset <= vga_line_cntr;
+                        end if;     
+                                          
+                        -- Lecture pattern vidéo
+                        if i_rom_addr_enable_for_vid_pattern = '1' then
+                            -- Caractere en inversion video ?
+                            if (char_reg(7) = '0') then
+                                vid_pattern <= D_rom_out;
+                            else
+                                vid_pattern <= not D_rom_out;
+                            end if;
+                        else
+                            -- Si le CPU est en HALT, on remplit l'adresse en RAM VGA avec des 0
+                            vid_pattern <= (others => '0');
+                        end if;
+                        
+                        -- Signaux pour le controlleur VGA
+                        -- Sur la totalite de la ligne, il y a 34 caractères en tenant compte de la detection
+                        -- de l'interruption de find de ligne (A_cpu(6) = 0)
+                        -- Comme la RAM ne contient que 32 caractères par ligne, on , n'ecrit pas les 2 dernier
+                        -- caracteres 
+                        -- if i_vga_char_offset <= 32 and vga_line_cntr > VGA_LINE_START and vga_line_cntr < VGA_LINE_STOP then
+                        -- if i_vga_char_offset <= 32 and (vga_line_cntr - vga_line_start_offset >= 0)  and 
+                        --     vga_line_cntr - vga_line_start_offset <= 192 then
+                        if i_vga_char_offset <= 32 then
+                            i_vga_wr <= '1';
+                        end if;
+                        state_m <= wait_for_video_exec;
+                        
+                     when others =>
+                        state_m <= wait_for_video_exec;
             end case;
-    end if;
+        end if;
 end process;
 
 -- Signal utilise pour postionner l'adresse du pattern video à lire en ROM
-ROM_ADDR_ENBL_FOR_VID_PATTERN <= i_rom_addr_enable_for_vid_pattern;
+VID_PATTERN_ROM_ADDR_SELECT <= i_rom_addr_enable_for_vid_pattern;
 
 -- Adresse de l'octet courant dans la RAM VGA. L'adresse est resette sur chaque VSYNC et incrementee quand on retourne un "NOP" ou un "HALT" au Z80
 -- Adresse VGA = char_line_cntr * 32 (34 caracteres par ligne mais 32 pris en compte)  + offset caractere
-vga_addr <= std_logic_vector(char_line_cntr) & "00000" + i_vga_char_offset - X"1";
+i_vga_addr <= std_logic_vector(vga_line_cntr + VGA_SCREEN_OFFSET) & "00000" + i_vga_char_offset - X"1";
 -- Pattern à afficher à l'ecran lu dans la ROM
-vga_data <= vid_pattern;
+i_vga_data <= vid_pattern;
+
+vga_addr <= i_vga_rfrsh_addr when i_vga_rfrsh_cs = '1' else i_vga_addr;
+vga_data <= X"00" when i_vga_rfrsh_cs = '1' else vid_pattern;
+vga_wr_cyc <= i_wr_rfrsh when i_vga_rfrsh_cs = '1' else i_vga_wr;
+
+i_vga_rfrsh_cs <= '1' when i_vsync_pulse_valid = '1' else '0';
 
 TAPE_OUT <= not i_vsync;
 

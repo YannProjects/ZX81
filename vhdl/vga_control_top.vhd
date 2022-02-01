@@ -26,6 +26,10 @@ use ieee.std_logic_arith.all;
 -- use ieee.numeric_std.shift_left;
 use work.VGA_control_pack.all;
 
+library UNISIM;
+use UNISIM.VComponents.all;
+use work.ZX81_Pack.all;
+
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 --use IEEE.NUMERIC_STD.ALL;

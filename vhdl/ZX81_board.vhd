@@ -28,7 +28,8 @@ use IEEE.std_logic_arith.ALL;
 use work.T80_Pack.all;
 use work.VGA_control_pack.all;
 use work.zx81_pack.all;
-use unisim.vcomponents.all;
+library UNISIM;
+use UNISIM.VComponents.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -98,7 +99,7 @@ architecture Behavioral of ZX81_board is
     -- Control signal
     signal i_waitn, i_nmin : std_logic := '1';
     signal i_m1n, i_mreqn, i_iorqn, i_tape_in : std_logic;
-    signal i_rdn, i_wrn, i_wrram, i_rfrshn, i_haltn, i_cs_for_video_pattern : std_logic;
+    signal i_rdn, i_wrn, i_wrram, i_rfrshn, i_haltn, i_video_pattern_select : std_logic;
     signal i_a_cpu, i_a_vid_pattern, i_a_rom : std_logic_vector (15 downto 0);
     signal i_d_cpu_out, i_d_cpu_in, i_d_ram_out, i_d_rom_out : std_logic_vector (7 downto 0);
     signal i_clk_52m, i_clk_3_25m : std_logic;
@@ -123,15 +124,13 @@ architecture Behavioral of ZX81_board is
     -- attribute mark_debug of i_m1n : signal is "true";
     -- attribute mark_debug of i_tape_in : signal is "true";
     -- attribute mark_debug of i_d_cpu_in : signal is "true";
-    -- attribute mark_debug of i_nmin : signal is "true";
-    -- attribute mark_debug of i_vga_addr : signal is "true";
-    -- attribute mark_debug of i_vga_data : signal is "true";
-    -- attribute mark_debug of i_vga_wr_cyc : signal is "true";     
+    -- attribute mark_debug of i_nmin : signal is "true";  
         
     -- attribute mark_debug of i_clk_3_25m : signal is "true";
     -- attribute mark_debug of i_kbd_l_swap : signal is "true";
     -- attribute mark_debug of i_iorqn : signal is "true";
     -- attribute mark_debug of i_rdn : signal is "true";
+    -- attribute mark_debug of i_rfrshn : signal is "true";
     
     begin
         
@@ -198,7 +197,7 @@ architecture Behavioral of ZX81_board is
        NMIn => i_nmin,
        MREQn => i_mreqn,
        RFRSHn => i_rfrshn,
-       ROM_ADDR_ENBL_FOR_VID_PATTERN => i_cs_for_video_pattern,
+       VID_PATTERN_ROM_ADDR_SELECT => i_video_pattern_select,
        M1n => i_m1n,
        WAITn => i_waitn,
        RESETn => i_resetn
@@ -244,7 +243,7 @@ architecture Behavioral of ZX81_board is
     
     -- Dans le cas où il y a une détection de NOP, l'adresse à utiliser est celle construite pour accéder au pattern video.
     -- Dans le autres cas c'est une adresse utilisée par le Z80.
-    i_a_rom <= i_a_vid_pattern when i_cs_for_video_pattern = '1' else i_a_cpu;
+    i_a_rom <= i_a_vid_pattern when i_video_pattern_select = '1' else i_a_cpu;
    
     -- Les 5 lignes du clavier
     KBD_C <= i_a_cpu(15 downto 8);
