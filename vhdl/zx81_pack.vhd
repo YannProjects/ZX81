@@ -39,8 +39,6 @@ constant FB_PORCH_OFF_DURATION : unsigned(7 downto 0) := X"C0"; -- @ 3,25 MHz
 -- Pour le heart beat
 constant IORQ_PERIOD : unsigned(15 downto 0) := X"0BB8";
 
-constant VGA_SCREEN_OFFSET : integer := 0;
-
 constant MIN_VSYNC_PULSE_DURATION : unsigned := X"30"; 
 
 end;

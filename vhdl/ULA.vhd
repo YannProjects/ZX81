@@ -76,7 +76,7 @@ architecture Behavioral of ULA is
     signal i_nmionn : std_logic;
     signal char_line_cntr : unsigned(2 downto 0);
     signal i_vsync_pulse_duration : unsigned(11 downto 0);
-    signal char_reg, vga_line_cntr, vga_line_start_offset, vga_line_start_offset_current, i_vga_data : std_logic_vector(7 downto 0);
+    signal char_reg, i_vga_line_cntr, vga_line_start_offset, vga_line_start_offset_current, i_vga_data : std_logic_vector(7 downto 0);
     
     signal i_nop_detect, i_halt_detect: std_logic; 
     signal i_vga_char_offset, i_vga_addr, i_vga_rfrsh_addr : std_logic_vector(12 downto 0);
@@ -116,9 +116,9 @@ begin
     if (RESETn = '0' or i_vsync = '1') then
         hsyncn_counter := X"00";
         if RESETn = '0' or i_vsync_pulse_valid = '1' then
-             vga_line_cntr <= (others => '0');
+             i_vga_line_cntr <= (others => '0');
         end if;
-        char_line_cntr <= (others => '0');
+        char_line_cntr <= (others => '0');        
         i_hsyncn <= '1';
     -- Sur chaque front descendant de l'horloge 6.5 MHz
     elsif rising_edge(CLK_3_25_M) then
@@ -131,7 +131,7 @@ begin
             when FB_PORCH_OFF_DURATION =>
                 i_hsyncn <= '0';
                 char_line_cntr <= char_line_cntr + 1;
-                vga_line_cntr <= vga_line_cntr + 1;           
+                i_vga_line_cntr <= i_vga_line_cntr + 1;
             -- HSYNCn OFF
             when FB_PORCH_OFF_DURATION + HSYNC_PULSE_ON_DURATION =>
                 i_hsyncn <= '1';
@@ -361,7 +361,7 @@ begin
                      when wait_for_m1_rfrsh =>
                         if vga_line_offset_update_needed = '1' then
                             vga_line_offset_update_needed <= '0';
-                            vga_line_start_offset <= vga_line_cntr;
+                            vga_line_start_offset <= i_vga_line_cntr;
                         end if;                  
                      
                         if RFRSHn = '0' then
@@ -376,7 +376,7 @@ begin
                      when wait_for_vid_data =>
                         if vga_line_offset_update_needed = '1' then
                             vga_line_offset_update_needed <= '0';
-                            vga_line_start_offset <= vga_line_cntr;
+                            vga_line_start_offset <= i_vga_line_cntr;
                         end if;     
                                           
                         -- Lecture pattern vidéo
@@ -416,7 +416,7 @@ VID_PATTERN_ROM_ADDR_SELECT <= i_rom_addr_enable_for_vid_pattern;
 
 -- Adresse de l'octet courant dans la RAM VGA. L'adresse est resette sur chaque VSYNC et incrementee quand on retourne un "NOP" ou un "HALT" au Z80
 -- Adresse VGA = char_line_cntr * 32 (34 caracteres par ligne mais 32 pris en compte)  + offset caractere
-i_vga_addr <= std_logic_vector(vga_line_cntr + VGA_SCREEN_OFFSET) & "00000" + i_vga_char_offset - X"1";
+i_vga_addr <= std_logic_vector(i_vga_line_cntr) & "00000" + i_vga_char_offset - X"1";
 -- Pattern à afficher à l'ecran lu dans la ROM
 i_vga_data <= vid_pattern;
 
