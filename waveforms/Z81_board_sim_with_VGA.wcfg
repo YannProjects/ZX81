@@ -14,13 +14,13 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000000 us"></ZoomStartTime>
-      <ZoomEndTime time="4,025.057133 us"></ZoomEndTime>
-      <Cursor1Time time="2,914.844356 us"></Cursor1Time>
+      <ZoomStartTime time="261,626,127.423 ns"></ZoomStartTime>
+      <ZoomEndTime time="261,628,467.424 ns"></ZoomEndTime>
+      <Cursor1Time time="261,627,527.423 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="282"></NameColumnWidth>
-      <ValueColumnWidth column_width="69"></ValueColumnWidth>
+      <ValueColumnWidth column_width="65"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="26" />
    <wave_markers>
@@ -121,6 +121,14 @@
       <obj_property name="label">ULA</obj_property>
       <obj_property name="DisplayName">label</obj_property>
       <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/CLK_6_5_M" type="logic">
+         <obj_property name="ElementShortName">CLK_6_5_M</obj_property>
+         <obj_property name="ObjectShortName">CLK_6_5_M</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/CLK_3_25_M" type="logic">
+         <obj_property name="ElementShortName">CLK_3_25_M</obj_property>
+         <obj_property name="ObjectShortName">CLK_3_25_M</obj_property>
+      </wvobject>
       <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/A_cpu" type="array">
          <obj_property name="ElementShortName">A_cpu[15:0]</obj_property>
          <obj_property name="ObjectShortName">A_cpu[15:0]</obj_property>
@@ -244,18 +252,6 @@
       <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_vid_shift_register" type="array">
          <obj_property name="ElementShortName">i_vid_shift_register[7:0]</obj_property>
          <obj_property name="ObjectShortName">i_vid_shift_register[7:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/vga_addr" type="array">
-         <obj_property name="ElementShortName">vga_addr[17:0]</obj_property>
-         <obj_property name="ObjectShortName">vga_addr[17:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/vga_data" type="logic">
-         <obj_property name="ElementShortName">vga_data</obj_property>
-         <obj_property name="ObjectShortName">vga_data</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/vga_wr_cyc" type="logic">
-         <obj_property name="ElementShortName">vga_wr_cyc</obj_property>
-         <obj_property name="ObjectShortName">vga_wr_cyc</obj_property>
       </wvobject>
       <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/VID_PATTERN_ROM_ADDR_SELECT" type="logic">
          <obj_property name="ElementShortName">VID_PATTERN_ROM_ADDR_SELECT</obj_property>
