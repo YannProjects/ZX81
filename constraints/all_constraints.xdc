@@ -20,11 +20,10 @@ set_false_path -to [get_ports Iorq_Heart_Beat]
 
 create_clock -period 19.231 -name CLK_52M -waveform {0.000 9.616} -add [get_pins clk_gen_0/clk_52m]
 create_clock -period 39.702 -name CLK_VGA -waveform {0.000 19.851} -add [get_pins clk_gen_0/vga_clk]
-create_generated_clock -name i_clk_3_25m -source [get_pins clk_gen_0/clk_divider_4/I] -divide_by 2 [get_pins clk_gen_0/clk_divider_4/O]
+create_clock -period 154.850 -name CLK_6_5M -waveform {0.000 76.920} -add [get_pins clk_gen_0/clk_6_5m]
+create_generated_clock -name i_clk_3_25m -source [get_pins clk_gen_0/clk_divider_4/I] -divide_by 2 [get_pins -hierarchical *CLK_6_5_M*]
 
-set_false_path -from [get_clocks CLK_VGA] -to [get_clocks CLK_52M]
-
-set_clock_groups -asynchronous -group [get_clocks CLK_52M] -group [get_clocks CLK_VGA]
+set_clock_groups -asynchronous -group [get_clocks CLK_52M] -group [get_clocks CLK_VGA] -group {[get_clocks CLK_6_5M ] [get_clocks i_clk_3_25m ]}
 
 # Il y a des erreurs reportées lors des checks de timing sur l'interface entre la CLK à 6,5 MHz côté ULA et
 # cell à 52 MHz côté controller VGA. J'ai essayé de rajouter un double échantillonage comme indiqué
@@ -32,7 +31,10 @@ set_clock_groups -asynchronous -group [get_clocks CLK_52M] -group [get_clocks CL
 # Mais, il y a toujours l'erreur. En attendant j'ajoute
 # une contrainte pour ignorer le cross domain checking.
 # (voir aussi: https://www.youtube.com/watch?v=KoC9hEckJdk)
-set_false_path -from [get_clocks -of_objects [get_pins clk_gen_0/clk_divider_4/O]] -to [get_clocks CLK_52M]
+
+
+
+
 
 
 

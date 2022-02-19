@@ -36,6 +36,7 @@ entity Clocks_gen is
     Port ( main_clk : in STD_LOGIC;
            clk_52m : out STD_LOGIC;
            clk_3_25m : out STD_LOGIC;
+           clk_6_5m : out STD_LOGIC;
            vga_clk : out STD_LOGIC;
            rst : in std_logic;
            pll_locked : out std_logic);
@@ -71,6 +72,7 @@ begin
         CLR => '0');
 
     clk_3_25m <= i_clk_3_25m;
+    clk_6_5m <= i_clk_6_5m;
     clk_52m <= i_clk_52m;
 
 end Based_on_IP;

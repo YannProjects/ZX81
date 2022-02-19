@@ -143,3 +143,19 @@ set_false_path -to [get_ports B_VGA_H*]
 
 
 
+
+
+
+
+
+
+
+
+
+set_clock_groups -asynchronous -group [get_clocks [list [get_clocks -of_objects [get_pins clk_gen_0/clk_divider_4/O]] [get_clocks -of_objects [get_pins clk_gen_0/clk_gen/inst/mmcm_adv_inst/CLKOUT2]]]] -group [get_clocks -of_objects [get_pins clk_gen_0/clk_gen/inst/mmcm_adv_inst/CLKOUT0]] -group [get_clocks -of_objects [get_pins clk_gen_0/clk_gen/inst/mmcm_adv_inst/CLKOUT1]]
+
+set_clock_groups -asynchronous -group [get_clocks [list CLK_6_5M [get_clocks -of_objects [get_pins clk_gen_0/clk_divider_4/O]]]] -group [get_clocks CLK_52M] -group [get_clocks CLK_VGA]
+
+
+
+set_false_path -from [get_clocks -of_objects [get_pins clk_gen_0/clk_divider_4/O]] -to [get_clocks CLK_6_5M]
