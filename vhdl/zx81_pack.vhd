@@ -37,7 +37,7 @@ constant HSYNC_PULSE_ON_DURATION : unsigned(11 downto 0) := X"00F"; -- @ 3,25 MH
 constant FB_PORCH_OFF_DURATION : unsigned(11 downto 0) := X"0C0"; -- @ 3,25 MHz
 
 -- Pour le heart beat
-constant IORQ_PERIOD : unsigned(15 downto 0) := X"1770";
+constant VSYNC_COUNTER_PERIOD : unsigned(15 downto 0) := X"000C";
 
 constant MIN_VSYNC_PULSE_DURATION : unsigned := X"30"; 
 

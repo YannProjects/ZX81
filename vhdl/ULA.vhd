@@ -54,7 +54,7 @@ entity ULA is
            TAPE_IN : in STD_LOGIC;
            USA_UK : in STD_LOGIC;
            TAPE_OUT : out STD_LOGIC;
-           Iorq_Heart_Beat : out std_logic; -- Heart beat pour la sortie video
+           vsync_heart_beat : out std_logic; -- Heart beat pour la sortie video
            RDn : in STD_LOGIC;
            WRn : in STD_LOGIC;
            HALTn : in STD_LOGIC;
@@ -81,37 +81,34 @@ architecture Behavioral of ULA is
     signal i_nop_detect, i_nop_detect_0, i_nop_detect_1: std_logic;
      
     signal i_vga_addr : std_logic_vector(17 downto 0);
-    signal i_vga_data : std_logic_vector(7 downto 0);
     signal i_vga_wr : std_logic;
     
-    signal iorqn_0, iorqn_1, i_nmin : std_logic;
+    signal i_vsync_0, i_vsync_1, i_nmin : std_logic;
     
     signal i_hsyncn_cnt : unsigned(11 downto 0);
     signal i_vid_shift_register : std_logic_vector(7 downto 0);
     signal i_rom_addr_enable_for_vid_pattern : std_logic;
        
-    -- attribute mark_debug : string;
-    -- attribute mark_debug of i_vsync : signal is "true";
-    -- attribute mark_debug of i_vsync_pulse_valid : signal is "true";
-    -- attribute mark_debug of i_hsyncn : signal is "true";
-    -- attribute mark_debug of vga_addr : signal is "true";
-    -- attribute mark_debug of vga_data : signal is "true";
-    -- attribute mark_debug of vga_wr_cyc : signal is "true";
+    attribute mark_debug : string;
+    attribute mark_debug of i_vsync : signal is "true";
+    attribute mark_debug of i_vsync_pulse_valid : signal is "true";
+    attribute mark_debug of i_hsyncn : signal is "true";
     -- attribute mark_debug of CLK_3_25_M : signal is "true";
-    -- attribute mark_debug of A_cpu : signal is "true";
-    -- attribute mark_debug of D_cpu_IN : signal is "true";
-    -- attribute mark_debug of M1n : signal is "true";
-    -- attribute mark_debug of MREQn : signal is "true";
-    -- attribute mark_debug of RFRSHn : signal is "true";
-    -- attribute mark_debug of RDn : signal is "true";
-    -- attribute mark_debug of char_line_cntr : signal is "true";
-    -- attribute mark_debug of HALTn : signal is "true";
-    -- attribute mark_debug of i_hsyncn : signal is "true";
-    -- attribute mark_debug of i_vsync : signal is "true";
-    -- attribute mark_debug of NMIn : signal is "true";
-    -- attribute mark_debug of i_vga_addr : signal is "true";
-    -- attribute mark_debug of i_vga_data : signal is "true";
-    -- attribute mark_debug of vga_wr_cyc : signal is "true";
+    attribute mark_debug of CLK_6_5_M : signal is "true";
+    attribute mark_debug of A_cpu : signal is "true";
+    attribute mark_debug of D_cpu_IN : signal is "true";
+    attribute mark_debug of M1n : signal is "true";
+    attribute mark_debug of MREQn : signal is "true";
+    attribute mark_debug of RFRSHn : signal is "true";
+    attribute mark_debug of RDn : signal is "true";
+    attribute mark_debug of char_line_cntr : signal is "true";
+    attribute mark_debug of HALTn : signal is "true";
+    attribute mark_debug of NMIn : signal is "true";
+    attribute mark_debug of i_nmionn : signal is "true";
+    attribute mark_debug of i_nop_detect : signal is "true";
+    attribute mark_debug of i_vga_addr : signal is "true";
+    attribute mark_debug of vga_data : signal is "true";
+    attribute mark_debug of vga_wr_cyc : signal is "true";
 
 begin
 
@@ -138,6 +135,9 @@ end process;
 p_vga_addr_counter: process (CLK_6_5_M, i_vsync, RESETn)
 begin
     if RESETn = '0' or i_vsync = '1' then
+        -- On ne resett l'adresse VGA que si c'est un pulse valide
+        -- (dans le ZX81 HiRes, le VSYNC est aussi utilisé pour resetter le compteur
+        -- char_line_cntr)
         if RESETn = '0' or (i_vsync = '1' and i_vsync_pulse_valid = '1') then
             i_vga_addr <= (others => '0');
         else
@@ -170,11 +170,11 @@ begin
         hsyncn_counter := (others => '0');
         char_line_cntr <= (others => '0');        
         i_hsyncn <= '1';
-    -- Sur chaque front descendant de l'horloge 6.5 MHz
+    -- Sur chaque front descendant de l'horloge 3,35 MHz
     -- L'horloge à 6,5 MHz est utilsée pour rester synchrone par rapport au process p_vga_addr_counter
     elsif rising_edge(CLK_3_25_M) then
-        -- 384 cycles d'horloge à 6.5 MHz = 59 µs
-        -- Duree pulse HSYNC = (414 - 384) @6.5 MHz = 4,6 µs 
+        -- 192 cycles d'horloge à 3,25 MHz
+        -- Duree pulse HSYNC = (207 - 192) @3,25 MHz = 4,6 µs 
         -- Generateur de HSYNC
         hsyncn_counter := hsyncn_counter + 1;
         if hsyncn_counter >= FB_PORCH_OFF_DURATION and hsyncn_counter < FB_PORCH_OFF_DURATION + HSYNC_PULSE_ON_DURATION then  
@@ -290,35 +290,33 @@ begin
 end process;
 
 -----------------------------------------------------
--- Process pour le heart beat IORQn (allumage LED)
+-- Process pour le heart beat (allumage LED)
 -----------------------------------------------------
-p_iorq_hb : process (RESETn, CLK_3_25_M, IORQn)
+p_vsync_hb : process (RESETn, CLK_3_25_M, IORQn)
 
-variable iorq_counter : unsigned(15 downto 0);
-variable i_iorq_heart_beat : std_logic;
+variable i_vsync_counter : unsigned(15 downto 0);
+variable i_heart_beat : std_logic;
 
 begin
     if (RESETn = '0') then
-        i_iorq_heart_beat := '0';
-        iorq_counter := IORQ_PERIOD;
-        iorqn_1 <= '1';
+        i_heart_beat := '0';
+        i_vsync_counter := VSYNC_COUNTER_PERIOD;
     -- Sur chaque front descendant de l'horloge 6.5 MHz
     elsif rising_edge(CLK_3_25_M) then
-        iorqn_0 <= IORQn;
-        iorqn_1 <= iorqn_0;
-        -- IORQ heart beat qui inclut le VSYNC et aussi les lectures clavier + load cassette
+        i_vsync_0 <= i_vsync_pulse_valid;
+        i_vsync_1 <= i_vsync_0;
         -- Compteur de heart beat pour faire clignoter la LED sur le CMOD S7. 
         -- Détection transtion 1 -> 0
-        if iorqn_1 = '1' and iorqn_0 = '0' then
-            iorq_counter := iorq_counter - 1;
-            if  iorq_counter(15) = '1' then
-                iorq_counter := IORQ_PERIOD;
-                i_iorq_heart_beat := not i_iorq_heart_beat;
+        if i_vsync_1 = '1' and i_vsync_0 = '0' then
+            i_vsync_counter := i_vsync_counter - 1;
+            if  i_vsync_counter(15) = '1' then
+                i_vsync_counter := VSYNC_COUNTER_PERIOD;
+                i_heart_beat := not i_heart_beat;
             end if;
         end if;
     end if;
     
-    iorq_heart_beat <= i_iorq_heart_beat;
+    vsync_heart_beat <= i_heart_beat;
     
 end process;
         
@@ -326,7 +324,7 @@ nop_detect_process: process (CLK_3_25_M)
 begin
     if rising_edge(CLK_3_25_M) then
         -- Le signalde NOP est décalé de 2 péreiodes de 3,25 MHz
-        -- pour se caler sur les cycels CPU T3 et T4
+        -- pour se caler sur les cycles CPU T3 et T4
         i_nop_detect_0 <= i_nop_detect;
         i_nop_detect_1 <= i_nop_detect_0;
         -- Si NOP detect, on lit le caractère dans la RAM

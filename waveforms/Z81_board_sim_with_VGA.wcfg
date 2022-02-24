@@ -3,7 +3,7 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="Z81_board_sim_behav.wdb" id="1">
+      <db_ref path="C:/Users/yannv/Documents/Projets_HW/ZX81/ZX81_full_FPGA_v7/ZX81_spartan7/ZX81_spartan7.sim/sim_1/behav/xsim/Z81_board_sim_behav.wdb" id="1">
          <top_modules>
             <top_module name="Z81_board_sim" />
             <top_module name="glbl" />
@@ -14,13 +14,13 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="261,626,127.423 ns"></ZoomStartTime>
-      <ZoomEndTime time="261,628,467.424 ns"></ZoomEndTime>
-      <Cursor1Time time="261,627,527.423 ns"></Cursor1Time>
+      <ZoomStartTime time="264,358,903.884 ns"></ZoomStartTime>
+      <ZoomEndTime time="264,361,419.885 ns"></ZoomEndTime>
+      <Cursor1Time time="264,360,857.884 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="282"></NameColumnWidth>
-      <ValueColumnWidth column_width="65"></ValueColumnWidth>
+      <ValueColumnWidth column_width="61"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="26" />
    <wave_markers>
@@ -32,6 +32,7 @@
       <marker time="261453457269" label="" />
       <marker time="261454070192" label="" />
       <marker time="261454683115" label="" />
+      <marker time="263982377884" label="" />
    </wave_markers>
    <wvobject fp_name="/Z81_board_sim/ZX81_board0/CLK_12M" type="logic">
       <obj_property name="ElementShortName">CLK_12M</obj_property>

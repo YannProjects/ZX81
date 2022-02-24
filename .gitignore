@@ -3,6 +3,7 @@
 *.docx
 *.svg
 *.txt
+*.zip
 LTSpice/
 Traces oscilloscope/
 software/
@@ -12,3 +13,4 @@ CircuitMaker/
 ZX81_ULA_v1.10/
 ZX81_full_FPGA_v7/
 Captures*
+Eightyone.1.0a

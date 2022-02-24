@@ -60,7 +60,7 @@ entity ZX81_board is
            -- LED_2 -> K1 : Non utilisée
            -- LED_3 -> J1 : Non utilisée
            -- LED_4 -> E1 : Non utilisée
-           Iorq_Heart_Beat : out std_logic;
+           Vsync_Heart_Beat : out std_logic;
            
            Dbg : out std_logic_vector(7 downto 0)
           
@@ -191,7 +191,7 @@ architecture Behavioral of ZX81_board is
        TAPE_IN => i_tape_in,
        USA_UK => '0',
        TAPE_OUT => MIC,
-       Iorq_Heart_Beat => Iorq_Heart_Beat,
+       vsync_heart_beat => Vsync_Heart_Beat,
        RDn => i_rdn,
        WRn => i_wrn,
        HALTn => i_haltn,
