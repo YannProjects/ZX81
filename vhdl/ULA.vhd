@@ -76,7 +76,7 @@ architecture Behavioral of ULA is
     signal i_nmionn : std_logic;
     signal char_line_cntr : unsigned(2 downto 0);
     signal i_vsync_pulse_duration : unsigned(11 downto 0);
-    signal char_reg : std_logic_vector(7 downto 0);
+    signal char_reg, i_d_cpu_in : std_logic_vector(7 downto 0);
     signal hsyncn_counter: unsigned(11 downto 0);
     signal i_nop_detect, i_nop_detect_0, i_nop_detect_1: std_logic;
      
@@ -122,9 +122,9 @@ begin
             -- Lecture pattern vidéo
             -- Caractere en inversion video ?
             if (char_reg(7) = '0') then
-                i_vid_shift_register <= D_rom_out;
+                i_vid_shift_register <= i_d_cpu_in;
             else
-                i_vid_shift_register <= not D_rom_out;
+                i_vid_shift_register <= not i_d_cpu_in;
             end if;
         else      
             i_vid_shift_register <= i_vid_shift_register(6 downto 0) & '0';
@@ -192,35 +192,39 @@ end process;
 
 -- Nouvelle version utilisant des fonctions combinatoires pour
 -- le décodage des adresses.
-p_cpu_data_in : process (A_cpu, RDn, MREQn, IORQn, D_ram_out, D_rom_out, TAPE_IN, USA_UK, KBDn)
+p_cpu_data_in : process (A_cpu, RDn, MREQn, IORQn, RFRSHn, D_ram_out, D_rom_out, TAPE_IN, USA_UK, KBDn)
 begin
-    if (MREQn = '0' and RDn = '0') then
+    -- MREQn = '0' and RFRSHn = '0' pour tenir compte du mode HiRers où l'on doit pouvoir lire des patterns
+    -- video à partir de la RAM et pas seulement de la ROM.
+    if (MREQn = '0' and RDn = '0') or (MREQn = '0' and RFRSHn = '0') then
         -- Cycle de lecture RAM / ROM
         case A_cpu(15 downto 14) is
             -- Adressage de la ROM
             when "00" =>
-                D_cpu_IN <= D_rom_out;
+                i_d_cpu_in <= D_rom_out;
             -- Adressage de la RAM 
             when "01" =>
-                D_cpu_IN <= D_ram_out;
+                i_d_cpu_in <= D_ram_out;
             -- NOP execution ?
             when "11" =>
                 -- NOP uniquement si le bit 6 = 0 (sinon c'est une instruction de HALT et on la laisse passer)
                 if D_ram_out(6) = '0' then
-                    D_cpu_IN <= X"00";
+                    i_d_cpu_in <= X"00";
                 else
-                    D_cpu_IN <= D_ram_out;
+                    i_d_cpu_in <= D_ram_out;
                 end if;
             when others =>
-                D_cpu_IN <= D_rom_out;
+                i_d_cpu_in <= D_rom_out;
         end case;
     elsif (IORQn = '0' and A_cpu(0) = '0' and RDn = '0') then
         -- IO inputs
-        D_cpu_in <= TAPE_IN & USA_UK & '0' & KBDn(0) & KBDn(1) & KBDn(2) & KBDn(3) & KBDn(4);
+        i_d_cpu_in <= TAPE_IN & USA_UK & '0' & KBDn(0) & KBDn(1) & KBDn(2) & KBDn(3) & KBDn(4);
     else
-        D_cpu_in <= (others => 'X');
+        i_d_cpu_in <= (others => 'X');
     end if;
 end process;
+
+D_cpu_in <= i_d_cpu_in;
 
 -- Detection NOP =>  on stockera le pattern video sera lu dans la ROM dans la RAM VGA
 i_nop_detect <= '1' when (M1n = '0' and MREQn = '0' and RDn = '0' and HALTn = '1' and A_cpu(15 downto 14) = "11" and D_ram_out(6) = '0') else '0';
