@@ -180,7 +180,7 @@ architecture Behavioral of vga_control_top is
         -- Thgdel (back porch) : 240 pixels
         -- Thgate : 384 pixels
         -- Front porch = 800 - (240+96+384) = 80 pixels
-        (HTIM_REG_ADDR,x"5FEF017F", '0'), -- program horizontal timing register
+        (HTIM_REG_ADDR,x"5F9F017F", '0'), -- program horizontal timing register
         -- Pour les lignes, il y a en tout 525 lignes
         -- => Sync pulse = 2 lignes
         -- => active time = 479 lignes (il faut une ligne de moins car sinon, on dépasse la mémoire ???)
@@ -271,13 +271,10 @@ begin
 	-- (frontière entre différents clock domains
 	process(clk_52M)
     begin
-        if rising_edge(clk_52M) then
-            i_video_addr_0 <= VIDEO_ADDR;
-            i_video_addr_1 <= i_video_addr_0;
-            i_video_data_0 <= VIDEO_DATA;
-            i_video_data_1 <= i_video_data_0;
-            i_wr_cyc_0 <= WR_CYC;
-            i_wr_cyc_1 <= i_wr_cyc_0;
+        if falling_edge(clk_52M) then
+            i_video_addr_1 <= VIDEO_ADDR;
+            i_video_data_1 <= VIDEO_DATA;
+            i_wr_cyc_1 <= WR_CYC;
         end if;
     end process;
 

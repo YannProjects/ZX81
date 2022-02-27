@@ -102,7 +102,7 @@ architecture Behavioral of ZX81_board is
     signal i_rdn, i_wrn, i_wrram, i_rfrshn, i_haltn, i_video_pattern_select : std_logic;
     signal i_a_cpu, i_a_vid_pattern, i_a_rom : std_logic_vector (15 downto 0);
     signal i_d_cpu_out, i_d_cpu_in, i_d_ram_out, i_d_rom_out : std_logic_vector (7 downto 0);
-    signal i_clk_52m, i_clk_3_25m, i_clk_6_5m : std_logic;
+    signal i_clk_52m, i_clk_3_25m, i_clk_6_5m, i_clk_13m : std_logic;
     signal i_resetn : std_logic;
     signal i_kbd_l_swap : std_logic_vector(4 downto 0);
     -- VGA
@@ -140,6 +140,7 @@ architecture Behavioral of ZX81_board is
         clk_52m => i_clk_52m,
         clk_3_25m => i_clk_3_25m,
         clk_6_5m => i_clk_6_5m,
+        clk_13m => i_clk_13m,
         vga_clk => i_vga_clock,
         rst => RESET,
         pll_locked => i_pll_locked
@@ -177,6 +178,7 @@ architecture Behavioral of ZX81_board is
     port map ( 
        CLK_3_25_M => i_clk_3_25m,
        CLK_6_5_M => i_clk_6_5m,
+       CLK_13_M => i_clk_13m,
        A_cpu => i_a_cpu, -- CPU address bus
        A_vid_pattern => i_a_vid_pattern, -- RAM/ROM address bus
        D_cpu_IN => i_d_cpu_in, -- CPU data bus IN. Output from ULA side

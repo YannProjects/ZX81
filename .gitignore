@@ -4,6 +4,7 @@
 *.svg
 *.txt
 *.zip
+Z81_board_sim_ULA_display.wcfg
 LTSpice/
 Traces oscilloscope/
 software/

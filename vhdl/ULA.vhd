@@ -37,7 +37,8 @@ use work.ZX81_Pack.all;
 entity ULA is
     Port ( 
            CLK_3_25_M : in std_logic;
-           CLK_6_5_M : in std_logic; 
+           CLK_6_5_M : in std_logic;
+           CLK_13_M : in std_logic;
            -- Separation bus addresse CPU et RAM/ROM
            A_cpu : in std_logic_vector (15 downto 0); -- CPU address bus to ULA. Input from ULA side
            A_vid_pattern : out std_logic_vector (15 downto 0); -- Address bus to RAM/ROM memories. Output from ULA side
@@ -80,82 +81,112 @@ architecture Behavioral of ULA is
     signal hsyncn_counter: unsigned(11 downto 0);
     signal i_nop_detect, i_nop_detect_0, i_nop_detect_1: std_logic;
      
-    signal i_vga_addr : std_logic_vector(17 downto 0);
+    signal i_vga_addr, i_vga_addr_frame_offset, i_vga_pixel_offset, i_vga_line_offset  : std_logic_vector(17 downto 0);
     signal i_vga_wr : std_logic;
     
     signal i_vsync_0, i_vsync_1, i_nmin : std_logic;
     
+    signal i_sample_pattern_video_done : std_logic;
+    
     signal i_hsyncn_cnt : unsigned(11 downto 0);
-    signal i_vid_shift_register : std_logic_vector(7 downto 0);
+    signal i_vid_shift_register : std_logic_vector(15 downto 0);
     signal i_rom_addr_enable_for_vid_pattern : std_logic;
+    
+    type state_pixel_counter is (move_to_next_pixel, move_to_next_line, wait_for_next_line, wait_one_more_pixel);
+    
+    signal pixel_counter_statem : state_pixel_counter;
        
-    attribute mark_debug : string;
-    attribute mark_debug of i_vsync : signal is "true";
-    attribute mark_debug of i_vsync_pulse_valid : signal is "true";
-    attribute mark_debug of i_hsyncn : signal is "true";
+    -- attribute mark_debug : string;
+    -- attribute mark_debug of i_vsync : signal is "true";
+    -- attribute mark_debug of i_vsync_pulse_valid : signal is "true";
+    -- attribute mark_debug of i_hsyncn : signal is "true";
     -- attribute mark_debug of CLK_3_25_M : signal is "true";
-    attribute mark_debug of CLK_6_5_M : signal is "true";
-    attribute mark_debug of A_cpu : signal is "true";
-    attribute mark_debug of D_cpu_IN : signal is "true";
-    attribute mark_debug of M1n : signal is "true";
-    attribute mark_debug of MREQn : signal is "true";
-    attribute mark_debug of RFRSHn : signal is "true";
-    attribute mark_debug of RDn : signal is "true";
-    attribute mark_debug of char_line_cntr : signal is "true";
-    attribute mark_debug of HALTn : signal is "true";
-    attribute mark_debug of NMIn : signal is "true";
-    attribute mark_debug of i_nmionn : signal is "true";
-    attribute mark_debug of i_nop_detect : signal is "true";
-    attribute mark_debug of i_vga_addr : signal is "true";
-    attribute mark_debug of vga_data : signal is "true";
-    attribute mark_debug of vga_wr_cyc : signal is "true";
+    -- attribute mark_debug of CLK_6_5_M : signal is "true";
+    -- attribute mark_debug of A_cpu : signal is "true";
+    -- attribute mark_debug of D_cpu_IN : signal is "true";
+    -- attribute mark_debug of M1n : signal is "true";
+    -- attribute mark_debug of MREQn : signal is "true";
+    -- attribute mark_debug of RFRSHn : signal is "true";
+    -- attribute mark_debug of RDn : signal is "true";
+    -- attribute mark_debug of char_line_cntr : signal is "true";
+    -- attribute mark_debug of HALTn : signal is "true";
+    -- attribute mark_debug of NMIn : signal is "true";
+    -- attribute mark_debug of i_nmionn : signal is "true";
+    -- attribute mark_debug of i_nop_detect : signal is "true";
+    -- attribute mark_debug of i_vga_addr : signal is "true";
+    -- attribute mark_debug of vga_data : signal is "true";
+    -- attribute mark_debug of vga_wr_cyc : signal is "true";
 
 begin
 
-p_vid_shift_register: process (CLK_6_5_M, RESETn)
+p_vid_shift_register: process (CLK_13_M, RESETn)
 begin
     if RESETn = '0' then
         i_vid_shift_register <= (others => '0');
-    elsif rising_edge(CLK_6_5_M) then
+        i_vga_line_offset <= (others => '0');
+    elsif falling_edge(CLK_13_M) then
         -- Sélection de la partie avec MREQn = 0 (cycle T4) durant laquelle on peut lire le pattern video
-        if MREQn = '0' and CLK_3_25_M = '0' and i_rom_addr_enable_for_vid_pattern = '1' then
-            -- Lecture pattern vidéo
+        if MREQn = '0' and CLK_3_25_M = '0' and i_rom_addr_enable_for_vid_pattern = '1' and i_sample_pattern_video_done = '0' then
+            -- Lecture pattern vidéo (mais une seule fois)
+            i_sample_pattern_video_done <= '1';
+            -- On resette la variable utilisée pour adressée une ligne ou celle du dessous avec la même valeur.
+            i_vga_line_offset <= (others => '0');
             -- Caractere en inversion video ?
             if (char_reg(7) = '0') then
-                i_vid_shift_register <= i_d_cpu_in;
+                -- Les pixel sont doublés car on les écrit 2 fois:
+                -- 1 fois à l'adresse A pendant le 1er cycle à 13 MHz et l'autre fois à l'adresse A + 384 (= nombre de pixels dans une ligne)
+                -- lors du second cycle de 13 MHz. Cette solution permte de doubler les lignes verticalement.
+                i_vid_shift_register <= i_d_cpu_in(7) & i_d_cpu_in(7) &
+                                        i_d_cpu_in(6) & i_d_cpu_in(6) &
+                                        i_d_cpu_in(5) & i_d_cpu_in(5) &
+                                        i_d_cpu_in(4) & i_d_cpu_in(4) &
+                                        i_d_cpu_in(3) & i_d_cpu_in(3) &
+                                        i_d_cpu_in(2) & i_d_cpu_in(2) &
+                                        i_d_cpu_in(1) & i_d_cpu_in(1) &
+                                        i_d_cpu_in(0) & i_d_cpu_in(0) ;
             else
-                i_vid_shift_register <= not i_d_cpu_in;
+                i_vid_shift_register <= not (i_d_cpu_in(7) & i_d_cpu_in(7) &
+                                        i_d_cpu_in(6) & i_d_cpu_in(6) &
+                                        i_d_cpu_in(5) & i_d_cpu_in(5) &
+                                        i_d_cpu_in(4) & i_d_cpu_in(4) &
+                                        i_d_cpu_in(3) & i_d_cpu_in(3) &
+                                        i_d_cpu_in(2) & i_d_cpu_in(2) &
+                                        i_d_cpu_in(1) & i_d_cpu_in(1) &
+                                        i_d_cpu_in(0) & i_d_cpu_in(0)) ;
             end if;
-        else      
-            i_vid_shift_register <= i_vid_shift_register(6 downto 0) & '0';
+        else
+            i_sample_pattern_video_done <= '0';
+            if i_vga_line_offset = "000000" & X"000" then
+                -- Ligne du dessous
+                i_vga_line_offset <= "000000" & X"180";
+            else
+                -- Ligne courante
+                i_vga_line_offset <= "000000" & X"000";
+            end if;
+            i_vid_shift_register <= i_vid_shift_register(14 downto 0) & '0';
         end if;
     end if;
 end process;
 
 p_vga_addr_counter: process (CLK_6_5_M, i_vsync, RESETn)
 begin
-    if RESETn = '0' or i_vsync = '1' then
-        -- On ne resett l'adresse VGA que si c'est un pulse valide
-        -- (dans le ZX81 HiRes, le VSYNC est aussi utilisé pour resetter le compteur
-        -- char_line_cntr)
-        if RESETn = '0' or (i_vsync = '1' and i_vsync_pulse_valid = '1') then
-            i_vga_addr <= (others => '0');
-        else
-            i_vga_addr <= i_vga_addr and B"11" & X"FF80";
-        end if;
+    if RESETn = '0' or i_hsyncn = '0' or i_vsync = '1' then
+        -- On resette le nombre de pixel depuis le début de la ligne en cas de HSYNCn ou VYNC
+        i_vga_pixel_offset <= (others => '0');
     elsif rising_edge(CLK_6_5_M) then
-        if i_hsyncn_cnt < MAX_VGA_PIXEL_OFFSET then
-            i_vga_addr <= i_vga_addr + 1;
-            i_vga_wr <= '1';
-        else
-            i_vga_wr <= '0';
+        if i_hsyncn_cnt < FB_PORCH_OFF_DURATION then
+            i_vga_pixel_offset <= i_vga_pixel_offset + 1;
         end if;
     end if;
 end process;
 
-vga_wr_cyc <= i_vga_wr;
-vga_addr <= i_vga_addr;
-vga_data <= i_vid_shift_register(7);
+-- i_vga_addr_frame_offset: Adresse du début de la la ligne courante dans la trame
+-- i_vga_pixel_offset: Offset du pixel dans la ligne
+-- i_vga_line_offset: Variable utilisée pour adressée un ligne sur 2 (contient 0 ou 384)
+-- LINE_OFFSET_FROM_FRAME_START: Offset pour décaler l'image de 45 lignes vers le haut et mieux la centrer par rapport à l'affichage VGA
+vga_addr <= i_vga_addr_frame_offset + i_vga_pixel_offset + i_vga_line_offset - LINE_OFFSET_FROM_FRAME_START;
+vga_data <= i_vid_shift_register(15);
+vga_wr_cyc <= i_hsyncn and not i_vsync when i_vga_addr_frame_offset >= LINE_OFFSET_FROM_FRAME_START else '0';
 
 ---------------------------------------------------------------------
 -- Process pour la génération du HSYNC et de la gate vidéo
@@ -168,20 +199,22 @@ variable hsyncn_counter: unsigned(11 downto 0);
 begin
     if (RESETn = '0' or i_vsync = '1') then
         hsyncn_counter := (others => '0');
-        char_line_cntr <= (others => '0');        
+        char_line_cntr <= (others => '0');
+        if (RESETn = '0' or i_vsync_pulse_valid = '1') then
+            i_vga_addr_frame_offset <= (others => '0');
+        end if;
         i_hsyncn <= '1';
-    -- Sur chaque front descendant de l'horloge 3,35 MHz
-    -- L'horloge à 6,5 MHz est utilsée pour rester synchrone par rapport au process p_vga_addr_counter
+    -- Sur chaque front descendant de l'horloge 3,25 MHz
     elsif rising_edge(CLK_3_25_M) then
         -- 192 cycles d'horloge à 3,25 MHz
         -- Duree pulse HSYNC = (207 - 192) @3,25 MHz = 4,6 µs 
-        -- Generateur de HSYNC
         hsyncn_counter := hsyncn_counter + 1;
         if hsyncn_counter >= FB_PORCH_OFF_DURATION and hsyncn_counter < FB_PORCH_OFF_DURATION + HSYNC_PULSE_ON_DURATION then  
             i_hsyncn <= '0';
         elsif hsyncn_counter = FB_PORCH_OFF_DURATION + HSYNC_PULSE_ON_DURATION then
             i_hsyncn <= '1';
             char_line_cntr <= char_line_cntr + 1;
+            i_vga_addr_frame_offset <= i_vga_addr_frame_offset + 2*384; 
             hsyncn_counter := (others => '0');
         end if;
     end if;
@@ -339,18 +372,18 @@ begin
 end process;
 
 -- Signal de sélection de l'adress de vid_pattern vers la ROM
--- Le signal est aligné sur les cycle T3 et T4 de l'excution en RAM pour l'affichage video
+-- Le signal est aligné sur les cycle T3 et T4 de l'execution en RAM pour l'affichage video
 i_rom_addr_enable_for_vid_pattern <= i_nop_detect_0 or i_nop_detect_1;
 
-A_vid_pattern <= A_cpu(15 downto 9) & char_reg(5 downto 0) & std_logic_vector(char_line_cntr(2 downto 0));
+A_vid_pattern <= A_cpu(15 downto 9) & char_reg(5 downto 0) & std_logic_vector(char_line_cntr);
 -- Signal utilise pour positionner l'adresse du pattern video à lire en ROM
 VID_PATTERN_ROM_ADDR_SELECT <= i_rom_addr_enable_for_vid_pattern;
 
 TAPE_OUT <= not i_vsync;
 
--- Explications issue de la page http://www.user.dccnet.com/wrigter/index_files/ZX81WAIT.htm
+-- Explications issue de la page https://quix.us/timex/rigter/ZX97lite.html
 -- En slow mode, le Z80 est interrompu toutes les 64 us par la NMI. La procédure d'interruption (en 0x0066)
--- compte le nombre de lignes restantes pour commencer l'afficahge vidéo.
+-- compte le nombre de lignes restantes pour commencer l'affichage vidéo.
 -- Lorsque le nombre de ligne est atteint, le CPU exécute une instruction HALT et attend la prochaine NMI
 -- Lorsque celle-ci arrive, le CPU continue son exécution à l'adresse 0x007A. Ce code, stoppe la NMI (OUT FD, A)
 -- et démare "l'exécution" en RAM vidéo (JP (IX)).

@@ -35,9 +35,10 @@ use unisim.vcomponents.all;
 entity Clocks_gen is
     Port ( main_clk : in STD_LOGIC;
            clk_52m : out STD_LOGIC;
+           vga_clk : out STD_LOGIC;
            clk_3_25m : out STD_LOGIC;
            clk_6_5m : out STD_LOGIC;
-           vga_clk : out STD_LOGIC;
+           clk_13m : out STD_LOGIC;
            rst : in std_logic;
            pll_locked : out std_logic);
 end Clocks_gen;
@@ -57,13 +58,28 @@ begin
         clk_in1 => main_clk,
         clk_52m => i_clk_52m,
         clk_vga => vga_clk,
-        clk_6_5M => i_clk_6_5m,
         reset => rst,
         locked => pll_locked
     );
 
     -- Code venant de https://forums.xilinx.com/t5/Other-FPGA-Architecture/How-to-divide-a-clock-by-2-with-a-simple-primitive-without-Clock/td-p/783488
-    clk_divider_4: BUFR
+    clk_divider_1: BUFR
+    generic map ( BUFR_DIVIDE => "4")
+    port map ( 
+        I => i_clk_52m,
+        O => i_clk_13m,
+        CE => '1',
+        CLR => '0');
+
+    clk_divider_2: BUFR
+    generic map ( BUFR_DIVIDE => "2")
+    port map ( 
+        I => i_clk_13m,
+        O => i_clk_6_5m,
+        CE => '1',
+        CLR => '0');
+
+    clk_divider_3: BUFR
     generic map ( BUFR_DIVIDE => "2")
     port map ( 
         I => i_clk_6_5m,
@@ -73,6 +89,7 @@ begin
 
     clk_3_25m <= i_clk_3_25m;
     clk_6_5m <= i_clk_6_5m;
+    clk_13m <= i_clk_13m;
     clk_52m <= i_clk_52m;
 
 end Based_on_IP;

@@ -39,11 +39,9 @@ constant FB_PORCH_OFF_DURATION : unsigned(11 downto 0) := X"0C0"; -- @ 3,25 MHz
 -- Pour le heart beat
 constant VSYNC_COUNTER_PERIOD : unsigned(15 downto 0) := X"000C";
 
-constant MIN_VSYNC_PULSE_DURATION : unsigned := X"30"; 
+constant MIN_VSYNC_PULSE_DURATION : unsigned := X"30";
 
-constant MIN_VGA_PIXEL_OFFSET : unsigned(11 downto 0) := X"04E";
--- constant MAX_VGA_PIXEL_OFFSET : unsigned(11 downto 0) := MIN_VGA_PIXEL_OFFSET + X"FF";
-constant MAX_VGA_PIXEL_OFFSET : unsigned(11 downto 0) := X"0C0"; -- 192 pixels @ 3,5 MHz
+constant LINE_OFFSET_FROM_FRAME_START: std_logic_vector(17 downto 0) := X"4380"; -- Offset de 45 lignes de 384 pixels vers le haut (384*45)
 
 end;
 
