@@ -147,3 +147,5 @@ set_false_path -from [get_clocks CLK_52M] -to [get_clocks CLK_3_25M]
 
 set_false_path -from [get_clocks CLK_52M] -to [get_clocks CLK_13M]
 set_false_path -from [get_clocks CLK_52M] -to [get_clocks CLK_6_5M]
+
+
