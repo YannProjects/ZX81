@@ -107,7 +107,7 @@ architecture Behavioral of ZX81_board is
     signal i_kbd_l_swap : std_logic_vector(4 downto 0);
     -- VGA
     signal i_vga_clock, i_pll_locked : std_logic;
-    signal i_vga_addr: std_logic_vector(17 downto 0);
+    signal i_vga_addr: std_logic_vector(19 downto 0);
     signal i_vga_data: std_logic;
     signal i_vga_wr_cyc, i_vga_control_init_done : std_logic;
     
