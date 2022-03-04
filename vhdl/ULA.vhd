@@ -47,7 +47,7 @@ entity ULA is
            D_ram_out : in STD_LOGIC_VECTOR (7 downto 0); -- RAM output data bus. Input for ULA side
            D_rom_out : in STD_LOGIC_VECTOR (7 downto 0); -- ROM ouput data bus. Input for ULA side
            -- Adresse et data vidéo pour le controlleur VGA
-           vga_addr : out std_logic_vector(17 downto 0);
+           vga_addr : out std_logic_vector(19 downto 0);
            vga_data : out std_logic;
            vga_wr_cyc : out STD_LOGIC;
            -- 
@@ -81,7 +81,7 @@ architecture Behavioral of ULA is
     signal hsyncn_counter: unsigned(11 downto 0);
     signal i_nop_detect, i_nop_detect_0, i_nop_detect_1: std_logic;
      
-    signal i_vga_addr, i_vga_addr_frame_offset, i_vga_pixel_offset, i_vga_line_offset  : std_logic_vector(17 downto 0);
+    signal i_vga_addr, i_vga_addr_frame_offset, i_vga_pixel_offset, i_vga_line_offset  : std_logic_vector(19 downto 0);
     signal i_vga_wr : std_logic;
     
     signal i_vsync_0, i_vsync_1, i_nmin : std_logic;
@@ -158,10 +158,10 @@ begin
             i_sample_pattern_video_done <= '0';
             if i_vga_line_offset = "000000" & X"000" then
                 -- Ligne du dessous
-                i_vga_line_offset <= "000000" & X"180";
+                i_vga_line_offset <= X"00180";
             else
                 -- Ligne courante
-                i_vga_line_offset <= "000000" & X"000";
+                i_vga_line_offset <= (others => '0');
             end if;
             i_vid_shift_register <= i_vid_shift_register(14 downto 0) & '0';
         end if;

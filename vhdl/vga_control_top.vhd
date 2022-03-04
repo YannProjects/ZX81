@@ -44,7 +44,7 @@ entity vga_control_top is
         RESET : in STD_LOGIC;
         CLK_52M : in std_logic;
         VGA_CLK : in std_logic;
-        VIDEO_ADDR : in std_logic_vector(17 downto 0);
+        VIDEO_ADDR : in std_logic_vector(19 downto 0);
         VIDEO_DATA : in std_logic;
         WR_CYC : in std_logic;
         VGA_CONTROL_INIT_DONE : out std_logic;
@@ -115,7 +115,7 @@ architecture Behavioral of vga_control_top is
         stb_i_vga_c : in std_logic;
         ack_o_vga_c : out std_logic;
         dat_o_vga_c : out std_logic_vector(31 downto 0);
-        adr_vid_i : in std_logic_vector (17 downto 0);
+        adr_vid_i : in std_logic_vector (19 downto 0);
         dat_vid_i : in std_logic;
         wr_i : in std_logic	
     );
@@ -152,7 +152,7 @@ architecture Behavioral of vga_control_top is
 	signal vga_sel_o                       : std_logic_vector(3 downto 0);
 	signal vga_we_o                        : std_logic;
 	
-	signal i_video_addr_0, i_video_addr_1 : std_logic_vector(17 downto 0);
+	signal i_video_addr_0, i_video_addr_1 : std_logic_vector(19 downto 0);
     signal i_video_data_0, i_video_data_1 : std_logic;
     signal i_wr_cyc_0, i_wr_cyc_1 : std_logic;
     
@@ -329,7 +329,7 @@ entity vid_mem is
 		-- Donnée RAM vidéo pour le controlleur VGA
 		dat_o_vga_c : out std_logic_vector(31 downto 0);
 		-- Adresse en écriture côté host
-		adr_vid_i : std_logic_vector (17 downto 0);
+		adr_vid_i : std_logic_vector (19 downto 0);
 		-- Données en entrées pour la RAM vidéo côté host
 		dat_vid_i : in std_logic;
 		-- Ecriture en RAM vidéo côté host
@@ -361,7 +361,7 @@ begin
 
     -- Les données sont écrites bit par bit et lues par groupe de 4 octets (1 octet = 1 pixel avec comme valeur 0x00 ou 0x01)
     u1: blk_mem_gen_vga_2
-        port map (clka => not clk_i, wea(0) => wr_i, addra => adr_vid_i, dina(0) => dat_vid_i,
+        port map (clka => not clk_i, wea(0) => wr_i, addra => adr_vid_i(17 downto 0), dina(0) => dat_vid_i,
             clkb => not clk_i, addrb => adr_i_ram_vga, doutb => dat_o_ram_vga);
     
     -- La résolution choisit pour le controlleur VGA est de 640 * 480.
