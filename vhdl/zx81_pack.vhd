@@ -36,8 +36,8 @@ constant HSYNC_PULSE_ON_DURATION : unsigned(11 downto 0) := X"00F"; -- @ 3,25 MH
 --- qui encadre les top lignes)
 constant FB_PORCH_OFF_DURATION : unsigned(11 downto 0) := X"0C0"; -- @ 3,25 MHz
 
-constant NUMBER_OF_PIXELS_PER_LINE : unsigned(19 downto 0) := X"00280"; -- 320 adresses contenant 2 bits
-constant NUMBER_OF_PIXELS_PER_VGA_LINE : unsigned(19 downto 0) := X"00500"; -- 640
+constant NUMBER_OF_PIXELS_PER_LINE : unsigned(19 downto 0) := X"00180"; -- 640 pixels par ligne
+constant NUMBER_OF_PIXELS_PER_VGA_LINE : unsigned(19 downto 0) := X"00300"; -- 640
 -- constant PIXEL_LINE_START : unsigned(19 downto 0) := X"00020"; -- 16 pixels
 -- constant PIXEL_LINE_STOP : unsigned(19 downto 0) := PIXEL_LINE_START + NUMBER_OF_PIXELS_PER_LINE;  -- 16 + 320 pixels
 constant PIXEL_LINE_START : unsigned(19 downto 0) := X"00040"; -- 16 pixels
@@ -48,9 +48,8 @@ constant VSYNC_COUNTER_PERIOD : unsigned(15 downto 0) := X"000C";
 
 constant MIN_VSYNC_PULSE_DURATION : unsigned := X"30";
 
-constant LINE_OFFSET_FROM_FRAME_START: std_logic_vector(19 downto 0) := X"04380"; -- Offset de 45 lignes de 384 pixels vers le haut (384*45)
-constant FRAME_LINE_START: unsigned(19 downto 0) := X"03200"; -- Offset de 40 lignes de 320 pixels vers le haut (320*40)
-constant FRAME_LINE_STOP: unsigned(19 downto 0) := FRAME_LINE_START + X"19000"; -- Offset de 40 lignes de 320 pixels vers le haut (320*40)
+constant FRAME_LINE_START: unsigned(19 downto 0) := X"04380"; -- Offset de  lignes de  pixels vers le haut
+constant FRAME_LINE_STOP: unsigned(19 downto 0) := FRAME_LINE_START + X"19000"; -- Offset de  lignes de  pixels vers le haut
 
 end;
 

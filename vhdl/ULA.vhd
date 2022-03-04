@@ -81,7 +81,7 @@ architecture Behavioral of ULA is
     signal hsyncn_counter: unsigned(11 downto 0);
     signal i_nop_detect, i_nop_detect_0, i_nop_detect_1: std_logic;
      
-    signal i_vga_addr, i_vga_addr_frame_offset, i_vga_pixel_offset, i_vga_line_offset  : std_logic_vector(19 downto 0);
+    signal i_vga_addr, i_vga_addr_frame_offset, i_vga_pixel_offset, i_vga_line_offset  : unsigned(19 downto 0);
     signal i_vga_wr : std_logic;
     
     signal i_vsync_0, i_vsync_1, i_nmin : std_logic;
@@ -135,7 +135,7 @@ begin
             if (char_reg(7) = '0') then
                 -- Les pixel sont doublés car on les écrit 2 fois:
                 -- 1 fois à l'adresse A pendant le 1er cycle à 13 MHz et l'autre fois à l'adresse A + 384 (= nombre de pixels dans une ligne)
-                -- lors du second cycle de 13 MHz. Cette solution permte de doubler les lignes verticalement.
+                -- lors du second cycle de 13 MHz. Cette solution permet de doubler les lignes verticalement.
                 i_vid_shift_register <= i_d_cpu_in(7) & i_d_cpu_in(7) &
                                         i_d_cpu_in(6) & i_d_cpu_in(6) &
                                         i_d_cpu_in(5) & i_d_cpu_in(5) &
@@ -156,9 +156,9 @@ begin
             end if;
         else
             i_sample_pattern_video_done <= '0';
-            if i_vga_line_offset = "000000" & X"000" then
+            if i_vga_line_offset = X"00000" then
                 -- Ligne du dessous
-                i_vga_line_offset <= X"00180";
+                i_vga_line_offset <= NUMBER_OF_PIXELS_PER_LINE;
             else
                 -- Ligne courante
                 i_vga_line_offset <= (others => '0');
@@ -184,9 +184,9 @@ end process;
 -- i_vga_pixel_offset: Offset du pixel dans la ligne
 -- i_vga_line_offset: Variable utilisée pour adressée un ligne sur 2 (contient 0 ou 384)
 -- LINE_OFFSET_FROM_FRAME_START: Offset pour décaler l'image de 45 lignes vers le haut et mieux la centrer par rapport à l'affichage VGA
-vga_addr <= i_vga_addr_frame_offset + i_vga_pixel_offset + i_vga_line_offset - LINE_OFFSET_FROM_FRAME_START;
+vga_addr <= std_logic_vector(i_vga_addr_frame_offset + i_vga_pixel_offset + i_vga_line_offset - FRAME_LINE_START);
 vga_data <= i_vid_shift_register(15);
-vga_wr_cyc <= i_hsyncn and not i_vsync when i_vga_addr_frame_offset >= LINE_OFFSET_FROM_FRAME_START else '0';
+vga_wr_cyc <= i_hsyncn and not i_vsync when i_vga_addr_frame_offset >= FRAME_LINE_START else '0';
 
 ---------------------------------------------------------------------
 -- Process pour la génération du HSYNC et de la gate vidéo
@@ -214,7 +214,7 @@ begin
         elsif hsyncn_counter = FB_PORCH_OFF_DURATION + HSYNC_PULSE_ON_DURATION then
             i_hsyncn <= '1';
             char_line_cntr <= char_line_cntr + 1;
-            i_vga_addr_frame_offset <= i_vga_addr_frame_offset + 2*384; 
+            i_vga_addr_frame_offset <= i_vga_addr_frame_offset + NUMBER_OF_PIXELS_PER_VGA_LINE; 
             hsyncn_counter := (others => '0');
         end if;
     end if;
