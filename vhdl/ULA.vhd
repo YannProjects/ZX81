@@ -76,26 +76,21 @@ architecture Behavioral of ULA is
     signal i_vsync, i_vsync_pulse_valid : std_logic;
     signal i_nmionn : std_logic;
     signal char_line_cntr : unsigned(2 downto 0);
-    signal i_vsync_pulse_duration : unsigned(11 downto 0);
+    signal i_vsync_pulse_duration : integer;
     signal char_reg, i_d_cpu_in : std_logic_vector(7 downto 0);
-    signal hsyncn_counter: unsigned(11 downto 0);
     signal i_nop_detect, i_nop_detect_0, i_nop_detect_1: std_logic;
      
-    signal i_vga_addr, i_vga_addr_frame_offset, i_vga_pixel_offset, i_vga_line_offset  : unsigned(19 downto 0);
+    signal i_vga_addr, i_vga_addr_frame_offset, i_vga_pixel_offset, i_vga_line_offset  : integer;
     signal i_vga_wr : std_logic;
     
     signal i_vsync_0, i_vsync_1, i_nmin : std_logic;
     
     signal i_sample_pattern_video_done : std_logic;
     
-    signal i_hsyncn_cnt : unsigned(11 downto 0);
+    signal i_hsyncn_cnt : integer;
     signal i_vid_shift_register : std_logic_vector(15 downto 0);
     signal i_rom_addr_enable_for_vid_pattern : std_logic;
-    
-    type state_pixel_counter is (move_to_next_pixel, move_to_next_line, wait_for_next_line, wait_one_more_pixel);
-    
-    signal pixel_counter_statem : state_pixel_counter;
-       
+           
     -- attribute mark_debug : string;
     -- attribute mark_debug of i_vsync : signal is "true";
     -- attribute mark_debug of i_vsync_pulse_valid : signal is "true";
@@ -123,14 +118,14 @@ p_vid_shift_register: process (CLK_13_M, RESETn)
 begin
     if RESETn = '0' then
         i_vid_shift_register <= (others => '0');
-        i_vga_line_offset <= (others => '0');
+        i_vga_line_offset <= 0;
     elsif falling_edge(CLK_13_M) then
         -- Sélection de la partie avec MREQn = 0 (cycle T4) durant laquelle on peut lire le pattern video
         if MREQn = '0' and CLK_3_25_M = '0' and i_rom_addr_enable_for_vid_pattern = '1' and i_sample_pattern_video_done = '0' then
             -- Lecture pattern vidéo (mais une seule fois)
             i_sample_pattern_video_done <= '1';
             -- On resette la variable utilisée pour adressée une ligne ou celle du dessous avec la même valeur.
-            i_vga_line_offset <= (others => '0');
+            i_vga_line_offset <= 0;
             -- Caractere en inversion video ?
             if (char_reg(7) = '0') then
                 -- Les pixel sont doublés car on les écrit 2 fois:
@@ -156,12 +151,12 @@ begin
             end if;
         else
             i_sample_pattern_video_done <= '0';
-            if i_vga_line_offset = X"00000" then
+            if i_vga_line_offset = 0 then
                 -- Ligne du dessous
                 i_vga_line_offset <= NUMBER_OF_PIXELS_PER_LINE;
             else
                 -- Ligne courante
-                i_vga_line_offset <= (others => '0');
+                i_vga_line_offset <= 0;
             end if;
             i_vid_shift_register <= i_vid_shift_register(14 downto 0) & '0';
         end if;
@@ -172,7 +167,7 @@ p_vga_addr_counter: process (CLK_6_5_M, i_vsync, RESETn)
 begin
     if RESETn = '0' or i_hsyncn = '0' or i_vsync = '1' then
         -- On resette le nombre de pixel depuis le début de la ligne en cas de HSYNCn ou VYNC
-        i_vga_pixel_offset <= (others => '0');
+        i_vga_pixel_offset <= 0;
     elsif rising_edge(CLK_6_5_M) then
         if i_hsyncn_cnt < FB_PORCH_OFF_DURATION then
             i_vga_pixel_offset <= i_vga_pixel_offset + 1;
@@ -184,7 +179,7 @@ end process;
 -- i_vga_pixel_offset: Offset du pixel dans la ligne
 -- i_vga_line_offset: Variable utilisée pour adressée un ligne sur 2 (contient 0 ou 384)
 -- LINE_OFFSET_FROM_FRAME_START: Offset pour décaler l'image de 45 lignes vers le haut et mieux la centrer par rapport à l'affichage VGA
-vga_addr <= std_logic_vector(i_vga_addr_frame_offset + i_vga_pixel_offset + i_vga_line_offset - FRAME_LINE_START);
+vga_addr <= std_logic_vector(to_unsigned(i_vga_addr_frame_offset + i_vga_pixel_offset + i_vga_line_offset - FRAME_LINE_START, vga_addr'length));
 vga_data <= i_vid_shift_register(15);
 vga_wr_cyc <= i_hsyncn and not i_vsync when i_vga_addr_frame_offset >= FRAME_LINE_START else '0';
 
@@ -194,14 +189,14 @@ vga_wr_cyc <= i_hsyncn and not i_vsync when i_vga_addr_frame_offset >= FRAME_LIN
 ---------------------------------------------------------------------
 hsync_and_gate_process: process (CLK_3_25_M, RESETn)
 
-variable hsyncn_counter: unsigned(11 downto 0);
+variable hsyncn_counter: integer;
  
 begin
     if (RESETn = '0' or i_vsync = '1') then
-        hsyncn_counter := (others => '0');
+        hsyncn_counter := 0;
         char_line_cntr <= (others => '0');
         if (RESETn = '0' or i_vsync_pulse_valid = '1') then
-            i_vga_addr_frame_offset <= (others => '0');
+            i_vga_addr_frame_offset <= 0;
         end if;
         i_hsyncn <= '1';
     -- Sur chaque front descendant de l'horloge 3,25 MHz
@@ -214,8 +209,8 @@ begin
         elsif hsyncn_counter = FB_PORCH_OFF_DURATION + HSYNC_PULSE_ON_DURATION then
             i_hsyncn <= '1';
             char_line_cntr <= char_line_cntr + 1;
-            i_vga_addr_frame_offset <= i_vga_addr_frame_offset + NUMBER_OF_PIXELS_PER_VGA_LINE; 
-            hsyncn_counter := (others => '0');
+            i_vga_addr_frame_offset <= i_vga_addr_frame_offset + 2*NUMBER_OF_PIXELS_PER_LINE; 
+            hsyncn_counter := 0;
         end if;
     end if;
     
@@ -298,7 +293,7 @@ end process;
 p_vsync_pulse_duration_counter : process(RESETn, CLK_3_25_M)
 begin
     if RESETn = '0' or i_vsync = '0' then
-        i_vsync_pulse_duration <= X"000";
+        i_vsync_pulse_duration <= 0;
         i_vsync_pulse_valid <= '0';
     -- On compte la durée du pulse de VSYNC pour savoir si c'est uyne vraie synchro trame ou pas
     -- (cas du ZX81 en mode pseudo-hires avec invaders ou pacman)
@@ -331,7 +326,7 @@ end process;
 -----------------------------------------------------
 p_vsync_hb : process (RESETn, CLK_3_25_M, IORQn)
 
-variable i_vsync_counter : unsigned(15 downto 0);
+variable i_vsync_counter : integer;
 variable i_heart_beat : std_logic;
 
 begin
@@ -346,7 +341,7 @@ begin
         -- Détection transtion 1 -> 0
         if i_vsync_1 = '1' and i_vsync_0 = '0' then
             i_vsync_counter := i_vsync_counter - 1;
-            if  i_vsync_counter(15) = '1' then
+            if  i_vsync_counter = 0 then
                 i_vsync_counter := VSYNC_COUNTER_PERIOD;
                 i_heart_beat := not i_heart_beat;
             end if;

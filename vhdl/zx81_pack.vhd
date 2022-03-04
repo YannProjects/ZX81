@@ -31,25 +31,22 @@ Package ZX81_Pack is
 constant RAM_ADDRWIDTH : integer := 14;
 
 --- Constantes pour la generation du HSYNC et back/front porch:
-constant HSYNC_PULSE_ON_DURATION : unsigned(11 downto 0) := X"00F"; -- @ 3,25 MHz
+constant HSYNC_PULSE_ON_DURATION : integer := 15; -- @ 3,25 MHz
 --- Back port to front port pulse duration (entre le d<E9>but de la zone de back porch et la fin de la zon de front porch
 --- qui encadre les top lignes)
-constant FB_PORCH_OFF_DURATION : unsigned(11 downto 0) := X"0C0"; -- @ 3,25 MHz
+constant FB_PORCH_OFF_DURATION : integer := 192; -- @ 3,25 MHz
+constant MIN_VSYNC_PULSE_DURATION : integer := 50;
 
-constant NUMBER_OF_PIXELS_PER_LINE : unsigned(19 downto 0) := X"00180"; -- 640 pixels par ligne
-constant NUMBER_OF_PIXELS_PER_VGA_LINE : unsigned(19 downto 0) := X"00300"; -- 640
--- constant PIXEL_LINE_START : unsigned(19 downto 0) := X"00020"; -- 16 pixels
--- constant PIXEL_LINE_STOP : unsigned(19 downto 0) := PIXEL_LINE_START + NUMBER_OF_PIXELS_PER_LINE;  -- 16 + 320 pixels
-constant PIXEL_LINE_START : unsigned(19 downto 0) := X"00040"; -- 16 pixels
-constant PIXEL_LINE_STOP : unsigned(19 downto 0) := X"00120";  -- 16 + 320 pixels
+constant NUMBER_OF_PIXELS_PER_LINE : integer := 640; -- 640 pixels par ligne
+constant PIXEL_LINE_START : integer := 64; -- 16 pixels
+constant PIXEL_LINE_STOP : integer := 224;
+
+constant FRAME_LINE_START: integer := 45*NUMBER_OF_PIXELS_PER_LINE; -- Offset de  lignes de  pixels vers le haut
+constant FRAME_LINE_STOP: integer := FRAME_LINE_START; -- Offset de  lignes de  pixels vers le haut
 
 -- Pour le heart beat
-constant VSYNC_COUNTER_PERIOD : unsigned(15 downto 0) := X"000C";
+constant VSYNC_COUNTER_PERIOD : integer := 12;
 
-constant MIN_VSYNC_PULSE_DURATION : unsigned := X"30";
-
-constant FRAME_LINE_START: unsigned(19 downto 0) := X"04380"; -- Offset de  lignes de  pixels vers le haut
-constant FRAME_LINE_STOP: unsigned(19 downto 0) := FRAME_LINE_START + X"19000"; -- Offset de  lignes de  pixels vers le haut
 
 end;
 

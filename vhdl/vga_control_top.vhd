@@ -179,8 +179,9 @@ architecture Behavioral of vga_control_top is
         -- Thsync : 96 pixels
         -- Thgdel (back porch) : 240 pixels
         -- Thgate : 384 pixels
-        -- Front porch = 800 - (240+96+384) = 80 pixels
-        (HTIM_REG_ADDR,x"5F9F017F", '0'), -- program horizontal timing register
+        -- Front porch = 800 - (96+240+384) = 80 pixels
+        -- (HTIM_REG_ADDR,x"5F9F017F", '0'), -- program horizontal timing register (384*480)
+        (HTIM_REG_ADDR,x"5F32027F", '0'), -- program horizontal timing register (640*480)
         -- Pour les lignes, il y a en tout 525 lignes
         -- => Sync pulse = 2 lignes
         -- => active time = 479 lignes (il faut une ligne de moins car sinon, on dépasse la mémoire ???)
@@ -344,10 +345,10 @@ architecture behavioral of vid_mem is
       port (
         clka : in std_logic;
         wea : in std_logic_vector(0 DOWNTO 0);
-        addra : in std_logic_vector(17 downto 0);
+        addra : in std_logic_vector(18 downto 0);
         dina : in std_logic_vector(0 DOWNTO 0);
         clkb : in std_logic;
-        addrb : in std_logic_vector(14 downto 0);
+        addrb : in std_logic_vector(15 downto 0);
         doutb : out std_logic_vector(7 downto 0)
       );
     end component;
@@ -355,13 +356,13 @@ architecture behavioral of vid_mem is
     -- Données vidéo ZX81 (8 bits, 1 pixel par bit)
     signal dat_o_ram_vga: std_logic_vector(7 downto 0);
     -- Données controlleur VGA (32 bits, 8 bits par pixel).
-    signal adr_i_ram_vga: std_logic_vector(14 downto 0);
+    signal adr_i_ram_vga: std_logic_vector(15 downto 0);
 	
 begin
 
     -- Les données sont écrites bit par bit et lues par groupe de 4 octets (1 octet = 1 pixel avec comme valeur 0x00 ou 0x01)
     u1: blk_mem_gen_vga_2
-        port map (clka => not clk_i, wea(0) => wr_i, addra => adr_vid_i(17 downto 0), dina(0) => dat_vid_i,
+        port map (clka => not clk_i, wea(0) => wr_i, addra => adr_vid_i(18 downto 0), dina(0) => dat_vid_i,
             clkb => not clk_i, addrb => adr_i_ram_vga, doutb => dat_o_ram_vga);
     
     -- La résolution choisit pour le controlleur VGA est de 640 * 480.
@@ -371,7 +372,7 @@ begin
     -- Contenu RAM VGA: 0xF0
     -- Valeurs lues par le controlleur VGA : 4 octets avec 0x01010101 (i.e.: 4 pixels couleurs) + 
     -- 4 octets avec 0x00000000 (i.e.: 4 pixels noirs)       
-    adr_i_ram_vga <= adr_i_vga_c(17 downto 3);
+    adr_i_ram_vga <= adr_i_vga_c(18 downto 3);
     
     with adr_i_vga_c(2) select
         dat_o_vga_c <= 
