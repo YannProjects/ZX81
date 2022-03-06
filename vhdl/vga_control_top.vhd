@@ -272,7 +272,7 @@ begin
 	-- (frontière entre différents clock domains
 	process(clk_52M)
     begin
-        if falling_edge(clk_52M) then
+        if rising_edge(clk_52M) then
             i_video_addr_1 <= VIDEO_ADDR;
             i_video_data_1 <= VIDEO_DATA;
             i_wr_cyc_1 <= WR_CYC;
