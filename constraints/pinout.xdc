@@ -134,18 +134,14 @@ set_false_path -to [get_ports G_VGA_H*]
 set_false_path -to [get_ports B_VGA_H*]
 
 
-create_generated_clock -name CLK_13M -source [get_pins clk_gen_0/clk_gen/clk_52M] -divide_by 4 [get_pins -hierarchical *clk_13m*]
-create_generated_clock -name CLK_6_5M -source [get_pins clk_gen_0/clk_divider_1/O] -divide_by 2 [get_pins -hierarchical *clk_6_5m*]
-create_generated_clock -name CLK_3_25M -source [get_pins clk_gen_0/clk_divider_3/O] -divide_by 2 [get_pins -hierarchical *clk_3_25m*]
+#create_generated_clock -name CLK_13M -source [get_pins clk_gen_0/clk_gen/clk_52M] -divide_by 4 [get_pins -hierarchical *clk_13m*]
+#create_generated_clock -name CLK_6_5M -source [get_pins clk_gen_0/clk_divider_1/O] -divide_by 2 [get_pins -hierarchical *clk_6_5m*]
+#create_generated_clock -name CLK_3_25M -source [get_pins clk_gen_0/clk_divider_2/O] -divide_by 2 [get_pins -hierarchical *clk_3_25m*]
 
+#create_generated_clock -name CLK_52M -source [get_pins -hierarchical *52m*] -multiply_by 1 [get_nets -hierarchical *i_clk_52m*]
+#create_generated_clock -name CLK_VGA -source [get_pins clk_gen_0/clk_gen/clk_vga] -multiply_by 1 [get_nets clk_gen_0/vga_clk]
 
+#set_false_path -from [get_clocks CLK_VGA] -to [get_clocks CLK_52M]
+#set_false_path -from [get_clocks CLK_52M] -to [get_clocks CLK_VGA]
 
-set_false_path -from [get_clocks CLK_VGA] -to [get_clocks CLK_52M]
-set_false_path -from [get_clocks CLK_52M] -to [get_clocks CLK_VGA]
-
-set_false_path -from [get_clocks CLK_52M] -to [get_clocks CLK_3_25M]
-
-set_false_path -from [get_clocks CLK_52M] -to [get_clocks CLK_13M]
-set_false_path -from [get_clocks CLK_52M] -to [get_clocks CLK_6_5M]
-
-
+set_clock_groups -name vga_and_system_clock_group -asynchronous -group [get_clocks [list [get_clocks -of_objects [get_pins clk_gen_0/clk_gen/inst/mmcm_adv_inst/CLKOUT0]] [get_clocks -of_objects [get_pins clk_gen_0/clk_divider_3/O]] [get_clocks -of_objects [get_pins clk_gen_0/clk_divider_2/O]] [get_clocks -of_objects [get_pins clk_gen_0/clk_divider_1/O]]]] -group [get_clocks -of_objects [get_pins clk_gen_0/clk_gen/inst/mmcm_adv_inst/CLKOUT1]]

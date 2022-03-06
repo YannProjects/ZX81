@@ -18,8 +18,6 @@ set_false_path -to [get_ports Vsync_Heart_Beat]
 #set_property DONT_TOUCH true [get_nets -hier]
 
 
-create_clock -period 19.231 -name CLK_52M -waveform {0.000 9.616} -add [get_pins clk_gen_0/clk_52m]
-create_clock -period 39.702 -name CLK_VGA -waveform {0.000 19.851} -add [get_pins clk_gen_0/clk_gen/clk_vga]
 
 
 # Il y a des erreurs reportées lors des checks de timing sur l'interface entre la CLK à 6,5 MHz côté ULA et
@@ -28,6 +26,11 @@ create_clock -period 39.702 -name CLK_VGA -waveform {0.000 19.851} -add [get_pin
 # Mais, il y a toujours l'erreur. En attendant j'ajoute
 # une contrainte pour ignorer le cross domain checking.
 # (voir aussi: https://www.youtube.com/watch?v=KoC9hEckJdk)
+
+
+
+
+
 
 
 

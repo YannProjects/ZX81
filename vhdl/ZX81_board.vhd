@@ -75,16 +75,6 @@ architecture Behavioral of ZX81_board is
         spo : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
     );
     end component; 
-
-    component dist_mem_gen_1 IS
-    port (
-       a : IN STD_LOGIC_VECTOR(RAM_ADDRWIDTH - 1 DOWNTO 0);
-       d : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
-       clk : IN STD_LOGIC;
-       we : IN STD_LOGIC;
-       spo : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
-     );
-     end component;
      
     component blk_mem_gen_0 IS
       PORT (
@@ -213,7 +203,7 @@ architecture Behavioral of ZX81_board is
        dina => i_d_cpu_out,
        douta => i_d_ram_out,       
        clka => i_clk_3_25m,
-       wea => i_wrram     -- Write actif sur niveau haut...
+       wea => i_wrram
     );
     
     vga_control0 : entity work.vga_control_top
@@ -246,7 +236,7 @@ architecture Behavioral of ZX81_board is
     );
     
     -- Dans le cas où il y a une détection de NOP, l'adresse à utiliser est celle construite pour accéder au pattern video.
-    -- Dans le autres cas c'est une adresse utilisée par le Z80.
+    -- Dans les autres cas c'est une adresse utilisée par le Z80.
     i_a_rom <= i_a_vid_pattern when i_video_pattern_select = '1' else i_a_cpu;
    
     -- Les 5 lignes du clavier

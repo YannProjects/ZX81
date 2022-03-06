@@ -78,9 +78,9 @@ architecture Behavioral of ULA is
     signal char_line_cntr : unsigned(2 downto 0);
     signal i_vsync_pulse_duration : integer;
     signal char_reg, i_d_cpu_in : std_logic_vector(7 downto 0);
-    signal i_nop_detect, i_nop_detect_0, i_nop_detect_1: std_logic;
+    signal i_nop_detect, i_nop_detect_0: std_logic;
      
-    signal i_vga_addr, i_vga_addr_frame_offset, i_vga_pixel_offset, i_vga_line_offset  : integer;
+    signal i_vga_addr_frame_offset, i_vga_pixel_offset, i_vga_line_offset  : integer;
     signal i_vga_wr : std_logic;
     
     signal i_vsync_0, i_vsync_1, i_nmin : std_logic;
@@ -108,7 +108,10 @@ architecture Behavioral of ULA is
     -- attribute mark_debug of NMIn : signal is "true";
     -- attribute mark_debug of i_nmionn : signal is "true";
     -- attribute mark_debug of i_nop_detect : signal is "true";
-    -- attribute mark_debug of i_vga_addr : signal is "true";
+    -- attribute mark_debug of vga_addr : signal is "true";
+    -- attribute mark_debug of i_vga_addr_frame_offset : signal is "true";
+    -- attribute mark_debug of i_vga_pixel_offset : signal is "true";
+    -- attribute mark_debug of i_vga_line_offset : signal is "true";
     -- attribute mark_debug of vga_data : signal is "true";
     -- attribute mark_debug of vga_wr_cyc : signal is "true";
 
@@ -119,17 +122,19 @@ begin
     if RESETn = '0' then
         i_vid_shift_register <= (others => '0');
         i_vga_line_offset <= 0;
-    elsif falling_edge(CLK_13_M) then
-        -- Sélection de la partie avec MREQn = 0 (cycle T4) durant laquelle on peut lire le pattern video
-        if MREQn = '0' and CLK_3_25_M = '0' and i_rom_addr_enable_for_vid_pattern = '1' and i_sample_pattern_video_done = '0' then
-            -- Lecture pattern vidéo (mais une seule fois)
-            i_sample_pattern_video_done <= '1';
+    elsif rising_edge(CLK_13_M) then
+        -- Sélection de la partie avec MREQn = 0 (cycle T4) durant laquelle il faut recharger le pattern video
+        -- Dans le schema original du ZX81, le registre à decalage est recharge en fin de cycle T4 de l'execution en RAM video.
+        -- C'est ce qui est reproduit ici en rechargeant le registre en fin de cycle T4 avec les conditions:
+        -- MREQn = '0' and CLK_3_25_M = '0' and CLK_6_5_M = '0'
+        -- (sur le front montant de l'horloge 13 MHz). 
+        if MREQn = '0' and CLK_3_25_M = '0' and CLK_6_5_M = '0' and i_rom_addr_enable_for_vid_pattern = '1' then
             -- On resette la variable utilisée pour adressée une ligne ou celle du dessous avec la même valeur.
             i_vga_line_offset <= 0;
             -- Caractere en inversion video ?
             if (char_reg(7) = '0') then
-                -- Les pixel sont doublés car on les écrit 2 fois:
-                -- 1 fois à l'adresse A pendant le 1er cycle à 13 MHz et l'autre fois à l'adresse A + 384 (= nombre de pixels dans une ligne)
+                -- Les pixels sont doublés car on les écrit 2 fois:
+                -- 1 fois à l'adresse A pendant le 1er cycle à 13 MHz et l'autre fois à l'adresse A + NUMBER_OF_PIXELS_PER_LINE (= nombre de pixels dans une ligne)
                 -- lors du second cycle de 13 MHz. Cette solution permet de doubler les lignes verticalement.
                 i_vid_shift_register <= i_d_cpu_in(7) & i_d_cpu_in(7) &
                                         i_d_cpu_in(6) & i_d_cpu_in(6) &
@@ -150,12 +155,11 @@ begin
                                         i_d_cpu_in(0) & i_d_cpu_in(0)) ;
             end if;
         else
-            i_sample_pattern_video_done <= '0';
             if i_vga_line_offset = 0 then
-                -- Ligne du dessous
+                -- Ligne du dessous (1 cycle de 13 MHz sur 2)
                 i_vga_line_offset <= NUMBER_OF_PIXELS_PER_LINE;
             else
-                -- Ligne courante
+                -- Ligne courante (1 cycle de 13 MHz sur 2)
                 i_vga_line_offset <= 0;
             end if;
             i_vid_shift_register <= i_vid_shift_register(14 downto 0) & '0';
@@ -166,22 +170,35 @@ end process;
 p_vga_addr_counter: process (CLK_6_5_M, i_vsync, RESETn)
 begin
     if RESETn = '0' or i_hsyncn = '0' or i_vsync = '1' then
-        -- On resette le nombre de pixel depuis le début de la ligne en cas de HSYNCn ou VYNC
+        -- On resette le nombre de pixel depuis le début de la ligne en cas de HSYNCn ou VSYNC
         i_vga_pixel_offset <= 0;
     elsif rising_edge(CLK_6_5_M) then
+        -- On débute le comptage des pixels  de ligne a partir du moment ou on a atteind
+        -- la fin du pulse de VSYNC
         if i_hsyncn_cnt < FB_PORCH_OFF_DURATION then
-            i_vga_pixel_offset <= i_vga_pixel_offset + 1;
+            -- On incremente de 2 pixels pour doubler le nombre de pixels de ligne
+            i_vga_pixel_offset <= i_vga_pixel_offset + 2;
         end if;
     end if;
 end process;
 
 -- i_vga_addr_frame_offset: Adresse du début de la la ligne courante dans la trame
 -- i_vga_pixel_offset: Offset du pixel dans la ligne
--- i_vga_line_offset: Variable utilisée pour adressée un ligne sur 2 (contient 0 ou 384)
+-- i_vga_line_offset: Variable utilisée pour adressée un ligne sur 2 (contient 0 ou NUMBER_OF_PIXELS_PER_LINE)
 -- LINE_OFFSET_FROM_FRAME_START: Offset pour décaler l'image de 45 lignes vers le haut et mieux la centrer par rapport à l'affichage VGA
-vga_addr <= std_logic_vector(to_unsigned(i_vga_addr_frame_offset + i_vga_pixel_offset + i_vga_line_offset - FRAME_LINE_START, vga_addr'length));
+-- PIXEL_LINE_START: Offset dans la ligne du premier pixel à écrire
+-- PIXEL_LINE_STOP: Offset dans la ligne du dernier pixel à écrire
+-- Une ligne d'affichage du ZX81 contient 192 cycles d'horloge à 3,5 MHz donc 384 cycles à 6,5 MHz, soit un maximum de 384 pixels par lignes.
+-- Si on double l'affichage pour utiliser la totalité de la ligne de 640x480, on arrive à 384 * 2 > 640 pixels, 
+-- le mieux est d'éliminer les premiers et dernier pixels pour n'avoir que 640 pixels par ligne:
+-- 2*384 - 640 = 128. J'ai donc mis 64 PIXEL_LINE_START ce qui correspond à 64 pixels de ligne VGA sur la partie gauche qui sont elimines de la ligne.
+
+vga_addr <= std_logic_vector(to_unsigned(i_vga_addr_frame_offset + i_vga_pixel_offset + i_vga_line_offset - FRAME_LINE_START - PIXEL_LINE_START, vga_addr'length));
 vga_data <= i_vid_shift_register(15);
-vga_wr_cyc <= i_hsyncn and not i_vsync when i_vga_addr_frame_offset >= FRAME_LINE_START else '0';
+vga_wr_cyc <= i_hsyncn and not i_vsync when i_vga_addr_frame_offset >= FRAME_LINE_START and 
+                                            i_vga_pixel_offset >= PIXEL_LINE_START and
+                                            i_vga_pixel_offset < PIXEL_LINE_STOP 
+                                       else '0';
 
 ---------------------------------------------------------------------
 -- Process pour la génération du HSYNC et de la gate vidéo
@@ -209,7 +226,7 @@ begin
         elsif hsyncn_counter = FB_PORCH_OFF_DURATION + HSYNC_PULSE_ON_DURATION then
             i_hsyncn <= '1';
             char_line_cntr <= char_line_cntr + 1;
-            i_vga_addr_frame_offset <= i_vga_addr_frame_offset + 2*NUMBER_OF_PIXELS_PER_LINE; 
+            i_vga_addr_frame_offset <= i_vga_addr_frame_offset + 2*NUMBER_OF_PIXELS_PER_LINE;
             hsyncn_counter := 0;
         end if;
     end if;
@@ -355,20 +372,17 @@ end process;
 nop_detect_process: process (CLK_3_25_M)
 begin
     if rising_edge(CLK_3_25_M) then
-        -- Le signalde NOP est décalé de 2 péreiodes de 3,25 MHz
+        -- Le signalde NOP est décalé de 2 périodes de 3,25 MHz
         -- pour se caler sur les cycles CPU T3 et T4
         i_nop_detect_0 <= i_nop_detect;
-        i_nop_detect_1 <= i_nop_detect_0;
+        -- Le signal est aligné sur les cycle T3 et T4 de l'execution en RAM pour l'affichage video
+        i_rom_addr_enable_for_vid_pattern <= i_nop_detect_0;
         -- Si NOP detect, on lit le caractère dans la RAM
         if i_nop_detect = '1' then
             char_reg <= D_ram_out;
         end if;
     end if;
 end process;
-
--- Signal de sélection de l'adress de vid_pattern vers la ROM
--- Le signal est aligné sur les cycle T3 et T4 de l'execution en RAM pour l'affichage video
-i_rom_addr_enable_for_vid_pattern <= i_nop_detect_0 or i_nop_detect_1;
 
 A_vid_pattern <= A_cpu(15 downto 9) & char_reg(5 downto 0) & std_logic_vector(char_line_cntr);
 -- Signal utilise pour positionner l'adresse du pattern video à lire en ROM

@@ -155,7 +155,7 @@ architecture Behavioral of vga_control_top is
 	signal i_video_addr_0, i_video_addr_1 : std_logic_vector(19 downto 0);
     signal i_video_data_0, i_video_data_1 : std_logic;
     signal i_wr_cyc_0, i_wr_cyc_1 : std_logic;
-    
+        
     attribute ASYNC_REG : string;
     attribute ASYNC_REG of i_video_addr_0, i_video_addr_1 : signal is "TRUE";
     attribute ASYNC_REG of i_video_data_0, i_video_data_1 : signal is "TRUE";
@@ -224,7 +224,7 @@ begin
             s_dat_o <= (others => 'X');
             s_we_o  <= 'X';
             s_sel_o <= (others => 'X');
-            VGA_CONTROL_INIT_DONE <= '0';
+            i_vga_controller_ok <= '0';
             init_timer <= 0;
             
         elsif rising_edge(clk_52M) then    
@@ -263,7 +263,7 @@ begin
                     s_stb_vga_o <= '0';
                     s_cyc_o <= '0';
                     s_we_o  <= '0';
-                    VGA_CONTROL_INIT_DONE <= '1';
+                    i_vga_controller_ok <= '1';
                end case;
         end if;
     end process;
@@ -276,6 +276,7 @@ begin
             i_video_addr_1 <= VIDEO_ADDR;
             i_video_data_1 <= VIDEO_DATA;
             i_wr_cyc_1 <= WR_CYC;
+            VGA_CONTROL_INIT_DONE <= i_vga_controller_ok;
         end if;
     end process;
 

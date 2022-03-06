@@ -38,10 +38,10 @@ constant FB_PORCH_OFF_DURATION : integer := 192; -- @ 3,25 MHz
 constant MIN_VSYNC_PULSE_DURATION : integer := 50;
 
 constant NUMBER_OF_PIXELS_PER_LINE : integer := 640; -- 640 pixels par ligne
-constant PIXEL_LINE_START : integer := 64; -- 16 pixels
-constant PIXEL_LINE_STOP : integer := 224;
+constant PIXEL_LINE_START : integer := 64;
+constant PIXEL_LINE_STOP : integer := PIXEL_LINE_START + NUMBER_OF_PIXELS_PER_LINE;
 
-constant FRAME_LINE_START: integer := 45*NUMBER_OF_PIXELS_PER_LINE; -- Offset de  lignes de  pixels vers le haut
+constant FRAME_LINE_START: integer := 46*NUMBER_OF_PIXELS_PER_LINE; -- Offset de  lignes de  pixels vers le haut
 constant FRAME_LINE_STOP: integer := FRAME_LINE_START; -- Offset de  lignes de  pixels vers le haut
 
 -- Pour le heart beat
