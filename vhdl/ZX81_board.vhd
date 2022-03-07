@@ -69,19 +69,20 @@ end ZX81_board;
 
 architecture Behavioral of ZX81_board is
 
-    component dist_mem_gen_0 IS
-    port (
-        a : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
-        spo : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
-    );
-    end component; 
-     
     component blk_mem_gen_0 IS
       PORT (
         clka : IN STD_LOGIC;
         wea : IN STD_LOGIC;
-        addra : IN STD_LOGIC_VECTOR(RAM_ADDRWIDTH - 1 DOWNTO 0);
+        addra : IN STD_LOGIC_VECTOR(13 DOWNTO 0);
         dina : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+        douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
+      );
+    end component;     
+     
+    component blk_mem_gen_1 IS
+      PORT (
+        clka : IN STD_LOGIC;
+        addra : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
         douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
       );
     end component;     
@@ -196,6 +197,17 @@ architecture Behavioral of ZX81_board is
        WAITn => i_waitn,
        RESETn => i_resetn
     );
+    
+    -- ROM du ZX81
+    rom0 : blk_mem_gen_1
+    port map (
+        -- L'horloge est à 6,5 MHz car les accès aux pattern en ROM se font en un cycle de 3,5 MHz
+        -- et il faut 2 cycles pour la ROM pour latcher l'adresse et ensuite lire la donnée
+        -- lors du second cycle.
+        clka => i_clk_6_5m,
+        addra => i_a_rom (12 downto 0),
+        douta => i_d_rom_out
+    );
 
     ram1 : blk_mem_gen_0
     port map (
@@ -226,15 +238,8 @@ architecture Behavioral of ZX81_board is
     -- Ajout d'une condition sur le signal WR Ram suite au problème rencontré sur l'instruction en L1A14 (LD      (DE),A)
     -- avec DE qui vaut 0. Je ne sais pas pourquoi vaut 0 dans ce cas. Mais, on reproduit le problème avec MAME.
     -- => Ajout de la condition sur A14 pour valider l'écriture en RAM.
-    i_wrram <= '1' when (i_wrn = '0' and i_mreqn = '0' and i_a_cpu(14) = '1' and i_a_cpu(15) = '0') else '0';
+    i_wrram <= '1' when (i_wrn = '0' and i_mreqn = '0' and i_a_cpu(14) = '1' and i_a_cpu(15) = '0') else '0';    
 
-    -- ROM du ZX81
-    rom0 : dist_mem_gen_0
-    port map (
-        a => i_a_rom (12 downto 0),
-        spo => i_d_rom_out
-    );
-    
     -- Dans le cas où il y a une détection de NOP, l'adresse à utiliser est celle construite pour accéder au pattern video.
     -- Dans les autres cas c'est une adresse utilisée par le Z80.
     i_a_rom <= i_a_vid_pattern when i_video_pattern_select = '1' else i_a_cpu;
