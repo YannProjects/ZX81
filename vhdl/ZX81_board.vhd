@@ -98,7 +98,7 @@ architecture Behavioral of ZX81_board is
     -- VGA
     signal i_vga_clock, i_pll_locked : std_logic;
     signal i_vga_addr: std_logic_vector(19 downto 0);
-    signal i_vga_data: std_logic;
+    signal i_vga_data: std_logic_vector(1 downto 0);
     signal i_vga_wr_cyc, i_vga_control_init_done : std_logic;
     
     signal R_VGA, G_VGA, B_VGA : std_logic_vector(7 downto 0);
@@ -142,7 +142,7 @@ architecture Behavioral of ZX81_board is
     ---------------------------------------------------------------------
     i_resetn <= not RESET and i_pll_locked and i_vga_control_init_done;
          
-    -- Instantiation Z80 basé sur le site OpenCores 
+    -- Instantiation Z80 basé sur la version MIST-devel (https://github.com/mist-devel/T80)
     cpu1 : entity work.T80se
     port map (
 		RESET_n	=> i_resetn,
@@ -179,7 +179,7 @@ architecture Behavioral of ZX81_board is
        vga_data => i_vga_data,    
        vga_wr_cyc => i_vga_wr_cyc, 
        
-       KBDn => i_kbd_l_swap, -- <<==
+       KBDn => i_kbd_l_swap,
        TAPE_IN => i_tape_in,
        USA_UK => '0',
        TAPE_OUT => MIC,

@@ -48,7 +48,7 @@ entity ULA is
            D_rom_out : in STD_LOGIC_VECTOR (7 downto 0); -- ROM ouput data bus. Input for ULA side
            -- Adresse et data vidéo pour le controlleur VGA
            vga_addr : out std_logic_vector(19 downto 0);
-           vga_data : out std_logic;
+           vga_data : out std_logic_vector(1 downto 0);
            vga_wr_cyc : out STD_LOGIC;
            -- 
            KBDn : in STD_LOGIC_VECTOR (4 downto 0);
@@ -177,7 +177,7 @@ begin
         -- la fin du pulse de VSYNC
         if i_hsyncn_cnt < FB_PORCH_OFF_DURATION then
             -- On incremente de 2 pixels pour doubler le nombre de pixels de ligne
-            i_vga_pixel_offset <= i_vga_pixel_offset + 2;
+            i_vga_pixel_offset <= i_vga_pixel_offset + 1;
         end if;
     end if;
 end process;
@@ -194,7 +194,7 @@ end process;
 -- 2*384 - 640 = 128. J'ai donc mis 64 PIXEL_LINE_START ce qui correspond à 64 pixels de ligne VGA sur la partie gauche qui sont elimines de la ligne.
 
 vga_addr <= std_logic_vector(to_unsigned(i_vga_addr_frame_offset + i_vga_pixel_offset + i_vga_line_offset - FRAME_LINE_START - PIXEL_LINE_START, vga_addr'length));
-vga_data <= i_vid_shift_register(15);
+vga_data <= i_vid_shift_register(15) & i_vid_shift_register(15);
 vga_wr_cyc <= i_hsyncn and not i_vsync when i_vga_addr_frame_offset >= FRAME_LINE_START and 
                                             i_vga_pixel_offset >= PIXEL_LINE_START and
                                             i_vga_pixel_offset < PIXEL_LINE_STOP 

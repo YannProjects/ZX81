@@ -37,8 +37,8 @@ constant HSYNC_PULSE_ON_DURATION : integer := 15; -- @ 3,25 MHz
 constant FB_PORCH_OFF_DURATION : integer := 192; -- @ 3,25 MHz
 constant MIN_VSYNC_PULSE_DURATION : integer := 50;
 
-constant NUMBER_OF_PIXELS_PER_LINE : integer := 640; -- 640 pixels par ligne
-constant PIXEL_LINE_START : integer := 64;
+constant NUMBER_OF_PIXELS_PER_LINE : integer := 640/2; -- 640 pixels par ligne par groupe de 2 bits
+constant PIXEL_LINE_START : integer := 64/2;
 constant PIXEL_LINE_STOP : integer := PIXEL_LINE_START + NUMBER_OF_PIXELS_PER_LINE;
 
 constant FRAME_LINE_START: integer := 46*NUMBER_OF_PIXELS_PER_LINE; -- Offset de  lignes de  pixels vers le haut
