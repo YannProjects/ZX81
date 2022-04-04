@@ -202,7 +202,7 @@ architecture Behavioral of vga_control_top is
         -- Violet: 0x00800080
         -- Jaune:  0x00e0e000
         (CLUT_REG_ADDR_1,x"00E0E0E0", '0'),
-        (CLUT_REG_ADDR_2,x"000000E0", '0'),
+        (CLUT_REG_ADDR_2,x"00000000", '0'),
         (CTRL_REG_ADDR,x"00000901", '0'), --   program control register (VEN=1 (video enabled), PC=1 (pseudo-color), CD=11 (32 bits))                                                
         -- end list
         (x"00000000",x"00000000", '1')  --38 stop testbench

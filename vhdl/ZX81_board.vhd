@@ -201,9 +201,8 @@ architecture Behavioral of ZX81_board is
     -- ROM du ZX81
     rom0 : blk_mem_gen_1
     port map (
-        -- L'horloge est à 6,5 MHz car les accès aux pattern en ROM se font en un cycle de 3,5 MHz
-        -- et il faut 2 cycles pour la ROM pour latcher l'adresse et ensuite lire la donnée
-        -- lors du second cycle.
+        -- L'horloge est à 6,5 MHz car les accès aux patterns video en ROM se font en un cycle de 3,5 MHz
+        -- La ROM a un accès synchrone et il faut 2 cycles : 1 pour latcher l'adresse et 1 pour lire la donnée
         clka => i_clk_6_5m,
         addra => i_a_rom (12 downto 0),
         douta => i_d_rom_out
@@ -250,9 +249,9 @@ architecture Behavioral of ZX81_board is
     i_tape_in <= EAR;
     
     -- On ne garde que 3 bits sur les 8
-    R_VGA_H(2 downto 0) <= R_VGA(7 downto 5) and (not BLANK_VGA & not BLANK_VGA & not BLANK_VGA);
-    G_VGA_H(2 downto 0) <= G_VGA(7 downto 5) and (not BLANK_VGA & not BLANK_VGA & not BLANK_VGA);
-    B_VGA_H(2 downto 0) <= B_VGA(7 downto 5) and (not BLANK_VGA & not BLANK_VGA & not BLANK_VGA);
+    R_VGA_H(2 downto 0) <= R_VGA(7 downto 5) when BLANK_VGA = '0' else "000";
+    G_VGA_H(2 downto 0) <= G_VGA(7 downto 5) when BLANK_VGA = '0' else "000";
+    B_VGA_H(2 downto 0) <= B_VGA(7 downto 5) when BLANK_VGA = '0' else "000";
     
     HSYNC_VGA <= i_hsync;
     VSYNC_VGA <= i_vsync;
