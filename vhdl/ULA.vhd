@@ -40,7 +40,7 @@ entity ULA is
            CLK_6_5_M : in std_logic;
            CLK_13_M : in std_logic;
            -- Separation bus addresse CPU et RAM/ROM
-           A_cpu : in std_logic_vector (15 downto 0); -- CPU address bus to ULA. Input from ULA side
+           Addr : in std_logic_vector (15 downto 0); -- CPU or video pattern address bus to ULA. Input from ULA side
            A_vid_pattern : out std_logic_vector (15 downto 0); -- Address bus to RAM/ROM memories. Output from ULA side
            -- Separation bus donnees RAM/ROM           
            D_cpu_IN : out STD_LOGIC_VECTOR (7 downto 0); -- CPU data bus IN. Output from ULA side
@@ -63,7 +63,7 @@ entity ULA is
            NMIn : out STD_LOGIC;
            MREQn : in STD_LOGIC;
            RFRSHn : in std_logic;
-           VID_PATTERN_ROM_ADDR_SELECT : out std_logic;
+           VID_PATTERN_ADDR_SELECT : out std_logic;
            M1n : in STD_LOGIC;
            WAITn : out std_logic;
            RESETn : in STD_LOGIC
@@ -84,12 +84,13 @@ architecture Behavioral of ULA is
     signal i_vga_wr : std_logic;
     
     signal i_vsync_0, i_vsync_1, i_nmin : std_logic;
+    signal i_vsync_det_0,i_vsync_det_1 : std_logic;
     
     signal i_sample_pattern_video_done : std_logic;
     
     signal i_hsyncn_cnt : integer;
     signal i_vid_shift_register : std_logic_vector(15 downto 0);
-    signal i_rom_addr_enable_for_vid_pattern : std_logic;
+    signal i_addr_enable_for_vid_pattern : std_logic;
            
     -- attribute mark_debug : string;
     -- attribute mark_debug of i_vsync : signal is "true";
@@ -97,7 +98,7 @@ architecture Behavioral of ULA is
     -- attribute mark_debug of i_hsyncn : signal is "true";
     -- attribute mark_debug of CLK_3_25_M : signal is "true";
     -- attribute mark_debug of CLK_6_5_M : signal is "true";
-    -- attribute mark_debug of A_cpu : signal is "true";
+    -- attribute mark_debug of Addr : signal is "true";
     -- attribute mark_debug of D_cpu_IN : signal is "true";
     -- attribute mark_debug of M1n : signal is "true";
     -- attribute mark_debug of MREQn : signal is "true";
@@ -128,7 +129,7 @@ begin
         -- C'est ce qui est reproduit ici en rechargeant le registre en fin de cycle T4 avec les conditions:
         -- MREQn = '0' and CLK_3_25_M = '0' and CLK_6_5_M = '0'
         -- (sur le front montant de l'horloge 13 MHz). 
-        if MREQn = '0' and CLK_3_25_M = '0' and CLK_6_5_M = '0' and i_rom_addr_enable_for_vid_pattern = '1' then
+        if MREQn = '0' and CLK_3_25_M = '0' and CLK_6_5_M = '0' and i_addr_enable_for_vid_pattern = '1' then
             -- On resette la variable utilisée pour adressée une ligne ou celle du dessous avec la même valeur.
             i_vga_line_offset <= 0;
             -- Caractere en inversion video ?
@@ -209,19 +210,35 @@ hsync_and_gate_process: process (CLK_3_25_M, RESETn)
 variable hsyncn_counter: integer;
  
 begin
-    if (RESETn = '0' or i_vsync = '1') then
+    if (RESETn = '0') then
         hsyncn_counter := 0;
         char_line_cntr <= (others => '0');
-        if (RESETn = '0' or i_vsync_pulse_valid = '1') then
-            i_vga_addr_frame_offset <= 0;
-        end if;
+        i_vga_addr_frame_offset <= 0;
         i_hsyncn <= '1';
     -- Sur chaque front descendant de l'horloge 3,25 MHz
     elsif rising_edge(CLK_3_25_M) then
+        hsyncn_counter := hsyncn_counter + 1;
+        i_vsync_det_1 <= i_vsync;
+        i_vsync_det_0 <= i_vsync_det_1;
+        -- Detection front montant vsync
+        -- Dans le cas des jeux PACMAN et INVADERS en mode pseudo-hires, il y a des pulse de VSYNC courts pou resetter le compteur
+        -- char_line_cntr. Cepedant, il faut continuer à incrémenter le compteur de lignes i_vga_addr_frame_offset.
+        -- Dans le cas d'un front montant Vsync, on incrémente le compteur de lignes 
+        if i_vsync_det_0 = '0' and i_vsync_det_1 = '1' then
+            i_vga_addr_frame_offset <= i_vga_addr_frame_offset + 2*NUMBER_OF_PIXELS_PER_LINE;
+        -- Sinon (à ne pas mettre dans la partie RESET), on resette le compteur de HSYNC
+        elsif i_vsync = '1' then
+            hsyncn_counter := 0;
+            char_line_cntr <= (others => '0');
+            -- Si c'est un pulse de VSYNC assez long, c'est un vrai VSYNC et on
+            -- resette le compteur de lignes.
+            if (i_vsync_pulse_valid = '1') then
+                i_vga_addr_frame_offset <= 0;
+            end if;
+            i_hsyncn <= '1';
         -- 192 cycles d'horloge à 3,25 MHz
         -- Duree pulse HSYNC = (207 - 192) @3,25 MHz = 4,6 µs 
-        hsyncn_counter := hsyncn_counter + 1;
-        if hsyncn_counter >= FB_PORCH_OFF_DURATION and hsyncn_counter < FB_PORCH_OFF_DURATION + HSYNC_PULSE_ON_DURATION then  
+        elsif hsyncn_counter >= FB_PORCH_OFF_DURATION and hsyncn_counter < FB_PORCH_OFF_DURATION + HSYNC_PULSE_ON_DURATION then  
             i_hsyncn <= '0';
         elsif hsyncn_counter = FB_PORCH_OFF_DURATION + HSYNC_PULSE_ON_DURATION then
             i_hsyncn <= '1';
@@ -237,31 +254,31 @@ end process;
 
 -- Nouvelle version utilisant des fonctions combinatoires pour
 -- le décodage des adresses.
-p_cpu_data_in : process (A_cpu, RDn, MREQn, IORQn, RFRSHn, D_ram_out, D_rom_out, TAPE_IN, USA_UK, KBDn)
+p_cpu_data_in : process (Addr, RDn, MREQn, IORQn, RFRSHn, D_ram_out, D_rom_out, TAPE_IN, USA_UK, KBDn)
 begin
-    -- MREQn = '0' and RFRSHn = '0' pour tenir compte du mode HiRers où l'on doit pouvoir lire des patterns
+    -- MREQn = '0' and RFRSHn = '0' pour tenir compte du mode HiRes où l'on doit pouvoir lire des patterns
     -- video à partir de la RAM et pas seulement de la ROM.
     if (MREQn = '0' and RDn = '0') or (MREQn = '0' and RFRSHn = '0') then
         -- Cycle de lecture RAM / ROM
-        case A_cpu(15 downto 14) is
+        case Addr(15 downto 13) is
             -- Adressage de la ROM
-            when "00" =>
+            when "000" =>
                 i_d_cpu_in <= D_rom_out;
             -- Adressage de la RAM 
-            when "01" =>
+            when "001"|"010"|"011"|"100"|"101" =>
                 i_d_cpu_in <= D_ram_out;
             -- NOP execution ?
-            when "11" =>
+            when "110"|"111" =>
                 -- NOP uniquement si le bit 6 = 0 (sinon c'est une instruction de HALT et on la laisse passer)
                 if D_ram_out(6) = '0' then
                     i_d_cpu_in <= X"00";
                 else
                     i_d_cpu_in <= D_ram_out;
                 end if;
-            when others =>
-                i_d_cpu_in <= D_rom_out;
+             when others =>
+                    i_d_cpu_in <= (others => 'X');
         end case;
-    elsif (IORQn = '0' and A_cpu(0) = '0' and RDn = '0') then
+    elsif (IORQn = '0' and Addr(0) = '0' and RDn = '0') then
         -- IO inputs
         i_d_cpu_in <= TAPE_IN & USA_UK & '0' & KBDn(0) & KBDn(1) & KBDn(2) & KBDn(3) & KBDn(4);
     else
@@ -272,7 +289,7 @@ end process;
 D_cpu_in <= i_d_cpu_in;
 
 -- Detection NOP =>  on stockera le pattern video sera lu dans la ROM dans la RAM VGA
-i_nop_detect <= '1' when (M1n = '0' and MREQn = '0' and RDn = '0' and HALTn = '1' and A_cpu(15 downto 14) = "11" and D_ram_out(6) = '0') else '0';
+i_nop_detect <= '1' when (M1n = '0' and MREQn = '0' and RDn = '0' and HALTn = '1' and Addr(15 downto 14) = "11" and D_ram_out(6) = '0') else '0';
 
 ----------------------------------------
 -- Process combinatoire pour la génération ed NIMONn et VSYNC
@@ -298,7 +315,7 @@ begin
     -- On synchronise quand même avec l'horloge poursuivre les conseils de vivado 
     elsif rising_edge(CLK_3_25_M) then
         -- Enable VSYNC (IN FE)
-        if IORQn = '0' and A_cpu(0) = '0' and RDn = '0' and i_nmionn = '1' then
+        if IORQn = '0' and Addr(0) = '0' and RDn = '0' and i_nmionn = '1' then
             i_vsync <= '1';
         -- Clear VSYNC (OUT NN)
         elsif IORQn = '0' and WRn = '0' then
@@ -329,10 +346,10 @@ begin
     -- On synchronise quand même avec l'horloge poursuivre les conseils de vivado        
     elsif rising_edge(CLK_3_25_M) then        
         -- Clear NMIn (OUT FD)
-        if IORQn = '0' and WRn = '0' and A_cpu(1) = '0' then
+        if IORQn = '0' and WRn = '0' and Addr(1) = '0' then
             i_nmionn <= '1';
         -- Enable NMIn (OUT FE)
-        elsif IORQn = '0' and WRn = '0' and A_cpu(0) = '0' then
+        elsif IORQn = '0' and WRn = '0' and Addr(0) = '0' then
             i_nmionn <= '0';
         end if;
     end if;
@@ -376,7 +393,7 @@ begin
         -- pour se caler sur les cycles CPU T3 et T4
         i_nop_detect_0 <= i_nop_detect;
         -- Le signal est aligné sur les cycle T3 et T4 de l'execution en RAM pour l'affichage video
-        i_rom_addr_enable_for_vid_pattern <= i_nop_detect_0;
+        i_addr_enable_for_vid_pattern <= i_nop_detect_0;
         -- Si NOP detect, on lit le caractère dans la RAM
         if i_nop_detect = '1' then
             char_reg <= D_ram_out;
@@ -384,9 +401,9 @@ begin
     end if;
 end process;
 
-A_vid_pattern <= A_cpu(15 downto 9) & char_reg(5 downto 0) & std_logic_vector(char_line_cntr);
+A_vid_pattern <= Addr(15 downto 9) & char_reg(5 downto 0) & std_logic_vector(char_line_cntr);
 -- Signal utilise pour positionner l'adresse du pattern video à lire en ROM
-VID_PATTERN_ROM_ADDR_SELECT <= i_rom_addr_enable_for_vid_pattern;
+VID_PATTERN_ADDR_SELECT <= i_addr_enable_for_vid_pattern;
 
 TAPE_OUT <= not i_vsync;
 

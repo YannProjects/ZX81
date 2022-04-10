@@ -73,7 +73,7 @@ architecture Behavioral of ZX81_board is
       PORT (
         clka : IN STD_LOGIC;
         wea : IN STD_LOGIC;
-        addra : IN STD_LOGIC_VECTOR(13 DOWNTO 0);
+        addra : IN STD_LOGIC_VECTOR(RAM_ADDRWIDTH-1 DOWNTO 0);
         dina : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
         douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
       );
@@ -91,7 +91,7 @@ architecture Behavioral of ZX81_board is
     signal i_waitn, i_nmin : std_logic := '1';
     signal i_m1n, i_mreqn, i_iorqn, i_tape_in : std_logic;
     signal i_rdn, i_wrn, i_wrram, i_rfrshn, i_haltn, i_video_pattern_select : std_logic;
-    signal i_a_cpu, i_a_vid_pattern, i_a_rom : std_logic_vector (15 downto 0);
+    signal i_a_cpu, i_a_vid_pattern, i_addr : std_logic_vector (15 downto 0);
     signal i_d_cpu_out, i_d_cpu_in, i_d_ram_out, i_d_rom_out : std_logic_vector (7 downto 0);
     signal i_clk_52m, i_clk_3_25m, i_clk_6_5m, i_clk_13m : std_logic;
     signal i_resetn : std_logic;
@@ -170,7 +170,7 @@ architecture Behavioral of ZX81_board is
        CLK_3_25_M => i_clk_3_25m,
        CLK_6_5_M => i_clk_6_5m,
        CLK_13_M => i_clk_13m,
-       A_cpu => i_a_cpu, -- CPU address bus
+       Addr => i_addr, -- CPU and video addresser address bus
        A_vid_pattern => i_a_vid_pattern, -- RAM/ROM address bus
        D_cpu_IN => i_d_cpu_in, -- CPU data bus IN. Output from ULA side
        D_ram_out => i_d_ram_out, -- RAM output data bus. Input for ULA side
@@ -192,7 +192,7 @@ architecture Behavioral of ZX81_board is
        NMIn => i_nmin,
        MREQn => i_mreqn,
        RFRSHn => i_rfrshn,
-       VID_PATTERN_ROM_ADDR_SELECT => i_video_pattern_select,
+       VID_PATTERN_ADDR_SELECT => i_video_pattern_select,
        M1n => i_m1n,
        WAITn => i_waitn,
        RESETn => i_resetn
@@ -204,13 +204,13 @@ architecture Behavioral of ZX81_board is
         -- L'horloge est à 6,5 MHz car les accès aux patterns video en ROM se font en un cycle de 3,5 MHz
         -- La ROM a un accès synchrone et il faut 2 cycles : 1 pour latcher l'adresse et 1 pour lire la donnée
         clka => i_clk_6_5m,
-        addra => i_a_rom (12 downto 0),
+        addra => i_addr (12 downto 0),
         douta => i_d_rom_out
     );
 
     ram1 : blk_mem_gen_0
     port map (
-       addra => i_a_cpu (RAM_ADDRWIDTH - 1 downto 0),
+       addra => i_addr (RAM_ADDRWIDTH - 1 downto 0),
        dina => i_d_cpu_out,
        douta => i_d_ram_out,       
        clka => i_clk_3_25m,
@@ -237,11 +237,11 @@ architecture Behavioral of ZX81_board is
     -- Ajout d'une condition sur le signal WR Ram suite au problème rencontré sur l'instruction en L1A14 (LD      (DE),A)
     -- avec DE qui vaut 0. Je ne sais pas pourquoi vaut 0 dans ce cas. Mais, on reproduit le problème avec MAME.
     -- => Ajout de la condition sur A14 pour valider l'écriture en RAM.
-    i_wrram <= '1' when (i_wrn = '0' and i_mreqn = '0' and i_a_cpu(14) = '1' and i_a_cpu(15) = '0') else '0';    
+    i_wrram <= '1' when (i_wrn = '0' and i_mreqn = '0' and i_addr(14) = '1' and i_addr(15) = '0') else '0';    
 
     -- Dans le cas où il y a une détection de NOP, l'adresse à utiliser est celle construite pour accéder au pattern video.
     -- Dans les autres cas c'est une adresse utilisée par le Z80.
-    i_a_rom <= i_a_vid_pattern when i_video_pattern_select = '1' else i_a_cpu;
+    i_addr <= i_a_vid_pattern when i_video_pattern_select = '1' else i_a_cpu;
    
     -- Les 5 lignes du clavier
     KBD_C <= i_a_cpu(15 downto 8);

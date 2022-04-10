@@ -35,7 +35,7 @@ constant HSYNC_PULSE_ON_DURATION : integer := 15; -- @ 3,25 MHz
 --- Back port to front port pulse duration (entre le d<E9>but de la zone de back porch et la fin de la zon de front porch
 --- qui encadre les top lignes)
 constant FB_PORCH_OFF_DURATION : integer := 192; -- @ 3,25 MHz
-constant MIN_VSYNC_PULSE_DURATION : integer := 50;
+constant MIN_VSYNC_PULSE_DURATION : integer := 60;
 
 constant NUMBER_OF_PIXELS_PER_LINE : integer := 640/2; -- 640 pixels par ligne par groupe de 2 bits
 constant PIXEL_LINE_START : integer := 64/2;
