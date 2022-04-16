@@ -152,14 +152,14 @@ architecture Behavioral of vga_control_top is
 	signal vga_sel_o                       : std_logic_vector(3 downto 0);
 	signal vga_we_o                        : std_logic;
 	
-	signal i_video_addr_0, i_video_addr_1 : std_logic_vector(19 downto 0);
-    signal i_video_data_0, i_video_data_1 : std_logic_vector(1 downto 0);
-    signal i_wr_cyc_0, i_wr_cyc_1 : std_logic;
+	signal i_video_addr_0 : std_logic_vector(19 downto 0);
+    signal i_video_data_0 : std_logic_vector(1 downto 0);
+    signal i_wr_cyc_0 : std_logic;
         
     attribute ASYNC_REG : string;
-    attribute ASYNC_REG of i_video_addr_0, i_video_addr_1 : signal is "TRUE";
-    attribute ASYNC_REG of i_video_data_0, i_video_data_1 : signal is "TRUE";
-    attribute ASYNC_REG of i_wr_cyc_0, i_wr_cyc_1 : signal is "TRUE";
+    attribute ASYNC_REG of i_video_addr_0 : signal is "TRUE";
+    attribute ASYNC_REG of i_video_data_0 : signal is "TRUE";
+    attribute ASYNC_REG of i_wr_cyc_0 : signal is "TRUE";
 	
 	shared variable vectors : vector_list :=
     (
@@ -213,7 +213,7 @@ begin
     -- Une fois le controlleur initialisé, on met VGA_CONTROL_INIT_DONE = 1 
     -- ce qui permettra de démarrer les autres composants (Z80, ULA,...).
     
-	process(clk_52M, RESET)
+	process(CLK_52M, RESET)
 	begin
         if (RESET = '1') then
             state <= chk_stop;
@@ -227,7 +227,7 @@ begin
             i_vga_controller_ok <= '0';
             init_timer <= 0;
             
-        elsif rising_edge(clk_52M) then    
+        elsif rising_edge(CLK_52M) then    
               case state is
                 when wait_init =>
                     init_timer <= init_timer + 1;
@@ -273,12 +273,13 @@ begin
 	process(clk_52M)
     begin
         if rising_edge(clk_52M) then
-            i_video_addr_1 <= VIDEO_ADDR;
-            i_video_data_1 <= VIDEO_DATA;
-            i_wr_cyc_1 <= WR_CYC;
-            VGA_CONTROL_INIT_DONE <= i_vga_controller_ok;
+            i_video_addr_0 <= VIDEO_ADDR;
+            i_video_data_0 <= VIDEO_DATA;
+            i_wr_cyc_0 <= WR_CYC;
         end if;
     end process;
+    
+    VGA_CONTROL_INIT_DONE <= i_vga_controller_ok;
 
 	--
 	-- hookup vga + clut core
@@ -304,7 +305,7 @@ begin
 	u3: vid_mem
     port map (clk_i => CLK_52M, adr_i_vga_c => vga_adr_o, cyc_i_vga_c => vga_cyc_o, 
                 stb_i_vga_c => vga_stb_o, ack_o_vga_c => vga_ack_i,
-                dat_o_vga_c => vga_dat_i, adr_vid_i => i_video_addr_1, dat_vid_i => i_video_data_1, wr_i => i_wr_cyc_1);
+                dat_o_vga_c => vga_dat_i, adr_vid_i => i_video_addr_0, dat_vid_i => i_video_data_0, wr_i => i_wr_cyc_0);
 
 end architecture Behavioral;
 

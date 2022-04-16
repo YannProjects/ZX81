@@ -100,7 +100,8 @@ architecture Behavioral of ZX81_board is
     signal i_vga_clock, i_pll_locked : std_logic;
     signal i_vga_addr: std_logic_vector(19 downto 0);
     signal i_vga_data: std_logic_vector(1 downto 0);
-    signal i_vga_wr_cyc, i_vga_control_init_done : std_logic;
+    signal i_vga_wr_cyc : std_logic;
+    signal i_vga_control_init_done, i_vga_control_init_done_0, i_vga_control_init_done_1 : std_logic;
     
     signal R_VGA, G_VGA, B_VGA : std_logic_vector(7 downto 0);
     signal BLANK_VGA : std_logic;
@@ -122,6 +123,9 @@ architecture Behavioral of ZX81_board is
     -- attribute mark_debug of i_iorqn : signal is "true";
     -- attribute mark_debug of i_rdn : signal is "true";
     -- attribute mark_debug of i_rfrshn : signal is "true";
+
+    attribute ASYNC_REG : string;
+    attribute ASYNC_REG of i_vga_control_init_done_0 : signal is "TRUE";
     
     begin
         
@@ -138,10 +142,16 @@ architecture Behavioral of ZX81_board is
     );
     
     ---------------------------------------------------------------------
-    -- Gestion du reset (à resynchroniser avec une horloge pour éviter les
-    -- métastabilités ?
+    -- Gestion du reset (resynchronisation avec une horloge pour éviter les
+    -- métastabilités)
     ---------------------------------------------------------------------
-    i_resetn <= not RESET and i_pll_locked and i_vga_control_init_done;
+    p_resync_vga_control_init : process(i_clk_3_25m)
+    begin
+        if rising_edge(i_clk_3_25m) then
+            i_vga_control_init_done_0 <= i_vga_control_init_done;
+        end if;
+    end process;
+    i_resetn <= not RESET and i_pll_locked and i_vga_control_init_done_0;
          
     -- Instantiation Z80 basé sur la version MIST-devel (https://github.com/mist-devel/T80)
     cpu1 : entity work.T80se
@@ -170,8 +180,8 @@ architecture Behavioral of ZX81_board is
        CLK_3_25_M => i_clk_3_25m,
        CLK_6_5_M => i_clk_6_5m,
        CLK_13_M => i_clk_13m,
-       Addr => i_addr, -- CPU and video addresser address bus
-       A_vid_pattern => i_a_vid_pattern, -- RAM/ROM address bus
+       Cpu_Addr => i_a_cpu,
+       Mem_Addr => i_addr, -- CPU and video addresser address bus
        D_cpu_IN => i_d_cpu_in, -- CPU data bus IN. Output from ULA side
        D_ram_out => i_d_ram_out, -- RAM output data bus. Input for ULA side
        D_rom_out => i_d_rom_out, -- ROM ouput data bus. Input for ULA side 
@@ -192,7 +202,6 @@ architecture Behavioral of ZX81_board is
        NMIn => i_nmin,
        MREQn => i_mreqn,
        RFRSHn => i_rfrshn,
-       VID_PATTERN_ADDR_SELECT => i_video_pattern_select,
        M1n => i_m1n,
        WAITn => i_waitn,
        RESETn => i_resetn
@@ -239,10 +248,6 @@ architecture Behavioral of ZX81_board is
     -- => Ajout de la condition sur A14 pour valider l'écriture en RAM.
     i_wrram <= '1' when (i_wrn = '0' and i_mreqn = '0' and i_addr(14) = '1' and i_addr(15) = '0') else '0';    
 
-    -- Dans le cas où il y a une détection de NOP, l'adresse à utiliser est celle construite pour accéder au pattern video.
-    -- Dans les autres cas c'est une adresse utilisée par le Z80.
-    i_addr <= i_a_vid_pattern when i_video_pattern_select = '1' else i_a_cpu;
-   
     -- Les 5 lignes du clavier
     KBD_C <= i_a_cpu(15 downto 8);
 
