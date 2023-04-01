@@ -110,7 +110,7 @@ architecture Behavioral of vga_control_top is
     component vid_mem is
     port(
         clk_i : in std_logic;
-        adr_i_vga_c : std_logic_vector (31 downto 0);
+        adr_i_vga_c : std_logic_vector (18 downto 0);
         cyc_i_vga_c : in std_logic;
         stb_i_vga_c : in std_logic;
         ack_o_vga_c : out std_logic;
@@ -303,7 +303,7 @@ begin
     -- Les données vidéo sont écrites par l'ULA (bit par bit via le registre série) 
     -- et lues par le contrôleur VGA (1 octet par pixel, couleur (0x01) ou noir (0x00). 
 	u3: vid_mem
-    port map (clk_i => CLK_52M, adr_i_vga_c => vga_adr_o, cyc_i_vga_c => vga_cyc_o, 
+    port map (clk_i => CLK_52M, adr_i_vga_c => vga_adr_o(18 downto 0), cyc_i_vga_c => vga_cyc_o, 
                 stb_i_vga_c => vga_stb_o, ack_o_vga_c => vga_ack_i,
                 dat_o_vga_c => vga_dat_i, adr_vid_i => i_video_addr_0, dat_vid_i => i_video_data_0, wr_i => i_wr_cyc_0);
 
@@ -322,7 +322,7 @@ entity vid_mem is
 	    -- Horloge comunne pour le controlleur VGA et le host 
 		clk_i : in std_logic;
 		-- Adresse de lecture côté VGA controlleur
-		adr_i_vga_c : in std_logic_vector (31 downto 0);
+		adr_i_vga_c : in std_logic_vector (18 downto 0);
 		-- CYC_I WB côté VGA controller
 		cyc_i_vga_c : in std_logic;
 		-- STB_I WB côté VGA controller

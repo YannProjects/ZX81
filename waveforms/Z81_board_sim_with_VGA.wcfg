@@ -14,15 +14,19 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
-      <ZoomEndTime time="50.134684730 ms"></ZoomEndTime>
-      <Cursor1Time time="45.813768576 ms"></Cursor1Time>
+      <ZoomStartTime time="44,944,636.576 ns"></ZoomStartTime>
+      <ZoomEndTime time="44,947,320.577 ns"></ZoomEndTime>
+      <Cursor1Time time="44,945,869.499 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="205"></NameColumnWidth>
+      <NameColumnWidth column_width="201"></NameColumnWidth>
       <ValueColumnWidth column_width="58"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="24" />
+   <wave_markers>
+      <marker time="44945256576" label="" />
+      <marker time="44946482422" label="" />
+   </wave_markers>
    <wvobject fp_name="/Z81_board_sim/ZX81_board0/CLK_12M" type="logic">
       <obj_property name="ElementShortName">CLK_12M</obj_property>
       <obj_property name="ObjectShortName">CLK_12M</obj_property>
@@ -941,8 +945,8 @@
          <obj_property name="ObjectShortName">clk_i</obj_property>
       </wvobject>
       <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u3/adr_i_vga_c" type="array">
-         <obj_property name="ElementShortName">adr_i_vga_c[31:0]</obj_property>
-         <obj_property name="ObjectShortName">adr_i_vga_c[31:0]</obj_property>
+         <obj_property name="ElementShortName">adr_i_vga_c[18:0]</obj_property>
+         <obj_property name="ObjectShortName">adr_i_vga_c[18:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u3/cyc_i_vga_c" type="logic">
          <obj_property name="ElementShortName">cyc_i_vga_c</obj_property>

@@ -223,7 +223,7 @@ vga_wr_cyc <= i_hsyncn and not i_vsync when i_vga_addr_frame_offset >= FRAME_LIN
 -- Process pour la génération du HSYNC et de la gate vidéo
 -- Aussi, génération du compteur de lignes par rapport au debut de la trame
 ---------------------------------------------------------------------
-hsync_and_gate_process: process (CLK_3_25_M, RESETn)
+hsync_and_gate_process: process (CLK_3_25_M, i_vsync, RESETn)
 
 variable hsyncn_counter: integer;
  
@@ -279,6 +279,8 @@ begin
     elsif (IORQn = '0' and Cpu_Addr(0) = '0' and RDn = '0') then
         -- IO inputs
         i_d_cpu_in <= TAPE_IN & USA_UK & '0' & KBDn(0) & KBDn(1) & KBDn(2) & KBDn(3) & KBDn(4);
+    -- On infère un lacth en supprimant le "else" (LDCE). Celà permet de conserver la donnée afin qu'elle soit lue
+    -- par le Z80 sans problème de timing. Il faut rester comme ça je pense.
     -- else
     --     i_d_cpu_in <= (others => 'X');
     end if;
