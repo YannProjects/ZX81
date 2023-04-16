@@ -61,19 +61,18 @@ begin
    ZX81_board0: entity work.ZX81_board
    port map (
        CLK_12M => i_main_clk,
-       MIC => i_mic_out,
-       RESET => i_board_reset,
-       PUSH_BUTTON => i_push_button,
-       KBD_L => i_kbd_l,
-       KBD_C => i_kbd_c,
-       EAR => i_ear_in,
+       o_MIC => i_mic_out,
+       i_RESET => i_board_reset,
+       i_PUSH_BUTTON => i_push_button,
+       i_KBD_L => i_kbd_l,
+       o_KBD_C => i_kbd_c,
+       i_EAR => i_ear_in,
        -- Debug => i_debug,
-       HSYNC_VGA => i_hsync_vga,
-       VSYNC_VGA => i_vsync_vga
+       o_HSYNC_VGA => i_hsync_vga,
+       o_VSYNC_VGA => i_vsync_vga
        -- R_VGA => i_r_vga,
        -- G_VGA => i_g_vga,
        -- B_VGA => i_b_vga
-
    );
    
    i_board_reset <= '1', '0' after 100 us;

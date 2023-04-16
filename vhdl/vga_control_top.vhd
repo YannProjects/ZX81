@@ -41,18 +41,19 @@ use work.ZX81_Pack.all;
 
 entity vga_control_top is
     Port ( 
-        RESET : in STD_LOGIC;
-        CLK_52M : in std_logic;
-        VGA_CLK : in std_logic;
-        VIDEO_ADDR : in std_logic_vector(19 downto 0);
-        VIDEO_DATA : in std_logic_vector(1 downto 0);
-        WR_CYC : in std_logic;
-        VGA_CONTROL_INIT_DONE : out std_logic;
-        HSYNC : out std_logic;
-        VSYNC : out std_logic;
-        CSYNC : out std_logic;
-        BLANK : out std_logic;
-        R,G,B : out std_logic_vector(7 downto 0)        -- RGB color signals
+        i_RESET : in STD_LOGIC;
+        i_CLK_52M : in std_logic;
+        i_CLK_6_5M : in std_logic;
+        i_VGA_CLK : in std_logic;
+        o_VGA_CONTROL_INIT_DONE : out std_logic;
+        i_ula_hsync : in std_logic;
+        i_ula_vsync : in std_logic;
+        i_ula_vid_data : in std_logic;
+        -- VGA control signals
+        o_HSYNC : out std_logic;
+        o_VSYNC : out std_logic;
+        o_BLANK : out std_logic;
+        o_R, o_G, o_B : out std_logic_vector(7 downto 0)        -- RGB color signals
     );
 end vga_control_top;
 
@@ -120,6 +121,19 @@ architecture Behavioral of vga_control_top is
         wr_i : in std_logic	
     );
     end component vid_mem;
+    
+	-- Mémoire dual port de taille 32 x 24 x 2 (les lignes sont dédoublées) x 8 bits
+    component blk_mem_gen_vga_2 is
+    port (
+        clka : in std_logic;
+        wea : in std_logic_vector(0 DOWNTO 0);
+        addra : in std_logic_vector(10 downto 0);
+        dina : in std_logic_vector(31 DOWNTO 0);
+        clkb : in std_logic;
+        addrb : in std_logic_vector(10 downto 0);
+        doutb : out std_logic_vector(31 downto 0)
+    );
+    end component;    
 
 	type states is (wait_init, chk_stop, gen_cycle, wait_for_ack, idle);
 	type vector_type is 
@@ -132,10 +146,9 @@ architecture Behavioral of vga_control_top is
     type vector_list is array(0 to 8) of vector_type;
 
 	-- signal declarations
-	signal rst_vga : std_logic := '1';
 	signal state : states;
 	signal icnt, init_timer : natural := 0;
-	signal i_vga_controller_ok : std_logic;	
+	signal vga_controller_ok : std_logic;	
 	
     -- wishbone host
 	signal s_cyc_o, s_we_o : std_logic;
@@ -146,20 +159,20 @@ architecture Behavioral of vga_control_top is
 	signal s_stb_vga_o : std_logic;
 	
     -- vga master
-	signal vga_adr_o                       : std_logic_vector(31 downto 0);
-	signal vga_dat_i                       : std_logic_vector(31 downto 0);
-	signal vga_stb_o, vga_cyc_o, vga_ack_i : std_logic;
-	signal vga_sel_o                       : std_logic_vector(3 downto 0);
-	signal vga_we_o                        : std_logic;
-	
-	signal i_video_addr_0 : std_logic_vector(19 downto 0);
-    signal i_video_data_0 : std_logic_vector(1 downto 0);
-    signal i_wr_cyc_0 : std_logic;
-        
-    attribute ASYNC_REG : string;
-    attribute ASYNC_REG of i_video_addr_0 : signal is "TRUE";
-    attribute ASYNC_REG of i_video_data_0 : signal is "TRUE";
-    attribute ASYNC_REG of i_wr_cyc_0 : signal is "TRUE";
+	signal vga_core_addr                  : std_logic_vector(31 downto 0);
+	signal vga_core_data                  : std_logic_vector(31 downto 0);
+	signal vga_core_stb, vga_core_cyc     : std_logic;
+	signal vga_core_ack                   : std_logic;
+	signal vga_core_sel                   : std_logic_vector(3 downto 0);
+	signal vga_we_o                       : std_logic;
+    
+    signal pixel_counter, pixel_line_counter : unsigned(15 downto 0);
+    signal vsync_pulse_duration, frame_line_cntr : unsigned(15 downto 0);
+    signal vid_shift_register, ula_vid_data : std_logic_vector(31 downto 0);
+    signal vid_mem_wr : std_logic;
+    signal horizontal_start, vertical_start, vsync_frame_detect : std_logic;
+    signal vga_buffer_adr : unsigned(10 downto 0);
+    signal ula_hsync0, ula_hsync1 : std_logic; 
 	
 	shared variable vectors : vector_list :=
     (
@@ -209,13 +222,14 @@ architecture Behavioral of vga_control_top is
     );
 
 begin
-    -- Partie destinée à confgurer le controlleur VGA
+
+    -- Partie destinée à configurer le controlleur VGA
     -- Une fois le controlleur initialisé, on met VGA_CONTROL_INIT_DONE = 1 
     -- ce qui permettra de démarrer les autres composants (Z80, ULA,...).
     
-	process(CLK_52M, RESET)
+	p_vga_controller_init : process(i_CLK_52M, i_RESET)
 	begin
-        if (RESET = '1') then
+        if (i_RESET = '1') then
             state <= chk_stop;
             icnt <= 0;
             s_cyc_o <= '0';
@@ -224,10 +238,10 @@ begin
             s_dat_o <= (others => 'X');
             s_we_o  <= 'X';
             s_sel_o <= (others => 'X');
-            i_vga_controller_ok <= '0';
+            vga_controller_ok <= '0';
             init_timer <= 0;
             
-        elsif rising_edge(CLK_52M) then    
+        elsif rising_edge(i_CLK_52M) then    
               case state is
                 when wait_init =>
                     init_timer <= init_timer + 1;
@@ -263,134 +277,114 @@ begin
                     s_stb_vga_o <= '0';
                     s_cyc_o <= '0';
                     s_we_o  <= '0';
-                    i_vga_controller_ok <= '1';
+                    vga_controller_ok <= '1';
                end case;
         end if;
     end process;
-	
-	-- Resynchronisation des signaux pour éviter les métastabilités
-	-- (frontière entre différents clock domains
-	process(clk_52M)
-    begin
-        if rising_edge(clk_52M) then
-            i_video_addr_0 <= VIDEO_ADDR;
-            i_video_data_0 <= VIDEO_DATA;
-            i_wr_cyc_0 <= WR_CYC;
-        end if;
-    end process;
     
-    VGA_CONTROL_INIT_DONE <= i_vga_controller_ok;
+    o_VGA_CONTROL_INIT_DONE <= vga_controller_ok;
 
 	--
 	-- hookup vga + clut core
 	--
 	-- Contrôleur VGA s'interfaçant avec le U3 (vid_mem)
 	u1: vga_enh_top port map (
-        wb_clk_i => CLK_52M, wb_rst_i => '0', rst_i => not RESET,
+        wb_clk_i => i_CLK_52M, wb_rst_i => '0', rst_i => not i_RESET,
         
+        -- Slave side (VGA controller initialisation)
         wbs_adr_i => s_adr_o(11 downto 0), wbs_dat_i => s_dat_o, wbs_dat_o => s_dat_i, 
         wbs_sel_i => s_sel_o, wbs_we_i => s_we_o, wbs_stb_i => s_stb_vga_o,
 		wbs_cyc_i => s_cyc_o, wbs_ack_o => s_ack_i, wbs_err_o => s_err_i,
 		
-		wbm_adr_o => vga_adr_o, wbm_dat_i => vga_dat_i, wbm_sel_o => vga_sel_o, wbm_stb_o => vga_stb_o,
-		wbm_cyc_o => vga_cyc_o, wbm_ack_i => vga_ack_i, wbm_err_i => '0',
+		-- Master side -> read video data by group of 32 bits (16 ULA pixels)
+		wbm_adr_o => vga_core_addr, wbm_dat_i => vga_core_data, wbm_sel_o => vga_core_sel, wbm_stb_o => vga_core_stb,
+		wbm_cyc_o => vga_core_cyc, wbm_ack_i => vga_core_ack, wbm_err_i => '0',
 		
-		clk_p_i => VGA_CLK, hsync_pad_o => HSYNC, vsync_pad_o => VSYNC, csync_pad_o => CSYNC, blank_pad_o => BLANK,
-		r_pad_o => R, g_pad_o => G, b_pad_o => B	
+		-- VGA outputs
+		clk_p_i => i_VGA_CLK, hsync_pad_o => o_HSYNC, vsync_pad_o => o_VSYNC, blank_pad_o => o_BLANK,
+		r_pad_o => o_R, g_pad_o => o_G, b_pad_o => o_B
 	);
-		
-    -- Composant utilisé comme interface entre le ZX81 et le contrôleur VGA
-    -- Les données vidéo sont écrites par l'ULA (bit par bit via le registre série) 
-    -- et lues par le contrôleur VGA (1 octet par pixel, couleur (0x01) ou noir (0x00). 
-	u3: vid_mem
-    port map (clk_i => CLK_52M, adr_i_vga_c => vga_adr_o(18 downto 0), cyc_i_vga_c => vga_cyc_o, 
-                stb_i_vga_c => vga_stb_o, ack_o_vga_c => vga_ack_i,
-                dat_o_vga_c => vga_dat_i, adr_vid_i => i_video_addr_0, dat_vid_i => i_video_data_0, wr_i => i_wr_cyc_0);
 
-end architecture Behavioral;
+    -- Les donnees sont ecrites bit par bit et lues par groupe de 4 octets (1 octet = 1 pixel avec comme valeur 0x00 ou 0x01)
+    u2: blk_mem_gen_vga_2
+        port map (clka => i_CLK_52M, wea(0) => vid_mem_wr, addra => std_logic_vector(vga_buffer_adr), dina => ula_vid_data,
+            clkb => i_CLK_52M, addrb => vga_core_addr(10 downto 0) and "11111011111", doutb => vga_core_data);
 
+    -- i_vga_addr_frame_offset: Adresse du début de la la ligne courante dans la trame
+    -- i_vga_pixel_offset: Offset du pixel dans la ligne
+    -- i_vga_line_offset: Variable utilisée pour adressée un ligne sur 2 (contient 0 ou NUMBER_OF_PIXELS_PER_LINE)
+    -- LINE_OFFSET_FROM_FRAME_START: Offset pour décaler l'image de 45 lignes vers le haut et mieux la centrer par rapport à l'affichage VGA
+    -- PIXEL_LINE_START: Offset dans la ligne du premier pixel à écrire
+    -- PIXEL_LINE_STOP: Offset dans la ligne du dernier pixel à écrire
+    -- Une ligne d'affichage du ZX81 contient 192 cycles d'horloge à 3,5 MHz donc 384 cycles à 6,5 MHz, soit un maximum de 384 pixels par lignes.
+    -- Si on double l'affichage pour utiliser la totalité de la ligne de 640x480, on arrive à 384 * 2 > 640 pixels, 
+    -- le mieux est d'éliminer les premiers et dernier pixels pour n'avoir que 640 pixels par ligne:
+    -- 2*384 - 640 = 128. J'ai donc mis 64 PIXEL_LINE_START ce qui correspond à 64 pixels de ligne VGA sur la partie gauche qui sont elimines de la ligne.  
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
--- use ieee.std_logic_arith.all;
-use ieee.std_logic_unsigned.all;
-use ieee.numeric_std.all;
-use work.all;
+    -- Convert serial ULA video data to 32 bits word with 16 ULA pixels
+    p_build_vga_data : process(i_CLK_6_5M)
+    begin
+        if i_RESET = '1' then
+            pixel_counter <= X"0000";
+            vid_shift_register <= (others => '0');
+            vga_buffer_adr <= (others => '0');
+            vid_mem_wr <= '0';
+        elsif pixel_counter = 15 then
+            pixel_counter <= X"0000";
+            ula_vid_data <= vid_shift_register;
+            vga_buffer_adr <= vga_buffer_adr + "1";
+            vid_mem_wr <= '1';
+        elsif rising_edge(i_CLK_6_5M) then
+            vid_mem_wr <= '0';
+            if horizontal_start = '1' and vertical_start = '1' then
+                vid_shift_register <= vid_shift_register(31 downto 2) & i_ula_vid_data & i_ula_vid_data;
+                pixel_counter <= pixel_counter + 1;
+            end if;
+        end if;
+    end process;
 
-entity vid_mem is
-	port(
-	    -- Horloge comunne pour le controlleur VGA et le host 
-		clk_i : in std_logic;
-		-- Adresse de lecture côté VGA controlleur
-		adr_i_vga_c : in std_logic_vector (18 downto 0);
-		-- CYC_I WB côté VGA controller
-		cyc_i_vga_c : in std_logic;
-		-- STB_I WB côté VGA controller
-		stb_i_vga_c : in std_logic;
-		-- ACK_O WB côté VGA controller
-		ack_o_vga_c : out std_logic;
-		-- Donnée RAM vidéo pour le controlleur VGA
-		dat_o_vga_c : out std_logic_vector(31 downto 0);
-		-- Adresse en écriture côté host
-		adr_vid_i : std_logic_vector (19 downto 0);
-		-- Données en entrées pour la RAM vidéo côté host
-		dat_vid_i : in std_logic_vector(1 downto 0);
-		-- Ecriture en RAM vidéo côté host
-		wr_i : in std_logic	
-	);
-end entity vid_mem;
-
-architecture behavioral of vid_mem is
-		
-	-- Mémoire dual port de taille 32 x 24 x 2 (les lignes sont dédoublées) x 8 bits
-    component blk_mem_gen_vga_2 is
-      port (
-        clka : in std_logic;
-        wea : in std_logic_vector(0 DOWNTO 0);
-        addra : in std_logic_vector(17 downto 0);
-        dina : in std_logic_vector(1 DOWNTO 0);
-        clkb : in std_logic;
-        addrb : in std_logic_vector(15 downto 0);
-        doutb : out std_logic_vector(7 downto 0)
-      );
-    end component;
+    p_vga_pixel_line_counter: process (i_CLK_6_5M, i_ula_hsync)
+    begin
+        if i_ula_hsync = '1' then
+            -- On resette le nombre de pixel depuis le début de la ligne en cas de HSYNC
+            pixel_line_counter <= X"0000";
+        elsif rising_edge(i_CLK_6_5M) then
+            pixel_line_counter <= pixel_line_counter + 1;
+        end if;
+    end process;
     
-    -- Données vidéo ZX81 (8 bits, 1 pixel par bit)
-    signal dat_o_ram_vga: std_logic_vector(7 downto 0);
-    -- Données controlleur VGA (32 bits, 8 bits par pixel).
-    signal adr_i_ram_vga: std_logic_vector(15 downto 0);
-	
-begin
-
-    -- Les données sont écrites bit par bit et lues par groupe de 4 octets (1 octet = 1 pixel avec comme valeur 0x00 ou 0x01)
-    u1: blk_mem_gen_vga_2
-        port map (clka => not clk_i, wea(0) => wr_i, addra => adr_vid_i(17 downto 0), dina => dat_vid_i,
-            clkb => not clk_i, addrb => adr_i_ram_vga, doutb => dat_o_ram_vga);
+    horizontal_start <= '1' when pixel_line_counter >= FB_PORCH_OFF_DURATION and pixel_line_counter < FB_PORCH_OFF_DURATION + HRES else '0';
     
-    -- La résolution choisit pour le controlleur VGA est de 640 * 480.
-    -- On n'utilise que 192 pixels de zone utile sur les lignes horizontales
-    -- Chaque octets stockés dans la RAM VGA défini 8 bits qui sont transformés en 2 groupe de 4 pixels côté controlleur VGA.
-    -- ex.
-    -- Contenu RAM VGA: 0xF0
-    -- Valeurs lues par le controlleur VGA : 4 octets avec 0x01010101 (i.e.: 4 pixels couleurs) + 
-    -- 4 octets avec 0x00000000 (i.e.: 4 pixels noirs)       
-    adr_i_ram_vga <= adr_i_vga_c(18 downto 3);
+    p_vga_line_counter: process (i_CLK_6_5M, vsync_frame_detect)
+    begin
+        if vsync_frame_detect = '1' then
+            frame_line_cntr <= X"0000";
+        -- Sur chaque front descendant de l'horloge 3,25 MHz
+        elsif rising_edge(i_CLK_6_5M) then
+            ula_hsync0 <= i_ula_hsync;
+            ula_hsync1 <= ula_hsync0;
+            -- Line start
+            if ula_hsync0 = '0' and ula_hsync1 = '1' then
+                frame_line_cntr <= frame_line_cntr + 1;
+            end if;
+        end if;
+    end process;
     
-    with adr_i_vga_c(2) select
-        dat_o_vga_c <= 
-            B"0000000" & dat_o_ram_vga(0) &
-            B"0000000" & dat_o_ram_vga(1) &
-            B"0000000" & dat_o_ram_vga(2) &
-            B"0000000" & dat_o_ram_vga(3) when '0',
-
-            B"0000000" & dat_o_ram_vga(4) &
-            B"0000000" & dat_o_ram_vga(5) &
-            B"0000000" & dat_o_ram_vga(6) &
-            B"0000000" & dat_o_ram_vga(7) when '1',                                    
-            
-            X"00000000" when others;
+    vertical_start <= '1' when frame_line_cntr >= FRAME_LINE_START and frame_line_cntr < FRAME_LINE_START + HRES else '0';
     
-    -- Acquittement immédiat
-    ack_o_vga_c <= '1' when (cyc_i_vga_c = '1') and (stb_i_vga_c = '1') else '0';
+    p_vsync_pulse_duration_counter : process(i_CLK_6_5M)
+    begin
+        if i_ula_vsync = '0' then
+            vsync_pulse_duration <= X"0000";
+            vsync_frame_detect <= '0';
+        -- On compte la durée du pulse de VSYNC pour savoir si c'est uyne vraie synchro trame ou pas
+        -- (cas du ZX81 en mode pseudo-hires avec invaders ou pacman)
+        elsif rising_edge(i_CLK_6_5M) then
+            vsync_pulse_duration <= vsync_pulse_duration + 1;
+            if vsync_pulse_duration >= MIN_VSYNC_PULSE_DURATION then
+                vsync_frame_detect <= '1';
+            end if;
+        end if;
+    end process;
 
 end architecture Behavioral;

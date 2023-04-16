@@ -14,210 +14,533 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="44,944,636.576 ns"></ZoomStartTime>
-      <ZoomEndTime time="44,947,320.577 ns"></ZoomEndTime>
-      <Cursor1Time time="44,945,869.499 ns"></Cursor1Time>
+      <ZoomStartTime time="261,510,725.499 ns"></ZoomStartTime>
+      <ZoomEndTime time="261,513,815.500 ns"></ZoomEndTime>
+      <Cursor1Time time="261,512,125.499 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="201"></NameColumnWidth>
-      <ValueColumnWidth column_width="58"></ValueColumnWidth>
+      <NameColumnWidth column_width="204"></NameColumnWidth>
+      <ValueColumnWidth column_width="79"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="24" />
+   <WVObjectSize size="67" />
    <wave_markers>
-      <marker time="44945256576" label="" />
-      <marker time="44946482422" label="" />
+      <marker time="261447462114" label="" />
+      <marker time="261448687960" label="" />
+      <marker time="261447768576" label="" />
+      <marker time="261512125499" label="" />
+      <marker time="261511512576" label="" />
+      <marker time="261511665806" label="" />
+      <marker time="261511819037" label="" />
+      <marker time="261511972268" label="" />
    </wave_markers>
    <wvobject fp_name="/Z81_board_sim/ZX81_board0/CLK_12M" type="logic">
       <obj_property name="ElementShortName">CLK_12M</obj_property>
       <obj_property name="ObjectShortName">CLK_12M</obj_property>
    </wvobject>
-   <wvobject fp_name="/Z81_board_sim/ZX81_board0/RESET" type="logic">
-      <obj_property name="ElementShortName">RESET</obj_property>
-      <obj_property name="ObjectShortName">RESET</obj_property>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/o_MIC" type="logic">
+      <obj_property name="ElementShortName">o_MIC</obj_property>
+      <obj_property name="ObjectShortName">o_MIC</obj_property>
    </wvobject>
-   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_resetn" type="logic">
-      <obj_property name="ElementShortName">i_resetn</obj_property>
-      <obj_property name="ObjectShortName">i_resetn</obj_property>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_RESET" type="logic">
+      <obj_property name="ElementShortName">i_RESET</obj_property>
+      <obj_property name="ObjectShortName">i_RESET</obj_property>
    </wvobject>
-   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_clk_3_25m" type="logic">
-      <obj_property name="ElementShortName">i_clk_3_25m</obj_property>
-      <obj_property name="ObjectShortName">i_clk_3_25m</obj_property>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_KBD_L" type="array">
+      <obj_property name="ElementShortName">i_KBD_L[4:0]</obj_property>
+      <obj_property name="ObjectShortName">i_KBD_L[4:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_a_cpu" type="array">
-      <obj_property name="ElementShortName">i_a_cpu[15:0]</obj_property>
-      <obj_property name="ObjectShortName">i_a_cpu[15:0]</obj_property>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/o_KBD_C" type="array">
+      <obj_property name="ElementShortName">o_KBD_C[7:0]</obj_property>
+      <obj_property name="ObjectShortName">o_KBD_C[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_d_cpu_out" type="array">
-      <obj_property name="ElementShortName">i_d_cpu_out[7:0]</obj_property>
-      <obj_property name="ObjectShortName">i_d_cpu_out[7:0]</obj_property>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_EAR" type="logic">
+      <obj_property name="ElementShortName">i_EAR</obj_property>
+      <obj_property name="ObjectShortName">i_EAR</obj_property>
    </wvobject>
-   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_d_cpu_in" type="array">
-      <obj_property name="ElementShortName">i_d_cpu_in[7:0]</obj_property>
-      <obj_property name="ObjectShortName">i_d_cpu_in[7:0]</obj_property>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/o_HSYNC_VGA" type="logic">
+      <obj_property name="ElementShortName">o_HSYNC_VGA</obj_property>
+      <obj_property name="ObjectShortName">o_HSYNC_VGA</obj_property>
    </wvobject>
-   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_d_rom_out" type="array">
-      <obj_property name="ElementShortName">i_d_rom_out[7:0]</obj_property>
-      <obj_property name="ObjectShortName">i_d_rom_out[7:0]</obj_property>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/o_VSYNC_VGA" type="logic">
+      <obj_property name="ElementShortName">o_VSYNC_VGA</obj_property>
+      <obj_property name="ObjectShortName">o_VSYNC_VGA</obj_property>
    </wvobject>
-   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_d_ram_out" type="array">
-      <obj_property name="ElementShortName">i_d_ram_out[7:0]</obj_property>
-      <obj_property name="ObjectShortName">i_d_ram_out[7:0]</obj_property>
-      <obj_property name="CustomSignalColor">#00FFFF</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/o_R_VGA_H" type="array">
+      <obj_property name="ElementShortName">o_R_VGA_H[2:0]</obj_property>
+      <obj_property name="ObjectShortName">o_R_VGA_H[2:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_haltn" type="logic">
-      <obj_property name="ElementShortName">i_haltn</obj_property>
-      <obj_property name="ObjectShortName">i_haltn</obj_property>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/o_G_VGA_H" type="array">
+      <obj_property name="ElementShortName">o_G_VGA_H[2:0]</obj_property>
+      <obj_property name="ObjectShortName">o_G_VGA_H[2:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_m1n" type="logic">
-      <obj_property name="ElementShortName">i_m1n</obj_property>
-      <obj_property name="ObjectShortName">i_m1n</obj_property>
-      <obj_property name="CustomSignalColor">#FF0080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/o_B_VGA_H" type="array">
+      <obj_property name="ElementShortName">o_B_VGA_H[2:0]</obj_property>
+      <obj_property name="ObjectShortName">o_B_VGA_H[2:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_mreqn" type="logic">
-      <obj_property name="ElementShortName">i_mreqn</obj_property>
-      <obj_property name="ObjectShortName">i_mreqn</obj_property>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/o_heart_beat" type="logic">
+      <obj_property name="ElementShortName">o_heart_beat</obj_property>
+      <obj_property name="ObjectShortName">o_heart_beat</obj_property>
    </wvobject>
-   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_rfrshn" type="logic">
-      <obj_property name="ElementShortName">i_rfrshn</obj_property>
-      <obj_property name="ObjectShortName">i_rfrshn</obj_property>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/clk_52m" type="logic">
+      <obj_property name="ElementShortName">clk_52m</obj_property>
+      <obj_property name="ObjectShortName">clk_52m</obj_property>
    </wvobject>
-   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_nmin" type="logic">
-      <obj_property name="ElementShortName">i_nmin</obj_property>
-      <obj_property name="ObjectShortName">i_nmin</obj_property>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/clk_6_5m" type="logic">
+      <obj_property name="ElementShortName">clk_6_5m</obj_property>
+      <obj_property name="ObjectShortName">clk_6_5m</obj_property>
    </wvobject>
-   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_iorqn" type="logic">
-      <obj_property name="ElementShortName">i_iorqn</obj_property>
-      <obj_property name="ObjectShortName">i_iorqn</obj_property>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/clk_13m" type="logic">
+      <obj_property name="ElementShortName">clk_13m</obj_property>
+      <obj_property name="ObjectShortName">clk_13m</obj_property>
    </wvobject>
-   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_rdn" type="logic">
-      <obj_property name="ElementShortName">i_rdn</obj_property>
-      <obj_property name="ObjectShortName">i_rdn</obj_property>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/clk_3_25m" type="logic">
+      <obj_property name="ElementShortName">clk_3_25m</obj_property>
+      <obj_property name="ObjectShortName">clk_3_25m</obj_property>
    </wvobject>
-   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_wrn" type="logic">
-      <obj_property name="ElementShortName">i_wrn</obj_property>
-      <obj_property name="ObjectShortName">i_wrn</obj_property>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu_addr" type="array">
+      <obj_property name="ElementShortName">cpu_addr[15:0]</obj_property>
+      <obj_property name="ObjectShortName">cpu_addr[15:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_wrram" type="logic">
-      <obj_property name="ElementShortName">i_wrram</obj_property>
-      <obj_property name="ObjectShortName">i_wrram</obj_property>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu_data_in" type="array">
+      <obj_property name="ElementShortName">cpu_data_in[7:0]</obj_property>
+      <obj_property name="ObjectShortName">cpu_data_in[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="group770" type="group">
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/waitn" type="logic">
+      <obj_property name="ElementShortName">waitn</obj_property>
+      <obj_property name="ObjectShortName">waitn</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/nmin" type="logic">
+      <obj_property name="ElementShortName">nmin</obj_property>
+      <obj_property name="ObjectShortName">nmin</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/m1n" type="logic">
+      <obj_property name="ElementShortName">m1n</obj_property>
+      <obj_property name="ObjectShortName">m1n</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/mreqn" type="logic">
+      <obj_property name="ElementShortName">mreqn</obj_property>
+      <obj_property name="ObjectShortName">mreqn</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/iorqn" type="logic">
+      <obj_property name="ElementShortName">iorqn</obj_property>
+      <obj_property name="ObjectShortName">iorqn</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/tape_in" type="logic">
+      <obj_property name="ElementShortName">tape_in</obj_property>
+      <obj_property name="ObjectShortName">tape_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/rdn" type="logic">
+      <obj_property name="ElementShortName">rdn</obj_property>
+      <obj_property name="ObjectShortName">rdn</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/wrn" type="logic">
+      <obj_property name="ElementShortName">wrn</obj_property>
+      <obj_property name="ObjectShortName">wrn</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/wrram" type="logic">
+      <obj_property name="ElementShortName">wrram</obj_property>
+      <obj_property name="ObjectShortName">wrram</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/rfrshn" type="logic">
+      <obj_property name="ElementShortName">rfrshn</obj_property>
+      <obj_property name="ObjectShortName">rfrshn</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/haltn" type="logic">
+      <obj_property name="ElementShortName">haltn</obj_property>
+      <obj_property name="ObjectShortName">haltn</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/rom_csn" type="logic">
+      <obj_property name="ElementShortName">rom_csn</obj_property>
+      <obj_property name="ObjectShortName">rom_csn</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/rom_data" type="array">
+      <obj_property name="ElementShortName">rom_data[7:0]</obj_property>
+      <obj_property name="ObjectShortName">rom_data[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/ram_csn" type="logic">
+      <obj_property name="ElementShortName">ram_csn</obj_property>
+      <obj_property name="ObjectShortName">ram_csn</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/ram_data" type="array">
+      <obj_property name="ElementShortName">ram_data[7:0]</obj_property>
+      <obj_property name="ObjectShortName">ram_data[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/mem_addr_char" type="array">
+      <obj_property name="ElementShortName">mem_addr_char[15:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_addr_char[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/mem_addr" type="array">
+      <obj_property name="ElementShortName">mem_addr[15:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_addr[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/A_prim" type="array">
+      <obj_property name="ElementShortName">A_prim[8:0]</obj_property>
+      <obj_property name="ObjectShortName">A_prim[8:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu_data_out" type="array">
+      <obj_property name="ElementShortName">cpu_data_out[7:0]</obj_property>
+      <obj_property name="ObjectShortName">cpu_data_out[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula_data" type="array">
+      <obj_property name="ElementShortName">ula_data[7:0]</obj_property>
+      <obj_property name="ObjectShortName">ula_data[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/video_pattern_data" type="array">
+      <obj_property name="ElementShortName">video_pattern_data[7:0]</obj_property>
+      <obj_property name="ObjectShortName">video_pattern_data[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu_resetn" type="logic">
+      <obj_property name="ElementShortName">cpu_resetn</obj_property>
+      <obj_property name="ObjectShortName">cpu_resetn</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/kbd_l_swap" type="array">
+      <obj_property name="ElementShortName">kbd_l_swap[4:0]</obj_property>
+      <obj_property name="ObjectShortName">kbd_l_swap[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula_csn" type="logic">
+      <obj_property name="ElementShortName">ula_csn</obj_property>
+      <obj_property name="ObjectShortName">ula_csn</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/vsync_0" type="logic">
+      <obj_property name="ElementShortName">vsync_0</obj_property>
+      <obj_property name="ObjectShortName">vsync_0</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/vsync_1" type="logic">
+      <obj_property name="ElementShortName">vsync_1</obj_property>
+      <obj_property name="ObjectShortName">vsync_1</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/vsync_heart_beat" type="logic">
+      <obj_property name="ElementShortName">vsync_heart_beat</obj_property>
+      <obj_property name="ObjectShortName">vsync_heart_beat</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/vsync_frame_detect" type="logic">
+      <obj_property name="ElementShortName">vsync_frame_detect</obj_property>
+      <obj_property name="ObjectShortName">vsync_frame_detect</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_clock" type="logic">
+      <obj_property name="ElementShortName">vga_clock</obj_property>
+      <obj_property name="ObjectShortName">vga_clock</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/pll_locked" type="logic">
+      <obj_property name="ElementShortName">pll_locked</obj_property>
+      <obj_property name="ObjectShortName">pll_locked</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_addr" type="array">
+      <obj_property name="ElementShortName">vga_addr[19:0]</obj_property>
+      <obj_property name="ObjectShortName">vga_addr[19:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_data" type="array">
+      <obj_property name="ElementShortName">vga_data[1:0]</obj_property>
+      <obj_property name="ObjectShortName">vga_data[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_wr_cyc" type="logic">
+      <obj_property name="ElementShortName">vga_wr_cyc</obj_property>
+      <obj_property name="ObjectShortName">vga_wr_cyc</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control_init_done" type="logic">
+      <obj_property name="ElementShortName">vga_control_init_done</obj_property>
+      <obj_property name="ObjectShortName">vga_control_init_done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control_init_done_0" type="logic">
+      <obj_property name="ElementShortName">vga_control_init_done_0</obj_property>
+      <obj_property name="ObjectShortName">vga_control_init_done_0</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/hsync" type="logic">
+      <obj_property name="ElementShortName">hsync</obj_property>
+      <obj_property name="ObjectShortName">hsync</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/vsync" type="logic">
+      <obj_property name="ElementShortName">vsync</obj_property>
+      <obj_property name="ObjectShortName">vsync</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/line_vid_data" type="logic">
+      <obj_property name="ElementShortName">line_vid_data</obj_property>
+      <obj_property name="ObjectShortName">line_vid_data</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/R_VGA" type="array">
+      <obj_property name="ElementShortName">R_VGA[7:0]</obj_property>
+      <obj_property name="ObjectShortName">R_VGA[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/G_VGA" type="array">
+      <obj_property name="ElementShortName">G_VGA[7:0]</obj_property>
+      <obj_property name="ObjectShortName">G_VGA[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/B_VGA" type="array">
+      <obj_property name="ElementShortName">B_VGA[7:0]</obj_property>
+      <obj_property name="ObjectShortName">B_VGA[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/BLANK_VGA" type="logic">
+      <obj_property name="ElementShortName">BLANK_VGA</obj_property>
+      <obj_property name="ObjectShortName">BLANK_VGA</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_hsync" type="logic">
+      <obj_property name="ElementShortName">i_hsync</obj_property>
+      <obj_property name="ObjectShortName">i_hsync</obj_property>
+   </wvobject>
+   <wvobject fp_name="/Z81_board_sim/ZX81_board0/i_vsync" type="logic">
+      <obj_property name="ElementShortName">i_vsync</obj_property>
+      <obj_property name="ObjectShortName">i_vsync</obj_property>
+   </wvobject>
+   <wvobject fp_name="group1788" type="group">
+      <obj_property name="label">CPU</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/RESET_n" type="logic">
+         <obj_property name="ElementShortName">RESET_n</obj_property>
+         <obj_property name="ObjectShortName">RESET_n</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/CLK_n" type="logic">
+         <obj_property name="ElementShortName">CLK_n</obj_property>
+         <obj_property name="ObjectShortName">CLK_n</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/A" type="array">
+         <obj_property name="ElementShortName">A[15:0]</obj_property>
+         <obj_property name="ObjectShortName">A[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/M1_n" type="logic">
+         <obj_property name="ElementShortName">M1_n</obj_property>
+         <obj_property name="ObjectShortName">M1_n</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/MREQ_n" type="logic">
+         <obj_property name="ElementShortName">MREQ_n</obj_property>
+         <obj_property name="ObjectShortName">MREQ_n</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/RFSH_n" type="logic">
+         <obj_property name="ElementShortName">RFSH_n</obj_property>
+         <obj_property name="ObjectShortName">RFSH_n</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/IORQ_n" type="logic">
+         <obj_property name="ElementShortName">IORQ_n</obj_property>
+         <obj_property name="ObjectShortName">IORQ_n</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/RD_n" type="logic">
+         <obj_property name="ElementShortName">RD_n</obj_property>
+         <obj_property name="ObjectShortName">RD_n</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/WR_n" type="logic">
+         <obj_property name="ElementShortName">WR_n</obj_property>
+         <obj_property name="ObjectShortName">WR_n</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/DI" type="array">
+         <obj_property name="ElementShortName">DI[7:0]</obj_property>
+         <obj_property name="ObjectShortName">DI[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/DO" type="array">
+         <obj_property name="ElementShortName">DO[7:0]</obj_property>
+         <obj_property name="ObjectShortName">DO[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/INT_n" type="logic">
+         <obj_property name="ElementShortName">INT_n</obj_property>
+         <obj_property name="ObjectShortName">INT_n</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/NMI_n" type="logic">
+         <obj_property name="ElementShortName">NMI_n</obj_property>
+         <obj_property name="ObjectShortName">NMI_n</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/WAIT_n" type="logic">
+         <obj_property name="ElementShortName">WAIT_n</obj_property>
+         <obj_property name="ObjectShortName">WAIT_n</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/HALT_n" type="logic">
+         <obj_property name="ElementShortName">HALT_n</obj_property>
+         <obj_property name="ObjectShortName">HALT_n</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/BUSRQ_n" type="logic">
+         <obj_property name="ElementShortName">BUSRQ_n</obj_property>
+         <obj_property name="ObjectShortName">BUSRQ_n</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/BUSAK_n" type="logic">
+         <obj_property name="ElementShortName">BUSAK_n</obj_property>
+         <obj_property name="ObjectShortName">BUSAK_n</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/IntCycle_n" type="logic">
+         <obj_property name="ElementShortName">IntCycle_n</obj_property>
+         <obj_property name="ObjectShortName">IntCycle_n</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/NoRead" type="logic">
+         <obj_property name="ElementShortName">NoRead</obj_property>
+         <obj_property name="ObjectShortName">NoRead</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/Write" type="logic">
+         <obj_property name="ElementShortName">Write</obj_property>
+         <obj_property name="ObjectShortName">Write</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/IORQ" type="logic">
+         <obj_property name="ElementShortName">IORQ</obj_property>
+         <obj_property name="ObjectShortName">IORQ</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/DI_Reg" type="array">
+         <obj_property name="ElementShortName">DI_Reg[7:0]</obj_property>
+         <obj_property name="ObjectShortName">DI_Reg[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/MCycle" type="array">
+         <obj_property name="ElementShortName">MCycle[2:0]</obj_property>
+         <obj_property name="ObjectShortName">MCycle[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/TState" type="array">
+         <obj_property name="ElementShortName">TState[2:0]</obj_property>
+         <obj_property name="ObjectShortName">TState[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/Mode" type="other">
+         <obj_property name="ElementShortName">Mode</obj_property>
+         <obj_property name="ObjectShortName">Mode</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/T2Write" type="other">
+         <obj_property name="ElementShortName">T2Write</obj_property>
+         <obj_property name="ObjectShortName">T2Write</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/cpu1/IOWait" type="other">
+         <obj_property name="ElementShortName">IOWait</obj_property>
+         <obj_property name="ObjectShortName">IOWait</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group1786" type="group">
       <obj_property name="label">ULA</obj_property>
       <obj_property name="DisplayName">label</obj_property>
       <obj_property name="isExpanded"></obj_property>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/CLK_6_5_M" type="logic">
-         <obj_property name="ElementShortName">CLK_6_5_M</obj_property>
-         <obj_property name="ObjectShortName">CLK_6_5_M</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_resetn" type="logic">
+         <obj_property name="ElementShortName">i_resetn</obj_property>
+         <obj_property name="ObjectShortName">i_resetn</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/CLK_3_25_M" type="logic">
-         <obj_property name="ElementShortName">CLK_3_25_M</obj_property>
-         <obj_property name="ObjectShortName">CLK_3_25_M</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_clk_3_25_m" type="logic">
+         <obj_property name="ElementShortName">i_clk_3_25_m</obj_property>
+         <obj_property name="ObjectShortName">i_clk_3_25_m</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/D_cpu_IN" type="array">
-         <obj_property name="ElementShortName">D_cpu_IN[7:0]</obj_property>
-         <obj_property name="ObjectShortName">D_cpu_IN[7:0]</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_clk_6_5_m" type="logic">
+         <obj_property name="ElementShortName">i_clk_6_5_m</obj_property>
+         <obj_property name="ObjectShortName">i_clk_6_5_m</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/D_ram_out" type="array">
-         <obj_property name="ElementShortName">D_ram_out[7:0]</obj_property>
-         <obj_property name="ObjectShortName">D_ram_out[7:0]</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_A" type="array">
+         <obj_property name="ElementShortName">i_A[15:0]</obj_property>
+         <obj_property name="ObjectShortName">i_A[15:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/D_rom_out" type="array">
-         <obj_property name="ElementShortName">D_rom_out[7:0]</obj_property>
-         <obj_property name="ObjectShortName">D_rom_out[7:0]</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/o_Ap" type="array">
+         <obj_property name="ElementShortName">o_Ap[8:0]</obj_property>
+         <obj_property name="ObjectShortName">o_Ap[8:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/KBDn" type="array">
-         <obj_property name="ElementShortName">KBDn[4:0]</obj_property>
-         <obj_property name="ObjectShortName">KBDn[4:0]</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_video_pattern" type="array">
+         <obj_property name="ElementShortName">i_video_pattern[7:0]</obj_property>
+         <obj_property name="ObjectShortName">i_video_pattern[7:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/TAPE_IN" type="logic">
-         <obj_property name="ElementShortName">TAPE_IN</obj_property>
-         <obj_property name="ObjectShortName">TAPE_IN</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/o_ula_data" type="array">
+         <obj_property name="ElementShortName">o_ula_data[7:0]</obj_property>
+         <obj_property name="ObjectShortName">o_ula_data[7:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/USA_UK" type="logic">
-         <obj_property name="ElementShortName">USA_UK</obj_property>
-         <obj_property name="ObjectShortName">USA_UK</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_kbdn" type="array">
+         <obj_property name="ElementShortName">i_kbdn[4:0]</obj_property>
+         <obj_property name="ObjectShortName">i_kbdn[4:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/TAPE_OUT" type="logic">
-         <obj_property name="ElementShortName">TAPE_OUT</obj_property>
-         <obj_property name="ObjectShortName">TAPE_OUT</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_tape_in" type="logic">
+         <obj_property name="ElementShortName">i_tape_in</obj_property>
+         <obj_property name="ObjectShortName">i_tape_in</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/RDn" type="logic">
-         <obj_property name="ElementShortName">RDn</obj_property>
-         <obj_property name="ObjectShortName">RDn</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_usa_uk" type="logic">
+         <obj_property name="ElementShortName">i_usa_uk</obj_property>
+         <obj_property name="ObjectShortName">i_usa_uk</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/WRn" type="logic">
-         <obj_property name="ElementShortName">WRn</obj_property>
-         <obj_property name="ObjectShortName">WRn</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/o_tape_out" type="logic">
+         <obj_property name="ElementShortName">o_tape_out</obj_property>
+         <obj_property name="ObjectShortName">o_tape_out</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/WAITn" type="logic">
-         <obj_property name="ElementShortName">WAITn</obj_property>
-         <obj_property name="ObjectShortName">WAITn</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/o_ram_csn" type="logic">
+         <obj_property name="ElementShortName">o_ram_csn</obj_property>
+         <obj_property name="ObjectShortName">o_ram_csn</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/M1n" type="logic">
-         <obj_property name="ElementShortName">M1n</obj_property>
-         <obj_property name="ObjectShortName">M1n</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/o_rom_csn" type="logic">
+         <obj_property name="ElementShortName">o_rom_csn</obj_property>
+         <obj_property name="ObjectShortName">o_rom_csn</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/HALTn" type="logic">
-         <obj_property name="ElementShortName">HALTn</obj_property>
-         <obj_property name="ObjectShortName">HALTn</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/o_ulan" type="logic">
+         <obj_property name="ElementShortName">o_ulan</obj_property>
+         <obj_property name="ObjectShortName">o_ulan</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/IORQn" type="logic">
-         <obj_property name="ElementShortName">IORQn</obj_property>
-         <obj_property name="ObjectShortName">IORQn</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_rdn" type="logic">
+         <obj_property name="ElementShortName">i_rdn</obj_property>
+         <obj_property name="ObjectShortName">i_rdn</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/NMIn" type="logic">
-         <obj_property name="ElementShortName">NMIn</obj_property>
-         <obj_property name="ObjectShortName">NMIn</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_wrn" type="logic">
+         <obj_property name="ElementShortName">i_wrn</obj_property>
+         <obj_property name="ObjectShortName">i_wrn</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/MREQn" type="logic">
-         <obj_property name="ElementShortName">MREQn</obj_property>
-         <obj_property name="ObjectShortName">MREQn</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_haltn" type="logic">
+         <obj_property name="ElementShortName">i_haltn</obj_property>
+         <obj_property name="ObjectShortName">i_haltn</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/RFRSHn" type="logic">
-         <obj_property name="ElementShortName">RFRSHn</obj_property>
-         <obj_property name="ObjectShortName">RFRSHn</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_iorqn" type="logic">
+         <obj_property name="ElementShortName">i_iorqn</obj_property>
+         <obj_property name="ObjectShortName">i_iorqn</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_nmin" type="logic">
-         <obj_property name="ElementShortName">i_nmin</obj_property>
-         <obj_property name="ObjectShortName">i_nmin</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_mreqn" type="logic">
+         <obj_property name="ElementShortName">i_mreqn</obj_property>
+         <obj_property name="ObjectShortName">i_mreqn</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_nmionn" type="logic">
-         <obj_property name="ElementShortName">i_nmionn</obj_property>
-         <obj_property name="ObjectShortName">i_nmionn</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_m1n" type="logic">
+         <obj_property name="ElementShortName">i_m1n</obj_property>
+         <obj_property name="ObjectShortName">i_m1n</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_hsyncn" type="logic">
-         <obj_property name="ElementShortName">i_hsyncn</obj_property>
-         <obj_property name="ObjectShortName">i_hsyncn</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_rfshn" type="logic">
+         <obj_property name="ElementShortName">i_rfshn</obj_property>
+         <obj_property name="ObjectShortName">i_rfshn</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_hsyncn_cnt" type="other">
-         <obj_property name="ElementShortName">i_hsyncn_cnt</obj_property>
-         <obj_property name="ObjectShortName">i_hsyncn_cnt</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/o_waitn" type="logic">
+         <obj_property name="ElementShortName">o_waitn</obj_property>
+         <obj_property name="ObjectShortName">o_waitn</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_vsync" type="logic">
-         <obj_property name="ElementShortName">i_vsync</obj_property>
-         <obj_property name="ObjectShortName">i_vsync</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/o_nmin" type="logic">
+         <obj_property name="ElementShortName">o_nmin</obj_property>
+         <obj_property name="ObjectShortName">o_nmin</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_vsync_frame_detect" type="logic">
-         <obj_property name="ElementShortName">i_vsync_frame_detect</obj_property>
-         <obj_property name="ObjectShortName">i_vsync_frame_detect</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/hsync" type="logic">
+         <obj_property name="ElementShortName">hsync</obj_property>
+         <obj_property name="ObjectShortName">hsync</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_csyncn" type="logic">
-         <obj_property name="ElementShortName">i_csyncn</obj_property>
-         <obj_property name="ObjectShortName">i_csyncn</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/hsync0" type="logic">
+         <obj_property name="ElementShortName">hsync0</obj_property>
+         <obj_property name="ObjectShortName">hsync0</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_nop_detect" type="logic">
-         <obj_property name="ElementShortName">i_nop_detect</obj_property>
-         <obj_property name="ObjectShortName">i_nop_detect</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/hsync1" type="logic">
+         <obj_property name="ElementShortName">hsync1</obj_property>
+         <obj_property name="ObjectShortName">hsync1</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_nop_detect_0" type="logic">
-         <obj_property name="ElementShortName">i_nop_detect_0</obj_property>
-         <obj_property name="ObjectShortName">i_nop_detect_0</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/vsync" type="logic">
+         <obj_property name="ElementShortName">vsync</obj_property>
+         <obj_property name="ObjectShortName">vsync</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_vid_shift_register" type="array">
-         <obj_property name="ElementShortName">i_vid_shift_register[15:0]</obj_property>
-         <obj_property name="ObjectShortName">i_vid_shift_register[15:0]</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/nmionn" type="logic">
+         <obj_property name="ElementShortName">nmionn</obj_property>
+         <obj_property name="ObjectShortName">nmionn</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/kbd_n" type="logic">
+         <obj_property name="ElementShortName">kbd_n</obj_property>
+         <obj_property name="ObjectShortName">kbd_n</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/nop_detect" type="logic">
+         <obj_property name="ElementShortName">nop_detect</obj_property>
+         <obj_property name="ObjectShortName">nop_detect</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/nop_delay" type="array">
+         <obj_property name="ElementShortName">nop_delay[2:0]</obj_property>
+         <obj_property name="ObjectShortName">nop_delay[2:0]</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/nmin" type="logic">
+         <obj_property name="ElementShortName">nmin</obj_property>
+         <obj_property name="ObjectShortName">nmin</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/reload_vid_pattern" type="logic">
+         <obj_property name="ElementShortName">reload_vid_pattern</obj_property>
+         <obj_property name="ObjectShortName">reload_vid_pattern</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/vid_shift_register" type="array">
+         <obj_property name="ElementShortName">vid_shift_register[15:0]</obj_property>
+         <obj_property name="ObjectShortName">vid_shift_register[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/hsyncn_counter" type="array">
+         <obj_property name="ElementShortName">hsyncn_counter[7:0]</obj_property>
+         <obj_property name="ObjectShortName">hsyncn_counter[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/nmin" type="logic">
+         <obj_property name="ElementShortName">nmin</obj_property>
+         <obj_property name="ObjectShortName">nmin</obj_property>
       </wvobject>
       <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/char_line_cntr" type="array">
          <obj_property name="ElementShortName">char_line_cntr[2:0]</obj_property>
@@ -227,93 +550,93 @@
          <obj_property name="ElementShortName">char_reg[7:0]</obj_property>
          <obj_property name="ObjectShortName">char_reg[7:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/vga_addr" type="array">
-         <obj_property name="ElementShortName">vga_addr[19:0]</obj_property>
-         <obj_property name="ObjectShortName">vga_addr[19:0]</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/hsyncn_counter" type="array">
+         <obj_property name="ElementShortName">hsyncn_counter[7:0]</obj_property>
+         <obj_property name="ObjectShortName">hsyncn_counter[7:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_vga_pixel_offset" type="other">
-         <obj_property name="ElementShortName">i_vga_pixel_offset</obj_property>
-         <obj_property name="ObjectShortName">i_vga_pixel_offset</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/o_vsync" type="logic">
+         <obj_property name="ElementShortName">o_vsync</obj_property>
+         <obj_property name="ObjectShortName">o_vsync</obj_property>
+         <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_vga_addr_frame_offset" type="other">
-         <obj_property name="ElementShortName">i_vga_addr_frame_offset</obj_property>
-         <obj_property name="ObjectShortName">i_vga_addr_frame_offset</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/o_hsync" type="logic">
+         <obj_property name="ElementShortName">o_hsync</obj_property>
+         <obj_property name="ObjectShortName">o_hsync</obj_property>
+         <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_vga_line_offset" type="other">
-         <obj_property name="ElementShortName">i_vga_line_offset</obj_property>
-         <obj_property name="ObjectShortName">i_vga_line_offset</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/i_clk_6_5_m" type="logic">
+         <obj_property name="ElementShortName">i_clk_6_5_m</obj_property>
+         <obj_property name="ObjectShortName">i_clk_6_5_m</obj_property>
+         <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/vga_data" type="array">
-         <obj_property name="ElementShortName">vga_data[1:0]</obj_property>
-         <obj_property name="ObjectShortName">vga_data[1:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/vga_wr_cyc" type="logic">
-         <obj_property name="ElementShortName">vga_wr_cyc</obj_property>
-         <obj_property name="ObjectShortName">vga_wr_cyc</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ula0/o_video_data" type="logic">
+         <obj_property name="ElementShortName">o_video_data</obj_property>
+         <obj_property name="ObjectShortName">o_video_data</obj_property>
+         <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
       </wvobject>
    </wvobject>
-   <wvobject fp_name="group2464" type="group">
-      <obj_property name="label">vga_control_top</obj_property>
+   <wvobject fp_name="group1787" type="group">
+      <obj_property name="label">VGA controller</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/RESET" type="logic">
-         <obj_property name="ElementShortName">RESET</obj_property>
-         <obj_property name="ObjectShortName">RESET</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/i_RESET" type="logic">
+         <obj_property name="ElementShortName">i_RESET</obj_property>
+         <obj_property name="ObjectShortName">i_RESET</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/CLK_52M" type="logic">
-         <obj_property name="ElementShortName">CLK_52M</obj_property>
-         <obj_property name="ObjectShortName">CLK_52M</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/i_CLK_52M" type="logic">
+         <obj_property name="ElementShortName">i_CLK_52M</obj_property>
+         <obj_property name="ObjectShortName">i_CLK_52M</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/VGA_CLK" type="logic">
-         <obj_property name="ElementShortName">VGA_CLK</obj_property>
-         <obj_property name="ObjectShortName">VGA_CLK</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/i_CLK_6_5M" type="logic">
+         <obj_property name="ElementShortName">i_CLK_6_5M</obj_property>
+         <obj_property name="ObjectShortName">i_CLK_6_5M</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/VIDEO_ADDR" type="array">
-         <obj_property name="ElementShortName">VIDEO_ADDR[19:0]</obj_property>
-         <obj_property name="ObjectShortName">VIDEO_ADDR[19:0]</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/i_VGA_CLK" type="logic">
+         <obj_property name="ElementShortName">i_VGA_CLK</obj_property>
+         <obj_property name="ObjectShortName">i_VGA_CLK</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/VIDEO_DATA" type="array">
-         <obj_property name="ElementShortName">VIDEO_DATA[1:0]</obj_property>
-         <obj_property name="ObjectShortName">VIDEO_DATA[1:0]</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/o_VGA_CONTROL_INIT_DONE" type="logic">
+         <obj_property name="ElementShortName">o_VGA_CONTROL_INIT_DONE</obj_property>
+         <obj_property name="ObjectShortName">o_VGA_CONTROL_INIT_DONE</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/WR_CYC" type="logic">
-         <obj_property name="ElementShortName">WR_CYC</obj_property>
-         <obj_property name="ObjectShortName">WR_CYC</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/i_ula_hsync" type="logic">
+         <obj_property name="ElementShortName">i_ula_hsync</obj_property>
+         <obj_property name="ObjectShortName">i_ula_hsync</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/VGA_CONTROL_INIT_DONE" type="logic">
-         <obj_property name="ElementShortName">VGA_CONTROL_INIT_DONE</obj_property>
-         <obj_property name="ObjectShortName">VGA_CONTROL_INIT_DONE</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/i_ula_vsync" type="logic">
+         <obj_property name="ElementShortName">i_ula_vsync</obj_property>
+         <obj_property name="ObjectShortName">i_ula_vsync</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/HSYNC" type="logic">
-         <obj_property name="ElementShortName">HSYNC</obj_property>
-         <obj_property name="ObjectShortName">HSYNC</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/i_ula_vid_data" type="logic">
+         <obj_property name="ElementShortName">i_ula_vid_data</obj_property>
+         <obj_property name="ObjectShortName">i_ula_vid_data</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/VSYNC" type="logic">
-         <obj_property name="ElementShortName">VSYNC</obj_property>
-         <obj_property name="ObjectShortName">VSYNC</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/o_HSYNC" type="logic">
+         <obj_property name="ElementShortName">o_HSYNC</obj_property>
+         <obj_property name="ObjectShortName">o_HSYNC</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/CSYNC" type="logic">
-         <obj_property name="ElementShortName">CSYNC</obj_property>
-         <obj_property name="ObjectShortName">CSYNC</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/o_VSYNC" type="logic">
+         <obj_property name="ElementShortName">o_VSYNC</obj_property>
+         <obj_property name="ObjectShortName">o_VSYNC</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/BLANK" type="logic">
-         <obj_property name="ElementShortName">BLANK</obj_property>
-         <obj_property name="ObjectShortName">BLANK</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/o_BLANK" type="logic">
+         <obj_property name="ElementShortName">o_BLANK</obj_property>
+         <obj_property name="ObjectShortName">o_BLANK</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/R" type="array">
-         <obj_property name="ElementShortName">R[7:0]</obj_property>
-         <obj_property name="ObjectShortName">R[7:0]</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/o_R" type="array">
+         <obj_property name="ElementShortName">o_R[7:0]</obj_property>
+         <obj_property name="ObjectShortName">o_R[7:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/G" type="array">
-         <obj_property name="ElementShortName">G[7:0]</obj_property>
-         <obj_property name="ObjectShortName">G[7:0]</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/o_G" type="array">
+         <obj_property name="ElementShortName">o_G[7:0]</obj_property>
+         <obj_property name="ObjectShortName">o_G[7:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/B" type="array">
-         <obj_property name="ElementShortName">B[7:0]</obj_property>
-         <obj_property name="ObjectShortName">B[7:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/rst_vga" type="logic">
-         <obj_property name="ElementShortName">rst_vga</obj_property>
-         <obj_property name="ObjectShortName">rst_vga</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/o_B" type="array">
+         <obj_property name="ElementShortName">o_B[7:0]</obj_property>
+         <obj_property name="ObjectShortName">o_B[7:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/state" type="other">
          <obj_property name="ElementShortName">state</obj_property>
@@ -323,9 +646,13 @@
          <obj_property name="ElementShortName">icnt</obj_property>
          <obj_property name="ObjectShortName">icnt</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/i_vga_controller_ok" type="logic">
-         <obj_property name="ElementShortName">i_vga_controller_ok</obj_property>
-         <obj_property name="ObjectShortName">i_vga_controller_ok</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/init_timer" type="other">
+         <obj_property name="ElementShortName">init_timer</obj_property>
+         <obj_property name="ObjectShortName">init_timer</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vga_controller_ok" type="logic">
+         <obj_property name="ElementShortName">vga_controller_ok</obj_property>
+         <obj_property name="ObjectShortName">vga_controller_ok</obj_property>
       </wvobject>
       <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/s_cyc_o" type="logic">
          <obj_property name="ElementShortName">s_cyc_o</obj_property>
@@ -363,630 +690,125 @@
          <obj_property name="ElementShortName">s_stb_vga_o</obj_property>
          <obj_property name="ObjectShortName">s_stb_vga_o</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vga_adr_o" type="array">
-         <obj_property name="ElementShortName">vga_adr_o[31:0]</obj_property>
-         <obj_property name="ObjectShortName">vga_adr_o[31:0]</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vga_core_addr" type="array">
+         <obj_property name="ElementShortName">vga_core_addr[31:0]</obj_property>
+         <obj_property name="ObjectShortName">vga_core_addr[31:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vga_dat_i" type="array">
-         <obj_property name="ElementShortName">vga_dat_i[31:0]</obj_property>
-         <obj_property name="ObjectShortName">vga_dat_i[31:0]</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vga_core_data" type="array">
+         <obj_property name="ElementShortName">vga_core_data[31:0]</obj_property>
+         <obj_property name="ObjectShortName">vga_core_data[31:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vga_stb_o" type="logic">
-         <obj_property name="ElementShortName">vga_stb_o</obj_property>
-         <obj_property name="ObjectShortName">vga_stb_o</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vga_core_stb" type="logic">
+         <obj_property name="ElementShortName">vga_core_stb</obj_property>
+         <obj_property name="ObjectShortName">vga_core_stb</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vga_cyc_o" type="logic">
-         <obj_property name="ElementShortName">vga_cyc_o</obj_property>
-         <obj_property name="ObjectShortName">vga_cyc_o</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vga_core_cyc" type="logic">
+         <obj_property name="ElementShortName">vga_core_cyc</obj_property>
+         <obj_property name="ObjectShortName">vga_core_cyc</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vga_ack_i" type="logic">
-         <obj_property name="ElementShortName">vga_ack_i</obj_property>
-         <obj_property name="ObjectShortName">vga_ack_i</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vga_core_ack" type="logic">
+         <obj_property name="ElementShortName">vga_core_ack</obj_property>
+         <obj_property name="ObjectShortName">vga_core_ack</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vga_sel_o" type="array">
-         <obj_property name="ElementShortName">vga_sel_o[3:0]</obj_property>
-         <obj_property name="ObjectShortName">vga_sel_o[3:0]</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vga_core_sel" type="array">
+         <obj_property name="ElementShortName">vga_core_sel[3:0]</obj_property>
+         <obj_property name="ObjectShortName">vga_core_sel[3:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vga_we_o" type="logic">
          <obj_property name="ElementShortName">vga_we_o</obj_property>
          <obj_property name="ObjectShortName">vga_we_o</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/i_video_addr_0" type="array">
-         <obj_property name="ElementShortName">i_video_addr_0[19:0]</obj_property>
-         <obj_property name="ObjectShortName">i_video_addr_0[19:0]</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/pixel_counter" type="array">
+         <obj_property name="ElementShortName">pixel_counter[15:0]</obj_property>
+         <obj_property name="ObjectShortName">pixel_counter[15:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/i_wr_cyc_0" type="logic">
-         <obj_property name="ElementShortName">i_wr_cyc_0</obj_property>
-         <obj_property name="ObjectShortName">i_wr_cyc_0</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/pixel_line_counter" type="array">
+         <obj_property name="ElementShortName">pixel_line_counter[15:0]</obj_property>
+         <obj_property name="ObjectShortName">pixel_line_counter[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vsync_pulse_duration" type="array">
+         <obj_property name="ElementShortName">vsync_pulse_duration[15:0]</obj_property>
+         <obj_property name="ObjectShortName">vsync_pulse_duration[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/frame_line_cntr" type="array">
+         <obj_property name="ElementShortName">frame_line_cntr[15:0]</obj_property>
+         <obj_property name="ObjectShortName">frame_line_cntr[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vid_shift_register" type="array">
+         <obj_property name="ElementShortName">vid_shift_register[31:0]</obj_property>
+         <obj_property name="ObjectShortName">vid_shift_register[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/ula_vid_data" type="array">
+         <obj_property name="ElementShortName">ula_vid_data[31:0]</obj_property>
+         <obj_property name="ObjectShortName">ula_vid_data[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vid_mem_wr" type="logic">
+         <obj_property name="ElementShortName">vid_mem_wr</obj_property>
+         <obj_property name="ObjectShortName">vid_mem_wr</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/horizontal_start" type="logic">
+         <obj_property name="ElementShortName">horizontal_start</obj_property>
+         <obj_property name="ObjectShortName">horizontal_start</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vertical_start" type="logic">
+         <obj_property name="ElementShortName">vertical_start</obj_property>
+         <obj_property name="ObjectShortName">vertical_start</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vsync_frame_detect" type="logic">
+         <obj_property name="ElementShortName">vsync_frame_detect</obj_property>
+         <obj_property name="ObjectShortName">vsync_frame_detect</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/vga_buffer_adr" type="array">
+         <obj_property name="ElementShortName">vga_buffer_adr[10:0]</obj_property>
+         <obj_property name="ObjectShortName">vga_buffer_adr[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/ula_hsync0" type="logic">
+         <obj_property name="ElementShortName">ula_hsync0</obj_property>
+         <obj_property name="ObjectShortName">ula_hsync0</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/ula_hsync1" type="logic">
+         <obj_property name="ElementShortName">ula_hsync1</obj_property>
+         <obj_property name="ObjectShortName">ula_hsync1</obj_property>
       </wvobject>
    </wvobject>
-   <wvobject fp_name="group2348" type="group">
-      <obj_property name="label">vga_enh_top</obj_property>
+   <wvobject fp_name="group2484" type="group">
+      <obj_property name="label">ROM</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wb_clk_i" type="logic">
-         <obj_property name="ElementShortName">wb_clk_i</obj_property>
-         <obj_property name="ObjectShortName">wb_clk_i</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wb_rst_i" type="logic">
-         <obj_property name="ElementShortName">wb_rst_i</obj_property>
-         <obj_property name="ObjectShortName">wb_rst_i</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/rst_i" type="logic">
-         <obj_property name="ElementShortName">rst_i</obj_property>
-         <obj_property name="ObjectShortName">rst_i</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wb_inta_o" type="logic">
-         <obj_property name="ElementShortName">wb_inta_o</obj_property>
-         <obj_property name="ObjectShortName">wb_inta_o</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbs_adr_i" type="array">
-         <obj_property name="ElementShortName">wbs_adr_i[11:0]</obj_property>
-         <obj_property name="ObjectShortName">wbs_adr_i[11:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbs_dat_i" type="array">
-         <obj_property name="ElementShortName">wbs_dat_i[31:0]</obj_property>
-         <obj_property name="ObjectShortName">wbs_dat_i[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbs_dat_o" type="array">
-         <obj_property name="ElementShortName">wbs_dat_o[31:0]</obj_property>
-         <obj_property name="ObjectShortName">wbs_dat_o[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbs_sel_i" type="array">
-         <obj_property name="ElementShortName">wbs_sel_i[3:0]</obj_property>
-         <obj_property name="ObjectShortName">wbs_sel_i[3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbs_we_i" type="logic">
-         <obj_property name="ElementShortName">wbs_we_i</obj_property>
-         <obj_property name="ObjectShortName">wbs_we_i</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbs_stb_i" type="logic">
-         <obj_property name="ElementShortName">wbs_stb_i</obj_property>
-         <obj_property name="ObjectShortName">wbs_stb_i</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbs_cyc_i" type="logic">
-         <obj_property name="ElementShortName">wbs_cyc_i</obj_property>
-         <obj_property name="ObjectShortName">wbs_cyc_i</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbs_ack_o" type="logic">
-         <obj_property name="ElementShortName">wbs_ack_o</obj_property>
-         <obj_property name="ObjectShortName">wbs_ack_o</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbs/wbm_busy" type="logic">
-         <obj_property name="ElementShortName">wbm_busy</obj_property>
-         <obj_property name="ObjectShortName">wbm_busy</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbs_rty_o" type="logic">
-         <obj_property name="ElementShortName">wbs_rty_o</obj_property>
-         <obj_property name="ObjectShortName">wbs_rty_o</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbs_err_o" type="logic">
-         <obj_property name="ElementShortName">wbs_err_o</obj_property>
-         <obj_property name="ObjectShortName">wbs_err_o</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbm_adr_o" type="array">
-         <obj_property name="ElementShortName">wbm_adr_o[31:0]</obj_property>
-         <obj_property name="ObjectShortName">wbm_adr_o[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbm_dat_i" type="array">
-         <obj_property name="ElementShortName">wbm_dat_i[31:0]</obj_property>
-         <obj_property name="ObjectShortName">wbm_dat_i[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbm_sel_o" type="array">
-         <obj_property name="ElementShortName">wbm_sel_o[3:0]</obj_property>
-         <obj_property name="ObjectShortName">wbm_sel_o[3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbm_we_o" type="logic">
-         <obj_property name="ElementShortName">wbm_we_o</obj_property>
-         <obj_property name="ObjectShortName">wbm_we_o</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbm_stb_o" type="logic">
-         <obj_property name="ElementShortName">wbm_stb_o</obj_property>
-         <obj_property name="ObjectShortName">wbm_stb_o</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbm_cyc_o" type="logic">
-         <obj_property name="ElementShortName">wbm_cyc_o</obj_property>
-         <obj_property name="ObjectShortName">wbm_cyc_o</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbm_cti_o" type="array">
-         <obj_property name="ElementShortName">wbm_cti_o[2:0]</obj_property>
-         <obj_property name="ObjectShortName">wbm_cti_o[2:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbm_bte_o" type="array">
-         <obj_property name="ElementShortName">wbm_bte_o[1:0]</obj_property>
-         <obj_property name="ObjectShortName">wbm_bte_o[1:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbm/busy" type="logic">
-         <obj_property name="ElementShortName">busy</obj_property>
-         <obj_property name="ObjectShortName">busy</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbm/cur_acc" type="logic">
-         <obj_property name="ElementShortName">cur_acc</obj_property>
-         <obj_property name="ObjectShortName">cur_acc</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbm/vmem_acc" type="logic">
-         <obj_property name="ElementShortName">vmem_acc</obj_property>
-         <obj_property name="ObjectShortName">vmem_acc</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbm_ack_i" type="logic">
-         <obj_property name="ElementShortName">wbm_ack_i</obj_property>
-         <obj_property name="ObjectShortName">wbm_ack_i</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbm_err_i" type="logic">
-         <obj_property name="ElementShortName">wbm_err_i</obj_property>
-         <obj_property name="ObjectShortName">wbm_err_i</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/clk_p_i" type="logic">
-         <obj_property name="ElementShortName">clk_p_i</obj_property>
-         <obj_property name="ObjectShortName">clk_p_i</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/clk_p_o" type="logic">
-         <obj_property name="ElementShortName">clk_p_o</obj_property>
-         <obj_property name="ObjectShortName">clk_p_o</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/hsync_pad_o" type="logic">
-         <obj_property name="ElementShortName">hsync_pad_o</obj_property>
-         <obj_property name="ObjectShortName">hsync_pad_o</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/vsync_pad_o" type="logic">
-         <obj_property name="ElementShortName">vsync_pad_o</obj_property>
-         <obj_property name="ObjectShortName">vsync_pad_o</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/csync_pad_o" type="logic">
-         <obj_property name="ElementShortName">csync_pad_o</obj_property>
-         <obj_property name="ObjectShortName">csync_pad_o</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/blank_pad_o" type="logic">
-         <obj_property name="ElementShortName">blank_pad_o</obj_property>
-         <obj_property name="ObjectShortName">blank_pad_o</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/r_pad_o" type="array">
-         <obj_property name="ElementShortName">r_pad_o[7:0]</obj_property>
-         <obj_property name="ObjectShortName">r_pad_o[7:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/g_pad_o" type="array">
-         <obj_property name="ElementShortName">g_pad_o[7:0]</obj_property>
-         <obj_property name="ObjectShortName">g_pad_o[7:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/b_pad_o" type="array">
-         <obj_property name="ElementShortName">b_pad_o[7:0]</obj_property>
-         <obj_property name="ObjectShortName">b_pad_o[7:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/arst" type="logic">
-         <obj_property name="ElementShortName">arst</obj_property>
-         <obj_property name="ObjectShortName">arst</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/ctrl_bl" type="logic">
-         <obj_property name="ElementShortName">ctrl_bl</obj_property>
-         <obj_property name="ObjectShortName">ctrl_bl</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/ctrl_csl" type="logic">
-         <obj_property name="ElementShortName">ctrl_csl</obj_property>
-         <obj_property name="ObjectShortName">ctrl_csl</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/ctrl_vsl" type="logic">
-         <obj_property name="ElementShortName">ctrl_vsl</obj_property>
-         <obj_property name="ObjectShortName">ctrl_vsl</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/ctrl_hsl" type="logic">
-         <obj_property name="ElementShortName">ctrl_hsl</obj_property>
-         <obj_property name="ObjectShortName">ctrl_hsl</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/ctrl_pc" type="logic">
-         <obj_property name="ElementShortName">ctrl_pc</obj_property>
-         <obj_property name="ObjectShortName">ctrl_pc</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/ctrl_cbsw" type="logic">
-         <obj_property name="ElementShortName">ctrl_cbsw</obj_property>
-         <obj_property name="ObjectShortName">ctrl_cbsw</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/ctrl_vbsw" type="logic">
-         <obj_property name="ElementShortName">ctrl_vbsw</obj_property>
-         <obj_property name="ObjectShortName">ctrl_vbsw</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/ctrl_ven" type="logic">
-         <obj_property name="ElementShortName">ctrl_ven</obj_property>
-         <obj_property name="ObjectShortName">ctrl_ven</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/ctrl_cd" type="array">
-         <obj_property name="ElementShortName">ctrl_cd[1:0]</obj_property>
-         <obj_property name="ObjectShortName">ctrl_cd[1:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/ctrl_vbl" type="array">
-         <obj_property name="ElementShortName">ctrl_vbl[1:0]</obj_property>
-         <obj_property name="ObjectShortName">ctrl_vbl[1:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/ctrl_dvi_odf" type="array">
-         <obj_property name="ElementShortName">ctrl_dvi_odf[1:0]</obj_property>
-         <obj_property name="ObjectShortName">ctrl_dvi_odf[1:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/Thsync" type="array">
-         <obj_property name="ElementShortName">Thsync[7:0]</obj_property>
-         <obj_property name="ObjectShortName">Thsync[7:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/Thgdel" type="array">
-         <obj_property name="ElementShortName">Thgdel[7:0]</obj_property>
-         <obj_property name="ObjectShortName">Thgdel[7:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/Tvsync" type="array">
-         <obj_property name="ElementShortName">Tvsync[7:0]</obj_property>
-         <obj_property name="ObjectShortName">Tvsync[7:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/Tvgdel" type="array">
-         <obj_property name="ElementShortName">Tvgdel[7:0]</obj_property>
-         <obj_property name="ObjectShortName">Tvgdel[7:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/Thgate" type="array">
-         <obj_property name="ElementShortName">Thgate[15:0]</obj_property>
-         <obj_property name="ObjectShortName">Thgate[15:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/Thlen" type="array">
-         <obj_property name="ElementShortName">Thlen[15:0]</obj_property>
-         <obj_property name="ObjectShortName">Thlen[15:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/Tvgate" type="array">
-         <obj_property name="ElementShortName">Tvgate[15:0]</obj_property>
-         <obj_property name="ObjectShortName">Tvgate[15:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/Tvlen" type="array">
-         <obj_property name="ElementShortName">Tvlen[15:0]</obj_property>
-         <obj_property name="ObjectShortName">Tvlen[15:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/VBARa" type="array">
-         <obj_property name="ElementShortName">VBARa[31:2]</obj_property>
-         <obj_property name="ObjectShortName">VBARa[31:2]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/VBARb" type="array">
-         <obj_property name="ElementShortName">VBARb[31:2]</obj_property>
-         <obj_property name="ObjectShortName">VBARb[31:2]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/cursor_adr" type="array">
-         <obj_property name="ElementShortName">cursor_adr[8:0]</obj_property>
-         <obj_property name="ObjectShortName">cursor_adr[8:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/cursor0_xy" type="array">
-         <obj_property name="ElementShortName">cursor0_xy[31:0]</obj_property>
-         <obj_property name="ObjectShortName">cursor0_xy[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/cursor1_xy" type="array">
-         <obj_property name="ElementShortName">cursor1_xy[31:0]</obj_property>
-         <obj_property name="ObjectShortName">cursor1_xy[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/cursor0_en" type="logic">
-         <obj_property name="ElementShortName">cursor0_en</obj_property>
-         <obj_property name="ObjectShortName">cursor0_en</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/cursor1_en" type="logic">
-         <obj_property name="ElementShortName">cursor1_en</obj_property>
-         <obj_property name="ObjectShortName">cursor1_en</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/cursor0_ba" type="array">
-         <obj_property name="ElementShortName">cursor0_ba[31:11]</obj_property>
-         <obj_property name="ObjectShortName">cursor0_ba[31:11]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/cursor1_ba" type="array">
-         <obj_property name="ElementShortName">cursor1_ba[31:11]</obj_property>
-         <obj_property name="ObjectShortName">cursor1_ba[31:11]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/cursor0_ld" type="logic">
-         <obj_property name="ElementShortName">cursor0_ld</obj_property>
-         <obj_property name="ObjectShortName">cursor0_ld</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/cursor1_ld" type="logic">
-         <obj_property name="ElementShortName">cursor1_ld</obj_property>
-         <obj_property name="ObjectShortName">cursor1_ld</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/cursor0_res" type="logic">
-         <obj_property name="ElementShortName">cursor0_res</obj_property>
-         <obj_property name="ObjectShortName">cursor0_res</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/cursor1_res" type="logic">
-         <obj_property name="ElementShortName">cursor1_res</obj_property>
-         <obj_property name="ObjectShortName">cursor1_res</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/cc0_dat_o" type="array">
-         <obj_property name="ElementShortName">cc0_dat_o[15:0]</obj_property>
-         <obj_property name="ObjectShortName">cc0_dat_o[15:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/cc1_dat_o" type="array">
-         <obj_property name="ElementShortName">cc1_dat_o[15:0]</obj_property>
-         <obj_property name="ObjectShortName">cc1_dat_o[15:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/stat_avmp" type="logic">
-         <obj_property name="ElementShortName">stat_avmp</obj_property>
-         <obj_property name="ObjectShortName">stat_avmp</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/stat_acmp" type="logic">
-         <obj_property name="ElementShortName">stat_acmp</obj_property>
-         <obj_property name="ObjectShortName">stat_acmp</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/vmem_swint" type="logic">
-         <obj_property name="ElementShortName">vmem_swint</obj_property>
-         <obj_property name="ObjectShortName">vmem_swint</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/clut_swint" type="logic">
-         <obj_property name="ElementShortName">clut_swint</obj_property>
-         <obj_property name="ObjectShortName">clut_swint</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/hint" type="logic">
-         <obj_property name="ElementShortName">hint</obj_property>
-         <obj_property name="ObjectShortName">hint</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/vint" type="logic">
-         <obj_property name="ElementShortName">vint</obj_property>
-         <obj_property name="ObjectShortName">vint</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/sint" type="logic">
-         <obj_property name="ElementShortName">sint</obj_property>
-         <obj_property name="ObjectShortName">sint</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wmb_busy" type="logic">
-         <obj_property name="ElementShortName">wmb_busy</obj_property>
-         <obj_property name="ObjectShortName">wmb_busy</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/luint" type="logic">
-         <obj_property name="ElementShortName">luint</obj_property>
-         <obj_property name="ObjectShortName">luint</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/cc0_adr_i" type="array">
-         <obj_property name="ElementShortName">cc0_adr_i[3:0]</obj_property>
-         <obj_property name="ObjectShortName">cc0_adr_i[3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/cc1_adr_i" type="array">
-         <obj_property name="ElementShortName">cc1_adr_i[3:0]</obj_property>
-         <obj_property name="ObjectShortName">cc1_adr_i[3:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/fb_data_fifo_rreq" type="logic">
-         <obj_property name="ElementShortName">fb_data_fifo_rreq</obj_property>
-         <obj_property name="ObjectShortName">fb_data_fifo_rreq</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/fb_data_fifo_empty" type="logic">
-         <obj_property name="ElementShortName">fb_data_fifo_empty</obj_property>
-         <obj_property name="ObjectShortName">fb_data_fifo_empty</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/fb_data_fifo_q" type="array">
-         <obj_property name="ElementShortName">fb_data_fifo_q[31:0]</obj_property>
-         <obj_property name="ObjectShortName">fb_data_fifo_q[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/ImDoneFifoQ" type="logic">
-         <obj_property name="ElementShortName">ImDoneFifoQ</obj_property>
-         <obj_property name="ObjectShortName">ImDoneFifoQ</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo_wreq" type="logic">
-         <obj_property name="ElementShortName">line_fifo_wreq</obj_property>
-         <obj_property name="ObjectShortName">line_fifo_wreq</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo_rreq" type="logic">
-         <obj_property name="ElementShortName">line_fifo_rreq</obj_property>
-         <obj_property name="ObjectShortName">line_fifo_rreq</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo_empty_rd" type="logic">
-         <obj_property name="ElementShortName">line_fifo_empty_rd</obj_property>
-         <obj_property name="ObjectShortName">line_fifo_empty_rd</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo_d" type="array">
-         <obj_property name="ElementShortName">line_fifo_d[23:0]</obj_property>
-         <obj_property name="ObjectShortName">line_fifo_d[23:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo_q" type="array">
-         <obj_property name="ElementShortName">line_fifo_q[23:0]</obj_property>
-         <obj_property name="ObjectShortName">line_fifo_q[23:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/ext_clut_req" type="logic">
-         <obj_property name="ElementShortName">ext_clut_req</obj_property>
-         <obj_property name="ObjectShortName">ext_clut_req</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/ext_clut_ack" type="logic">
-         <obj_property name="ElementShortName">ext_clut_ack</obj_property>
-         <obj_property name="ObjectShortName">ext_clut_ack</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/ext_clut_q" type="array">
-         <obj_property name="ElementShortName">ext_clut_q[23:0]</obj_property>
-         <obj_property name="ObjectShortName">ext_clut_q[23:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/cp_clut_req" type="logic">
-         <obj_property name="ElementShortName">cp_clut_req</obj_property>
-         <obj_property name="ObjectShortName">cp_clut_req</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/cp_clut_ack" type="logic">
-         <obj_property name="ElementShortName">cp_clut_ack</obj_property>
-         <obj_property name="ObjectShortName">cp_clut_ack</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/cp_clut_adr" type="array">
-         <obj_property name="ElementShortName">cp_clut_adr[8:0]</obj_property>
-         <obj_property name="ObjectShortName">cp_clut_adr[8:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/cp_clut_q" type="array">
-         <obj_property name="ElementShortName">cp_clut_q[23:0]</obj_property>
-         <obj_property name="ObjectShortName">cp_clut_q[23:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/ctrl_ven_not" type="logic">
-         <obj_property name="ElementShortName">ctrl_ven_not</obj_property>
-         <obj_property name="ObjectShortName">ctrl_ven_not</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/luint_pclk" type="logic">
-         <obj_property name="ElementShortName">luint_pclk</obj_property>
-         <obj_property name="ObjectShortName">luint_pclk</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/sluint" type="logic">
-         <obj_property name="ElementShortName">sluint</obj_property>
-         <obj_property name="ObjectShortName">sluint</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/wbm_busy" type="logic">
-         <obj_property name="ElementShortName">wbm_busy</obj_property>
-         <obj_property name="ObjectShortName">wbm_busy</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo_full_wr" type="logic">
-         <obj_property name="ElementShortName">line_fifo_full_wr</obj_property>
-         <obj_property name="ObjectShortName">line_fifo_full_wr</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/ARST_LVL" type="logic">
-         <obj_property name="ElementShortName">ARST_LVL</obj_property>
-         <obj_property name="ObjectShortName">ARST_LVL</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/LINE_FIFO_AWIDTH" type="array">
-         <obj_property name="ElementShortName">LINE_FIFO_AWIDTH[31:0]</obj_property>
-         <obj_property name="ObjectShortName">LINE_FIFO_AWIDTH[31:0]</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/rom0/clka" type="logic">
+         <obj_property name="ElementShortName">clka</obj_property>
+         <obj_property name="ObjectShortName">clka</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/rom0/addra" type="array">
+         <obj_property name="ElementShortName">addra[12:0]</obj_property>
+         <obj_property name="ObjectShortName">addra[12:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/rom0/douta" type="array">
+         <obj_property name="ElementShortName">douta[7:0]</obj_property>
+         <obj_property name="ObjectShortName">douta[7:0]</obj_property>
       </wvobject>
    </wvobject>
-   <wvobject fp_name="group531" type="group">
-      <obj_property name="label">line_fifo</obj_property>
+   <wvobject fp_name="group2485" type="group">
+      <obj_property name="label">RAM</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/rclk" type="logic">
-         <obj_property name="ElementShortName">rclk</obj_property>
-         <obj_property name="ObjectShortName">rclk</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ram1/clka" type="logic">
+         <obj_property name="ElementShortName">clka</obj_property>
+         <obj_property name="ObjectShortName">clka</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/wclk" type="logic">
-         <obj_property name="ElementShortName">wclk</obj_property>
-         <obj_property name="ObjectShortName">wclk</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ram1/wea" type="array">
+         <obj_property name="ElementShortName">wea[0:0]</obj_property>
+         <obj_property name="ObjectShortName">wea[0:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/rclr" type="logic">
-         <obj_property name="ElementShortName">rclr</obj_property>
-         <obj_property name="ObjectShortName">rclr</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ram1/addra" type="array">
+         <obj_property name="ElementShortName">addra[10:0]</obj_property>
+         <obj_property name="ObjectShortName">addra[10:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/wclr" type="logic">
-         <obj_property name="ElementShortName">wclr</obj_property>
-         <obj_property name="ObjectShortName">wclr</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ram1/dina" type="array">
+         <obj_property name="ElementShortName">dina[7:0]</obj_property>
+         <obj_property name="ObjectShortName">dina[7:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/wreq" type="logic">
-         <obj_property name="ElementShortName">wreq</obj_property>
-         <obj_property name="ObjectShortName">wreq</obj_property>
+      <wvobject fp_name="/Z81_board_sim/ZX81_board0/ram1/douta" type="array">
+         <obj_property name="ElementShortName">douta[7:0]</obj_property>
+         <obj_property name="ObjectShortName">douta[7:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/d" type="array">
-         <obj_property name="ElementShortName">d[23:0]</obj_property>
-         <obj_property name="ObjectShortName">d[23:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/rreq" type="logic">
-         <obj_property name="ElementShortName">rreq</obj_property>
-         <obj_property name="ObjectShortName">rreq</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/q" type="array">
-         <obj_property name="ElementShortName">q[23:0]</obj_property>
-         <obj_property name="ObjectShortName">q[23:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/empty" type="logic">
-         <obj_property name="ElementShortName">empty</obj_property>
-         <obj_property name="ObjectShortName">empty</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/full" type="logic">
-         <obj_property name="ElementShortName">full</obj_property>
-         <obj_property name="ObjectShortName">full</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/rrst" type="logic">
-         <obj_property name="ElementShortName">rrst</obj_property>
-         <obj_property name="ObjectShortName">rrst</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/wrst" type="logic">
-         <obj_property name="ElementShortName">wrst</obj_property>
-         <obj_property name="ObjectShortName">wrst</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/srclr" type="logic">
-         <obj_property name="ElementShortName">srclr</obj_property>
-         <obj_property name="ObjectShortName">srclr</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/ssrclr" type="logic">
-         <obj_property name="ElementShortName">ssrclr</obj_property>
-         <obj_property name="ObjectShortName">ssrclr</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/swclr" type="logic">
-         <obj_property name="ElementShortName">swclr</obj_property>
-         <obj_property name="ObjectShortName">swclr</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/sswclr" type="logic">
-         <obj_property name="ElementShortName">sswclr</obj_property>
-         <obj_property name="ObjectShortName">sswclr</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/rptr" type="array">
-         <obj_property name="ElementShortName">rptr[6:0]</obj_property>
-         <obj_property name="ObjectShortName">rptr[6:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/wptr" type="array">
-         <obj_property name="ElementShortName">wptr[6:0]</obj_property>
-         <obj_property name="ObjectShortName">wptr[6:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/rptr_gray" type="array">
-         <obj_property name="ElementShortName">rptr_gray[6:0]</obj_property>
-         <obj_property name="ObjectShortName">rptr_gray[6:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/wptr_gray" type="array">
-         <obj_property name="ElementShortName">wptr_gray[6:0]</obj_property>
-         <obj_property name="ObjectShortName">wptr_gray[6:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/srptr_gray" type="array">
-         <obj_property name="ElementShortName">srptr_gray[6:0]</obj_property>
-         <obj_property name="ObjectShortName">srptr_gray[6:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/ssrptr_gray" type="array">
-         <obj_property name="ElementShortName">ssrptr_gray[6:0]</obj_property>
-         <obj_property name="ObjectShortName">ssrptr_gray[6:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/swptr_gray" type="array">
-         <obj_property name="ElementShortName">swptr_gray[6:0]</obj_property>
-         <obj_property name="ObjectShortName">swptr_gray[6:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/sswptr_gray" type="array">
-         <obj_property name="ElementShortName">sswptr_gray[6:0]</obj_property>
-         <obj_property name="ObjectShortName">sswptr_gray[6:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/AWIDTH" type="array">
-         <obj_property name="ElementShortName">AWIDTH[31:0]</obj_property>
-         <obj_property name="ObjectShortName">AWIDTH[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u1/line_fifo/DWIDTH" type="array">
-         <obj_property name="ElementShortName">DWIDTH[31:0]</obj_property>
-         <obj_property name="ObjectShortName">DWIDTH[31:0]</obj_property>
-      </wvobject>
-   </wvobject>
-   <wvobject fp_name="group125" type="group">
-      <obj_property name="label">vid_mem</obj_property>
-      <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u3/clk_i" type="logic">
-         <obj_property name="ElementShortName">clk_i</obj_property>
-         <obj_property name="ObjectShortName">clk_i</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u3/adr_i_vga_c" type="array">
-         <obj_property name="ElementShortName">adr_i_vga_c[18:0]</obj_property>
-         <obj_property name="ObjectShortName">adr_i_vga_c[18:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u3/cyc_i_vga_c" type="logic">
-         <obj_property name="ElementShortName">cyc_i_vga_c</obj_property>
-         <obj_property name="ObjectShortName">cyc_i_vga_c</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u3/stb_i_vga_c" type="logic">
-         <obj_property name="ElementShortName">stb_i_vga_c</obj_property>
-         <obj_property name="ObjectShortName">stb_i_vga_c</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u3/ack_o_vga_c" type="logic">
-         <obj_property name="ElementShortName">ack_o_vga_c</obj_property>
-         <obj_property name="ObjectShortName">ack_o_vga_c</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u3/dat_o_vga_c" type="array">
-         <obj_property name="ElementShortName">dat_o_vga_c[31:0]</obj_property>
-         <obj_property name="ObjectShortName">dat_o_vga_c[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u3/adr_vid_i" type="array">
-         <obj_property name="ElementShortName">adr_vid_i[19:0]</obj_property>
-         <obj_property name="ObjectShortName">adr_vid_i[19:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u3/dat_vid_i" type="array">
-         <obj_property name="ElementShortName">dat_vid_i[1:0]</obj_property>
-         <obj_property name="ObjectShortName">dat_vid_i[1:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u3/wr_i" type="logic">
-         <obj_property name="ElementShortName">wr_i</obj_property>
-         <obj_property name="ObjectShortName">wr_i</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u3/dat_o_ram_vga" type="array">
-         <obj_property name="ElementShortName">dat_o_ram_vga[7:0]</obj_property>
-         <obj_property name="ObjectShortName">dat_o_ram_vga[7:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/Z81_board_sim/ZX81_board0/vga_control0/u3/adr_i_ram_vga" type="array">
-         <obj_property name="ElementShortName">adr_i_ram_vga[15:0]</obj_property>
-         <obj_property name="ObjectShortName">adr_i_ram_vga[15:0]</obj_property>
-      </wvobject>
-   </wvobject>
-   <wvobject fp_name="group1341" type="group">
-      <obj_property name="label">vid_state_machine</obj_property>
-      <obj_property name="DisplayName">label</obj_property>
    </wvobject>
 </wave_config>

@@ -26,15 +26,15 @@ use ieee.numeric_std.all;
 Package ZX81_Pack is
 
 -- 2K
--- constant RAM_ADDRWIDTH : integer := 11;
+constant RAM_ADDRWIDTH : integer := 11;
 -- 16K
-constant RAM_ADDRWIDTH : integer := 14;
+-- constant RAM_ADDRWIDTH : integer := 14;
 
 --- Constantes pour la generation du HSYNC et back/front porch:
 constant HSYNC_PULSE_ON_DURATION : integer := 15; -- @ 3,25 MHz
---- Back port to front port pulse duration (entre le d<E9>but de la zone de back porch et la fin de la zon de front porch
+--- Back port to front port pulse duration (entre le debut de la zone de back porch et la fin de la zone de front porch
 --- qui encadre les top lignes)
-constant FB_PORCH_OFF_DURATION : integer := 192; -- @ 3,25 MHz
+constant FB_PORCH_OFF_DURATION : integer := 192; -- @ 6,5 MHz
 constant MIN_VSYNC_PULSE_DURATION : integer := 60;
 
 constant NUMBER_OF_PIXELS_PER_LINE : integer := 640/2; -- 640 pixels par ligne par groupe de 2 bits
@@ -43,6 +43,10 @@ constant PIXEL_LINE_STOP : integer := PIXEL_LINE_START + NUMBER_OF_PIXELS_PER_LI
 
 constant FRAME_LINE_START: integer := 46*NUMBER_OF_PIXELS_PER_LINE; -- Offset de  lignes de  pixels vers le haut
 constant FRAME_LINE_STOP: integer := FRAME_LINE_START; -- Offset de  lignes de  pixels vers le haut
+
+-- ZX81 screen resolution
+constant HRES: integer := 32*8;
+constant VRES: integer := 24*8;
 
 -- Pour le heart beat
 constant VSYNC_COUNTER_PERIOD : integer := 12;
