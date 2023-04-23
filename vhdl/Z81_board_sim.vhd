@@ -63,7 +63,6 @@ begin
        CLK_12M => i_main_clk,
        o_MIC => i_mic_out,
        i_RESET => i_board_reset,
-       i_PUSH_BUTTON => i_push_button,
        i_KBD_L => i_kbd_l,
        o_KBD_C => i_kbd_c,
        i_EAR => i_ear_in,

@@ -127,10 +127,10 @@ architecture Behavioral of vga_control_top is
     port (
         clka : in std_logic;
         wea : in std_logic_vector(0 DOWNTO 0);
-        addra : in std_logic_vector(10 downto 0);
+        addra : in std_logic_vector(11 downto 0);
         dina : in std_logic_vector(31 DOWNTO 0);
         clkb : in std_logic;
-        addrb : in std_logic_vector(10 downto 0);
+        addrb : in std_logic_vector(11 downto 0);
         doutb : out std_logic_vector(31 downto 0)
     );
     end component;    
@@ -163,15 +163,14 @@ architecture Behavioral of vga_control_top is
 	signal vga_core_data                  : std_logic_vector(31 downto 0);
 	signal vga_core_stb, vga_core_cyc     : std_logic;
 	signal vga_core_ack                   : std_logic;
-	signal vga_core_sel                   : std_logic_vector(3 downto 0);
-	signal vga_we_o                       : std_logic;
     
     signal pixel_counter, pixel_line_counter : unsigned(15 downto 0);
     signal vsync_pulse_duration, frame_line_cntr : unsigned(15 downto 0);
     signal vid_shift_register, ula_vid_data : std_logic_vector(31 downto 0);
     signal vid_mem_wr : std_logic;
     signal horizontal_start, vertical_start, vsync_frame_detect : std_logic;
-    signal vga_buffer_adr : unsigned(10 downto 0);
+    signal vga_pixel_buffer_adr : unsigned(15 downto 0);
+    signal vga_buffer_adr : std_logic_vector(11 downto 0);
     signal ula_hsync0, ula_hsync1 : std_logic; 
 	
 	shared variable vectors : vector_list :=
@@ -190,18 +189,17 @@ architecture Behavioral of vga_control_top is
         (VBARb_REG_ADDR,x"00100000", '0'), --   program video base address 0 register (VBARb). Pas utilisé
         -- Pour le cas du ZX81, le mode choisit et une résolution de 640 x 480 avec un affichage de:
         -- Thsync : 96 pixels
-        -- Thgdel (back porch) : 240 pixels
-        -- Thgate : 384 pixels
-        -- Front porch = 800 - (96+240+384) = 80 pixels
-        -- (HTIM_REG_ADDR,x"5F9F017F", '0'), -- program horizontal timing register (384*480)
-        (HTIM_REG_ADDR,x"5F32027F", '0'), -- program horizontal timing register (640*480)
+        -- Thgdel (back porch) : 112 pixels
+        -- Thgate : 512 pixels
+        -- Front porch = 800 - (96+112+512) = 80 pixels
+        (HTIM_REG_ADDR,x"5F6F01FF", '0'), -- program horizontal timing register
         -- Pour les lignes, il y a en tout 525 lignes
         -- => Sync pulse = 2 lignes
-        -- => active time = 479 lignes (il faut une ligne de moins car sinon, on dépasse la mémoire ???)
+        -- => active time = 384 lignes (il faut une ligne de moins car sinon, on dépasse la mémoire ???)
         -- => back porch = 30
-        -- => front porch = 600 - (2+30+479) = 89 lignes
-        (VTIM_REG_ADDR,x"011D01DE", '0'), --   program vertical timing register
-        (HVLEN_REG_ADDR,x"031F020C", '0'), --   program horizontal/vertical length register (800 x 525).
+        -- => front porch = 600 - (2+30+384) = 184 lignes
+        (VTIM_REG_ADDR,x"011D017F", '0'), -- program vertical timing register
+        (HVLEN_REG_ADDR,x"031F020C", '0'), -- program horizontal/vertical length register (800 x 525 pour une resolution de 640 x 480 60 Hz).
         
         -- On n'utilise que 2 couleurs: la première en index 0 et la dernière en index 255 sur la CLUT 0 (CLUT 1 pas utilisée)
         -- CLUT_REG_ADDR_1: Couleur de fond
@@ -297,18 +295,22 @@ begin
 		wbs_cyc_i => s_cyc_o, wbs_ack_o => s_ack_i, wbs_err_o => s_err_i,
 		
 		-- Master side -> read video data by group of 32 bits (16 ULA pixels)
-		wbm_adr_o => vga_core_addr, wbm_dat_i => vga_core_data, wbm_sel_o => vga_core_sel, wbm_stb_o => vga_core_stb,
+		wbm_adr_o => vga_core_addr, wbm_dat_i => vga_core_data, wbm_stb_o => vga_core_stb,
 		wbm_cyc_o => vga_core_cyc, wbm_ack_i => vga_core_ack, wbm_err_i => '0',
 		
 		-- VGA outputs
 		clk_p_i => i_VGA_CLK, hsync_pad_o => o_HSYNC, vsync_pad_o => o_VSYNC, blank_pad_o => o_BLANK,
 		r_pad_o => o_R, g_pad_o => o_G, b_pad_o => o_B
 	);
+	
+	-- Acquittement imm<E9>diat
+    vga_core_ack <= '1' when (vga_core_cyc = '1') and (vga_core_stb = '1') else '0';
+
 
     -- Les donnees sont ecrites bit par bit et lues par groupe de 4 octets (1 octet = 1 pixel avec comme valeur 0x00 ou 0x01)
     u2: blk_mem_gen_vga_2
-        port map (clka => i_CLK_52M, wea(0) => vid_mem_wr, addra => std_logic_vector(vga_buffer_adr), dina => ula_vid_data,
-            clkb => i_CLK_52M, addrb => vga_core_addr(10 downto 0) and "11111011111", doutb => vga_core_data);
+        port map (clka => i_CLK_52M, wea(0) => vid_mem_wr, addra => vga_buffer_adr, dina => ula_vid_data,
+            clkb => i_CLK_52M, addrb => vga_core_addr(11 downto 0) and X"FEF", doutb => vga_core_data);
 
     -- i_vga_addr_frame_offset: Adresse du début de la la ligne courante dans la trame
     -- i_vga_pixel_offset: Offset du pixel dans la ligne
@@ -324,24 +326,20 @@ begin
     -- Convert serial ULA video data to 32 bits word with 16 ULA pixels
     p_build_vga_data : process(i_CLK_6_5M)
     begin
-        if i_RESET = '1' then
-            pixel_counter <= X"0000";
+        if i_RESET = '1' or vertical_start = '0' then
+            vga_pixel_buffer_adr <= (others => '0');
             vid_shift_register <= (others => '0');
-            vga_buffer_adr <= (others => '0');
-            vid_mem_wr <= '0';
-        elsif pixel_counter = 15 then
-            pixel_counter <= X"0000";
-            ula_vid_data <= vid_shift_register;
-            vga_buffer_adr <= vga_buffer_adr + "1";
-            vid_mem_wr <= '1';
         elsif rising_edge(i_CLK_6_5M) then
-            vid_mem_wr <= '0';
             if horizontal_start = '1' and vertical_start = '1' then
-                vid_shift_register <= vid_shift_register(31 downto 2) & i_ula_vid_data & i_ula_vid_data;
-                pixel_counter <= pixel_counter + 1;
+                vid_shift_register <= vid_shift_register(29 downto 0) & i_ula_vid_data & i_ula_vid_data;
+                vga_pixel_buffer_adr <= vga_pixel_buffer_adr + "1";
             end if;
         end if;
     end process;
+    
+    vga_buffer_adr <= std_logic_vector(vga_pixel_buffer_adr(15 downto 4));
+    ula_vid_data <= vid_shift_register;
+    vid_mem_wr <= '1' when vga_pixel_buffer_adr(3 downto 0) = 15 else '0';
 
     p_vga_pixel_line_counter: process (i_CLK_6_5M, i_ula_hsync)
     begin
@@ -353,7 +351,7 @@ begin
         end if;
     end process;
     
-    horizontal_start <= '1' when pixel_line_counter >= FB_PORCH_OFF_DURATION and pixel_line_counter < FB_PORCH_OFF_DURATION + HRES else '0';
+    horizontal_start <= '1' when pixel_line_counter >= PIXEL_LINE_OFFSET and pixel_line_counter < PIXEL_LINE_OFFSET + HRES else '0';
     
     p_vga_line_counter: process (i_CLK_6_5M, vsync_frame_detect)
     begin
@@ -370,7 +368,7 @@ begin
         end if;
     end process;
     
-    vertical_start <= '1' when frame_line_cntr >= FRAME_LINE_START and frame_line_cntr < FRAME_LINE_START + HRES else '0';
+    vertical_start <= '1' when frame_line_cntr >= FRAME_LINE_START and frame_line_cntr < FRAME_LINE_START + VRES else '0';
     
     p_vsync_pulse_duration_counter : process(i_CLK_6_5M)
     begin

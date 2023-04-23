@@ -30,6 +30,7 @@ use work.VGA_control_pack.all;
 use work.zx81_pack.all;
 library UNISIM;
 use UNISIM.VComponents.all;
+use std.textio.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -40,7 +41,6 @@ entity ZX81_board is
            -- Sortie "audio" ZX81 - Entrée "audio" PC
            o_MIC : out STD_LOGIC;
            i_RESET : in std_logic;
-           i_PUSH_BUTTON : in std_logic;
            i_KBD_L : in STD_LOGIC_vector (4 downto 0);
            o_KBD_C : out STD_LOGIC_vector (7 downto 0);
            -- Sortie "audio" PC - Entrée "audio" ZX81
@@ -198,6 +198,16 @@ architecture Behavioral of ZX81_board is
         o_hsync => hsync,
         o_video_data => line_vid_data
     );
+    
+    p_write_pattern : process(clk_6_5m)
+        file outfile : text open write_mode is "C:\Users\yannv\Documents\Projets_HW\ZX81\test_patterns\VGA_test_pattern.txt";
+        variable test_pattern : line;  
+    begin    
+        if rising_edge(clk_6_5m) then
+            write(test_pattern, std_logic'image(vsync) & " " & std_logic'image(hsync) & " " & std_logic'image(line_vid_data), right, 1);
+            writeline(outfile, test_pattern);
+        end if;
+    end process;         
     
     mem_addr <= mem_addr_char when (cpu_addr(14) = '0' and rfrshn = '0') else cpu_addr;
     mem_addr_char <= cpu_addr(15 downto 9) & A_prim;

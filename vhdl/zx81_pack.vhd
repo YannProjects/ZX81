@@ -34,14 +34,15 @@ constant RAM_ADDRWIDTH : integer := 11;
 constant HSYNC_PULSE_ON_DURATION : integer := 15; -- @ 3,25 MHz
 --- Back port to front port pulse duration (entre le debut de la zone de back porch et la fin de la zone de front porch
 --- qui encadre les top lignes)
-constant FB_PORCH_OFF_DURATION : integer := 192; -- @ 6,5 MHz
+constant FB_PORCH_OFF_DURATION : integer := 192; -- @ 6,5 MHz pour la generation du HSYNC de l'ULA
+constant PIXEL_LINE_OFFSET : integer := 32; -- Offset en pixel sur la ligne pour le demarrage de l'affichage VGA
 constant MIN_VSYNC_PULSE_DURATION : integer := 60;
 
 constant NUMBER_OF_PIXELS_PER_LINE : integer := 640/2; -- 640 pixels par ligne par groupe de 2 bits
 constant PIXEL_LINE_START : integer := 64/2;
 constant PIXEL_LINE_STOP : integer := PIXEL_LINE_START + NUMBER_OF_PIXELS_PER_LINE;
 
-constant FRAME_LINE_START: integer := 46*NUMBER_OF_PIXELS_PER_LINE; -- Offset de  lignes de  pixels vers le haut
+constant FRAME_LINE_START: integer := 46; -- Offset de  lignes de  pixels vers le haut
 constant FRAME_LINE_STOP: integer := FRAME_LINE_START; -- Offset de  lignes de  pixels vers le haut
 
 -- ZX81 screen resolution

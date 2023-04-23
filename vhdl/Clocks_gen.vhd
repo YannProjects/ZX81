@@ -55,9 +55,9 @@ begin
     -- 3,25 MHz: Z80    
     clk_gen : entity work.clk_wiz_2
     port map (
-        clk_in1 => main_clk,
+        main_clk => main_clk,
         clk_52m => i_clk_52m,
-        clk_vga => vga_clk,
+        vga_clock => vga_clk,
         reset => rst,
         locked => pll_locked
     );
