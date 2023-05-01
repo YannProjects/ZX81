@@ -200,7 +200,7 @@ architecture Behavioral of ZX81_board is
     );
     
     p_write_pattern : process(clk_6_5m)
-        file outfile : text open write_mode is "C:\Users\yannv\Documents\Projets_HW\ZX81\test_patterns\VGA_test_pattern.txt";
+        file outfile : text open write_mode is "D:\Documents\Projets_HW\ZX81\test_patterns\VGA_test_pattern.txt";
         variable test_pattern : line;  
     begin    
         if rising_edge(clk_6_5m) then
@@ -254,6 +254,9 @@ architecture Behavioral of ZX81_board is
         o_VGA_CONTROL_INIT_DONE => vga_control_init_done,
         i_ula_hsync => hsync,
         i_ula_vsync => vsync,
+        o_HSYNC => o_HSYNC_VGA,
+        o_VSYNC => o_VSYNC_VGA,
+        o_BLANK => BLANK_VGA,
         o_R => R_VGA,
         o_G => G_VGA,
         o_B => B_VGA
@@ -273,9 +276,6 @@ architecture Behavioral of ZX81_board is
     o_R_VGA_H(2 downto 0) <= R_VGA(7 downto 5) when BLANK_VGA = '0' else "000";
     o_G_VGA_H(2 downto 0) <= G_VGA(7 downto 5) when BLANK_VGA = '0' else "000";
     o_B_VGA_H(2 downto 0) <= B_VGA(7 downto 5) when BLANK_VGA = '0' else "000";
-    
-    o_HSYNC_VGA <= i_hsync;
-    o_VSYNC_VGA <= i_vsync;
     
     kbd_l_swap <= i_KBD_L;
 

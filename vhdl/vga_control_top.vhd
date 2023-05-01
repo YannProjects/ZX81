@@ -62,7 +62,7 @@ end vga_control_top;
 -- Chaque bit est transformé en une série d'octets lus par le controlleur VGA qui est configuré ôur un affichage en noir et blanc:
 -- '1' => 0xFF
 -- '0' => 0x00
--- Les pixels et les lignes sont aussi dupliquées pour s'adapter à la résolution VGA de 640 x 480
+-- Les pixels et les lignes sont aussi dupliquées pour s'adapter à la résolution VGA de 512 x 384
 architecture Behavioral of vga_control_top is
 
     -- Controller VGA Opencores
@@ -107,31 +107,17 @@ architecture Behavioral of vga_control_top is
 		r_pad_o,g_pad_o,b_pad_o : out std_logic_vector(7 downto 0)        -- RGB color signals
 	);
     end component vga_enh_top;
-
-    component vid_mem is
-    port(
-        clk_i : in std_logic;
-        adr_i_vga_c : std_logic_vector (18 downto 0);
-        cyc_i_vga_c : in std_logic;
-        stb_i_vga_c : in std_logic;
-        ack_o_vga_c : out std_logic;
-        dat_o_vga_c : out std_logic_vector(31 downto 0);
-        adr_vid_i : in std_logic_vector (19 downto 0);
-        dat_vid_i : in std_logic_vector(1 downto 0);
-        wr_i : in std_logic	
-    );
-    end component vid_mem;
     
 	-- Mémoire dual port de taille 32 x 24 x 2 (les lignes sont dédoublées) x 8 bits
     component blk_mem_gen_vga_2 is
     port (
         clka : in std_logic;
         wea : in std_logic_vector(0 DOWNTO 0);
-        addra : in std_logic_vector(11 downto 0);
-        dina : in std_logic_vector(31 DOWNTO 0);
+        addra : in std_logic_vector(15 downto 0);
+        dina : in std_logic_vector(0 DOWNTO 0);
         clkb : in std_logic;
-        addrb : in std_logic_vector(11 downto 0);
-        doutb : out std_logic_vector(31 downto 0)
+        addrb : in std_logic_vector(14 downto 0);
+        doutb : out std_logic_vector(1 downto 0)
     );
     end component;    
 
@@ -164,14 +150,15 @@ architecture Behavioral of vga_control_top is
 	signal vga_core_stb, vga_core_cyc     : std_logic;
 	signal vga_core_ack                   : std_logic;
     
-    signal pixel_counter, pixel_line_counter : unsigned(15 downto 0);
+    signal pixel_line_counter : unsigned(15 downto 0);
     signal vsync_pulse_duration, frame_line_cntr : unsigned(15 downto 0);
-    signal vid_shift_register, ula_vid_data : std_logic_vector(31 downto 0);
+    signal vid_shift_register, ula_vid_data : std_logic_vector(15 downto 0);
     signal vid_mem_wr : std_logic;
     signal horizontal_start, vertical_start, vsync_frame_detect : std_logic;
     signal vga_pixel_buffer_adr : unsigned(15 downto 0);
-    signal vga_buffer_adr : std_logic_vector(11 downto 0);
-    signal ula_hsync0, ula_hsync1 : std_logic; 
+    signal vga_mem_addr : std_logic_vector(14 downto 0);
+    signal ula_hsync0, ula_hsync1 : std_logic;
+    signal pixel_data : std_logic_vector(1 downto 0);
 	
 	shared variable vectors : vector_list :=
     (
@@ -224,7 +211,6 @@ begin
     -- Partie destinée à configurer le controlleur VGA
     -- Une fois le controlleur initialisé, on met VGA_CONTROL_INIT_DONE = 1 
     -- ce qui permettra de démarrer les autres composants (Z80, ULA,...).
-    
 	p_vga_controller_init : process(i_CLK_52M, i_RESET)
 	begin
         if (i_RESET = '1') then
@@ -303,14 +289,14 @@ begin
 		r_pad_o => o_R, g_pad_o => o_G, b_pad_o => o_B
 	);
 	
-	-- Acquittement imm<E9>diat
+	-- Acquittement immediat
     vga_core_ack <= '1' when (vga_core_cyc = '1') and (vga_core_stb = '1') else '0';
 
-
-    -- Les donnees sont ecrites bit par bit et lues par groupe de 4 octets (1 octet = 1 pixel avec comme valeur 0x00 ou 0x01)
+    -- Les donnees sont ecrites par gourpe de 32 bits et lues par groupe de 2 bits et transforme en
+    -- 2 octets (1 octet = 1 pixel avec comme valeur 0x00 ou 0x01)
     u2: blk_mem_gen_vga_2
-        port map (clka => i_CLK_52M, wea(0) => vid_mem_wr, addra => vga_buffer_adr, dina => ula_vid_data,
-            clkb => i_CLK_52M, addrb => vga_core_addr(11 downto 0) and X"FEF", doutb => vga_core_data);
+        port map (clka => i_CLK_52M, wea(0) => vid_mem_wr, addra => std_logic_vector(vga_pixel_buffer_adr), dina => "" & i_ula_vid_data,
+            clkb => not i_CLK_52M, addrb => vga_mem_addr, doutb => pixel_data);
 
     -- i_vga_addr_frame_offset: Adresse du début de la la ligne courante dans la trame
     -- i_vga_pixel_offset: Offset du pixel dans la ligne
@@ -322,24 +308,25 @@ begin
     -- Si on double l'affichage pour utiliser la totalité de la ligne de 640x480, on arrive à 384 * 2 > 640 pixels, 
     -- le mieux est d'éliminer les premiers et dernier pixels pour n'avoir que 640 pixels par ligne:
     -- 2*384 - 640 = 128. J'ai donc mis 64 PIXEL_LINE_START ce qui correspond à 64 pixels de ligne VGA sur la partie gauche qui sont elimines de la ligne.  
+    vga_core_data <= B"0000000" & pixel_data(0) &
+                     B"0000000" & pixel_data(0) &
+                     B"0000000" & pixel_data(1) &
+                     B"0000000" & pixel_data(1);
+    
+    vga_mem_addr <= vga_core_addr(17 downto 10) & vga_core_addr(8 downto 2);
+    vid_mem_wr <= '1' when horizontal_start = '1' and vertical_start = '1' else '0';
 
-    -- Convert serial ULA video data to 32 bits word with 16 ULA pixels
+    -- Pixel line counter
     p_build_vga_data : process(i_CLK_6_5M)
     begin
         if i_RESET = '1' or vertical_start = '0' then
             vga_pixel_buffer_adr <= (others => '0');
-            vid_shift_register <= (others => '0');
         elsif rising_edge(i_CLK_6_5M) then
             if horizontal_start = '1' and vertical_start = '1' then
-                vid_shift_register <= vid_shift_register(29 downto 0) & i_ula_vid_data & i_ula_vid_data;
                 vga_pixel_buffer_adr <= vga_pixel_buffer_adr + "1";
             end if;
         end if;
     end process;
-    
-    vga_buffer_adr <= std_logic_vector(vga_pixel_buffer_adr(15 downto 4));
-    ula_vid_data <= vid_shift_register;
-    vid_mem_wr <= '1' when vga_pixel_buffer_adr(3 downto 0) = 15 else '0';
 
     p_vga_pixel_line_counter: process (i_CLK_6_5M, i_ula_hsync)
     begin

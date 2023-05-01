@@ -58,9 +58,8 @@ set_property IOSTANDARD LVCMOS33 [get_ports i_RESET]
 set_property PACKAGE_PIN M9 [get_ports CLK_12M]
 set_property IOSTANDARD LVCMOS33 [get_ports CLK_12M]
 
-create_generated_clock -name CLK_13M -source [get_pins clk_gen_0/clk_gen/clk_52m] -divide_by 4 [get_pins clk_gen_0/clk_13m]
-create_generated_clock -name CLK_6_25 -source [get_pins clk_gen_0/clk_13m] -divide_by 2 [get_pins clk_gen_0/clk_6_5m]
-create_generated_clock -name CLK_Z80 -source [get_pins clk_gen_0/clk_6_5m] -divide_by 2 [get_pins clk_gen_0/clk_3_25m]
+
+
 
 
 

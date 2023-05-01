@@ -96,7 +96,7 @@ architecture Behavioral of ULA is
     signal nop_detect, nmin : std_logic;
     signal reload_vid_pattern : std_logic;
      
-    signal vid_shift_register : std_logic_vector(15 downto 0);
+    signal vid_shift_register : std_logic_vector(7 downto 0);
     
     signal hsyncn_counter : unsigned(7 downto 0);
     signal nop_delay : std_logic_vector(2 downto 0);
@@ -242,34 +242,17 @@ begin
         if reload_vid_pattern = '1' then
             -- Caractere en inversion video ?
             if (char_reg(7) = '0') then
-                -- Les pixels sont doublés car on les écrit 2 fois:
-                -- 1 fois à l'adresse A pendant le 1er cycle à 13 MHz et l'autre fois à l'adresse A + NUMBER_OF_PIXELS_PER_LINE (= nombre de pixels dans une ligne)
-                -- lors du second cycle de 13 MHz. Cette solution permet de doubler les lignes verticalement.
-                vid_shift_register <= i_video_pattern(7) & i_video_pattern(7) &
-                                        i_video_pattern(6) & i_video_pattern(6) &
-                                        i_video_pattern(5) & i_video_pattern(5) &
-                                        i_video_pattern(4) & i_video_pattern(4) &
-                                        i_video_pattern(3) & i_video_pattern(3) &
-                                        i_video_pattern(2) & i_video_pattern(2) &
-                                        i_video_pattern(1) & i_video_pattern(1) &
-                                        i_video_pattern(0) & i_video_pattern(0) ;
+                vid_shift_register <= i_video_pattern;
             else
-                vid_shift_register <= not (i_video_pattern(7) & i_video_pattern(7) &
-                                        i_video_pattern(6) & i_video_pattern(6) &
-                                        i_video_pattern(5) & i_video_pattern(5) &
-                                        i_video_pattern(4) & i_video_pattern(4) &
-                                        i_video_pattern(3) & i_video_pattern(3) &
-                                        i_video_pattern(2) & i_video_pattern(2) &
-                                        i_video_pattern(1) & i_video_pattern(1) &
-                                        i_video_pattern(0) & i_video_pattern(0)) ;
+                vid_shift_register <= not i_video_pattern;
             end if;
         else
-            vid_shift_register <= vid_shift_register(14 downto 0) & '0';
+            vid_shift_register <= vid_shift_register(6 downto 0) & '0';
         end if;
     end if;
 end process;
 
-o_video_data <= vid_shift_register(15);
+o_video_data <= vid_shift_register(7);
 o_hsync <= hsync;
 o_vsync <= vsync;
 
