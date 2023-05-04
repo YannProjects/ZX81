@@ -37,7 +37,7 @@ use std.textio.all;
 --use IEEE.NUMERIC_STD.ALL;
 
 entity ZX81_board is
-    Port ( CLK_12M : in STD_LOGIC; -- Clock from CMOD S7
+    Port ( CLK_12M : in STD_LOGIC; -- Main clock from CMOD S7
            -- Sortie "audio" ZX81 - Entrée "audio" PC
            o_MIC : out STD_LOGIC;
            i_RESET : in std_logic;
@@ -78,9 +78,8 @@ architecture Behavioral of ZX81_board is
     signal cpu_data_out, cpu_data_in, ram_data, rom_data : std_logic_vector (7 downto 0);
     signal ula_data, video_pattern_data : std_logic_vector (7 downto 0);
     signal cpu_resetn : std_logic;
-    signal kbd_l_swap : std_logic_vector(4 downto 0);
     signal rom_csn, ram_csn, ula_csn : std_logic;
-    signal vsync_0, vsync_1, vsync_heart_beat, vsync_frame_detect : std_logic;
+    signal vsync_0, vsync_1, vsync_frame_detect : std_logic;
     
     -- VGA
     signal vga_clock, pll_locked : std_logic;
@@ -93,6 +92,9 @@ architecture Behavioral of ZX81_board is
     signal R_VGA, G_VGA, B_VGA : std_logic_vector(7 downto 0);
     signal BLANK_VGA : std_logic;
     signal i_hsync, i_vsync : std_logic;
+    
+    signal vsync_counter : integer;
+    signal heart_beat : std_logic;
 
     attribute ASYNC_REG : string;
     attribute ASYNC_REG of vga_control_init_done_0 : signal is "TRUE";
@@ -176,7 +178,7 @@ architecture Behavioral of ZX81_board is
         o_Ap => A_prim,
         i_video_pattern => video_pattern_data,
         o_ula_data => ula_data, 
-        i_kbdn => kbd_l_swap,
+        i_kbdn => i_KBD_L,
         i_tape_in => tape_in,
         i_usa_uk => '0',
         o_tape_out => o_MIC,
@@ -199,16 +201,17 @@ architecture Behavioral of ZX81_board is
         o_video_data => line_vid_data
     );
     
-    p_write_pattern : process(clk_6_5m)
-        file outfile : text open write_mode is "D:\Documents\Projets_HW\ZX81\test_patterns\VGA_test_pattern.txt";
-        variable test_pattern : line;  
-    begin    
-        if rising_edge(clk_6_5m) then
-            write(test_pattern, std_logic'image(vsync) & " " & std_logic'image(hsync) & " " & std_logic'image(line_vid_data), right, 1);
-            writeline(outfile, test_pattern);
-        end if;
-    end process;         
+    -- p_write_pattern : process(clk_6_5m)
+    --     file outfile : text open write_mode is "D:\Documents\Projets_HW\ZX81\test_patterns\VGA_test_pattern.txt";
+    --     variable test_pattern : line;  
+    -- begin    
+    --     if rising_edge(clk_6_5m) then
+    --         write(test_pattern, std_logic'image(vsync) & " " & std_logic'image(hsync) & " " & std_logic'image(line_vid_data), right, 1);
+    --         writeline(outfile, test_pattern);
+    --     end if;
+    -- end process;         
     
+    -- U12 - Read char bitmap during refresh cycle when A14 = 0
     mem_addr <= mem_addr_char when (cpu_addr(14) = '0' and rfrshn = '0') else cpu_addr;
     mem_addr_char <= cpu_addr(15 downto 9) & A_prim;
     -- Char address in RAM or video pattern in ROM
@@ -235,6 +238,7 @@ architecture Behavioral of ZX81_board is
         douta => rom_data
     );
 
+    -- RAM ZX81 (tuned to 2K ro 16K with RAM_ADDRWIDTH)
     ram1 : blk_mem_gen_0
     port map (
        clka => clk_3_25m,
@@ -244,16 +248,18 @@ architecture Behavioral of ZX81_board is
        wea => wrram
     );
     
+    -- Interface to VGA
     vga_control0 : entity work.vga_control_top
     port map (
         i_RESET => i_RESET,
-        i_CLK_52M => clk_52m,
         i_CLK_6_5M => clk_6_5m,
+        i_ula_vid_data => line_vid_data,        
         i_VGA_CLK => vga_clock,
-        i_ula_vid_data => line_vid_data,
+        i_CLK_52M => clk_52m,        
         o_VGA_CONTROL_INIT_DONE => vga_control_init_done,
         i_ula_hsync => hsync,
         i_ula_vsync => vsync,
+        -- VGA interface
         o_HSYNC => o_HSYNC_VGA,
         o_VSYNC => o_VSYNC_VGA,
         o_BLANK => BLANK_VGA,
@@ -276,21 +282,15 @@ architecture Behavioral of ZX81_board is
     o_R_VGA_H(2 downto 0) <= R_VGA(7 downto 5) when BLANK_VGA = '0' else "000";
     o_G_VGA_H(2 downto 0) <= G_VGA(7 downto 5) when BLANK_VGA = '0' else "000";
     o_B_VGA_H(2 downto 0) <= B_VGA(7 downto 5) when BLANK_VGA = '0' else "000";
-    
-    kbd_l_swap <= i_KBD_L;
 
 -----------------------------------------------------
 -- Process pour le heart beat (allumage LED)
 -----------------------------------------------------
 p_vsync_hb : process (i_RESET, clk_3_25m, IORQn)
-
-variable i_vsync_counter : integer;
-variable i_heart_beat : std_logic;
-
 begin
     if (i_RESET = '0') then
-        i_heart_beat := '0';
-        i_vsync_counter := VSYNC_COUNTER_PERIOD;
+        heart_beat <= '0';
+        vsync_counter <= VSYNC_COUNTER_PERIOD;
     -- Sur chaque front descendant de l'horloge 6.5 MHz
     elsif rising_edge(clk_3_25m) then
         vsync_0 <= vsync_frame_detect;
@@ -298,15 +298,15 @@ begin
         -- Compteur de heart beat pour faire clignoter la LED sur le CMOD S7. 
         -- Détection transtion 1 -> 0
         if vsync_1 = '1' and vsync_0 = '0' then
-            i_vsync_counter := i_vsync_counter - 1;
-            if  i_vsync_counter = 0 then
-                i_vsync_counter := VSYNC_COUNTER_PERIOD;
-                i_heart_beat := not i_heart_beat;
+            vsync_counter <= vsync_counter - 1;
+            if  vsync_counter = 0 then
+                vsync_counter <= VSYNC_COUNTER_PERIOD;
+                heart_beat <= not heart_beat;
             end if;
         end if;
     end if;
     
-    vsync_heart_beat <= i_heart_beat;
+    o_heart_beat <= heart_beat;
     
 end process;
 

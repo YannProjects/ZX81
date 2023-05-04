@@ -58,11 +58,11 @@ entity vga_control_top is
 end vga_control_top;
 
 -- Composant permettant d'accéder au controlleur VGA.
--- On écrit les données vidéo du ZX81 dans une RAM de 768 octets (32*24).
--- Chaque bit est transformé en une série d'octets lus par le controlleur VGA qui est configuré ôur un affichage en noir et blanc:
--- '1' => 0xFF
--- '0' => 0x00
+-- On écrit les données vidéo du ZX81 dans une RAM de 49152 bits (32*8*24*8).
+-- Les données sont écrites bit par bit et lues par groupe de 2 bits, dupliqués et transformés en 2 octets (0x00, 0x01)
+-- pour l'affichage en N&B du controlleur VGA
 -- Les pixels et les lignes sont aussi dupliquées pour s'adapter à la résolution VGA de 512 x 384
+-- Le lignes sont dupliquées en supprimant le bit 9 de l'adresse master du controller VGA
 architecture Behavioral of vga_control_top is
 
     -- Controller VGA Opencores
@@ -142,7 +142,7 @@ architecture Behavioral of vga_control_top is
 	signal s_dat_o, s_dat_i         : std_logic_vector(31 downto 0);
 	signal s_sel_o                  : std_logic_vector(3 downto 0);
 	signal s_ack_i, s_err_i         : std_logic;
-	signal s_stb_vga_o : std_logic;
+	signal s_stb_vga_o              : std_logic;
 	
     -- vga master
 	signal vga_core_addr                  : std_logic_vector(31 downto 0);
@@ -292,27 +292,18 @@ begin
 	-- Acquittement immediat
     vga_core_ack <= '1' when (vga_core_cyc = '1') and (vga_core_stb = '1') else '0';
 
-    -- Les donnees sont ecrites par gourpe de 32 bits et lues par groupe de 2 bits et transforme en
+    -- Les donnees sont ecrites bit par bit et lues par groupe de 2 bits et transformees en
     -- 2 octets (1 octet = 1 pixel avec comme valeur 0x00 ou 0x01)
     u2: blk_mem_gen_vga_2
         port map (clka => i_CLK_52M, wea(0) => vid_mem_wr, addra => std_logic_vector(vga_pixel_buffer_adr), dina => "" & i_ula_vid_data,
-            clkb => not i_CLK_52M, addrb => vga_mem_addr, doutb => pixel_data);
+           clkb => not i_CLK_52M, addrb => vga_mem_addr, doutb => pixel_data);
 
-    -- i_vga_addr_frame_offset: Adresse du début de la la ligne courante dans la trame
-    -- i_vga_pixel_offset: Offset du pixel dans la ligne
-    -- i_vga_line_offset: Variable utilisée pour adressée un ligne sur 2 (contient 0 ou NUMBER_OF_PIXELS_PER_LINE)
-    -- LINE_OFFSET_FROM_FRAME_START: Offset pour décaler l'image de 45 lignes vers le haut et mieux la centrer par rapport à l'affichage VGA
-    -- PIXEL_LINE_START: Offset dans la ligne du premier pixel à écrire
-    -- PIXEL_LINE_STOP: Offset dans la ligne du dernier pixel à écrire
-    -- Une ligne d'affichage du ZX81 contient 192 cycles d'horloge à 3,5 MHz donc 384 cycles à 6,5 MHz, soit un maximum de 384 pixels par lignes.
-    -- Si on double l'affichage pour utiliser la totalité de la ligne de 640x480, on arrive à 384 * 2 > 640 pixels, 
-    -- le mieux est d'éliminer les premiers et dernier pixels pour n'avoir que 640 pixels par ligne:
-    -- 2*384 - 640 = 128. J'ai donc mis 64 PIXEL_LINE_START ce qui correspond à 64 pixels de ligne VGA sur la partie gauche qui sont elimines de la ligne.  
     vga_core_data <= B"0000000" & pixel_data(0) &
                      B"0000000" & pixel_data(0) &
                      B"0000000" & pixel_data(1) &
                      B"0000000" & pixel_data(1);
-    
+
+    -- Suppression du bit 9 pour doubler les lignes (384 = 2*192).    
     vga_mem_addr <= vga_core_addr(17 downto 10) & vga_core_addr(8 downto 2);
     vid_mem_wr <= '1' when horizontal_start = '1' and vertical_start = '1' else '0';
 

@@ -25,10 +25,6 @@ use ieee.std_logic_unsigned.all;
 use ieee.std_logic_arith.all;
 use work.ZX81_Pack.all;
 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
 library UNISIM;
@@ -147,7 +143,7 @@ begin
 end process;
 
 -- U12
-o_Ap <= char_reg(5 downto 0) & std_logic_vector(char_line_cntr);
+o_Ap <= char_reg(5 downto 0) & std_logic_vector(char_line_cntr) when i_rdn = '0';
 
 -- Timing generator
 p_hsync_gen: process (i_clk_3_25_m, i_resetn, vsync)
@@ -169,7 +165,7 @@ hsync <= '1' when hsyncn_counter >= FB_PORCH_OFF_DURATION else '0';
 -- Basé sur le schéma http://quix.us/timex/rigter/ZX97lite.html
 -- Chapitre 6) VSYNC / NMI CIRCUIT
 -------------------------------------------------------
--- D'apres le schema du ZX81 clone:
+-- D'apres le schema du ZX97:
 -- IORQ read et A0 = 0 et NMI_ONn = 1 => VSYNC = 1
 -- IORQ write => VSYNC = 0
 -- IORQ write et A0 = 0 => NMI_ONn = 0 (OUT_FEn)
@@ -209,7 +205,7 @@ end process;
 -- Lorsque celle-ci arrive, le CPU continue son exécution à l'adresse 0x007A. Ce code, stoppe la NMI (OUT FD, A)
 -- et démare "l'exécution" en RAM vidéo (JP (IX)).
 -- Cependant, cette phase a besoin d'être synchonisée avec la fin du pulse de NMI afin de démarrer l'envoi
--- de la vidéo préciésement à ce moment.
+-- de la vidéo préciséement à ce moment.
 -- C'est la fonction de la porte OR ci-dessous.
 -- Si on sort de HALTn et que NMIn = 0 (NMI pulse en court), on insère des cycles de WAIT afin d'attendre la fin du pulse de NMI
 -- et relacher le CPU sur le cycle T3 (après les cycles de WAIT) et charger le registre à décalage vidéo sur le cycle T4 juste après...
@@ -217,6 +213,7 @@ nmin <= nmionn or not hsync;
 o_waitn <= not i_haltn or nmin;
 o_nmin <= nmin;
 
+-- Lecture entrée clavier (U8)
 kbd_n <= (i_A(0) or i_rdn) or i_iorqn;
 o_ulan <= not(not kbd_n or nop_detect);
 o_ula_data <= i_TAPE_IN & i_USA_UK & '0' & i_kbdn(0) & i_kbdn(1) & i_kbdn(2) & i_kbdn(3) & i_kbdn(4) when kbd_n = '0' else (others => '0');
@@ -226,6 +223,8 @@ o_tape_out <= not vsync;
 nop_detect <= '1' when (i_m1n = '0' and i_mreqn = '0' and i_rdn = '0' and i_haltn = '1' and i_A(15 downto 14) = "11" and i_video_pattern(6) = '0') else '0';
 char_reg <= i_video_pattern when nop_detect = '1';
 
+-- Retarde le NOP de 2 cycles de 6,5 MHz pour être synchonisé avec l'instant de rechargement du 
+-- pattern video
 p_process_nop_delay: process(i_clk_6_5_m)
 begin
     if rising_edge(i_clk_6_5_m) then
@@ -235,7 +234,7 @@ end process;
 
 reload_vid_pattern <= '1' when nop_delay="100" else '0';
 
--- Video part
+-- Registre à décalage (U22)
 p_vid_shift_register: process (i_clk_6_5_m, reload_vid_pattern)
 begin
     if rising_edge(i_clk_6_5_m) then
