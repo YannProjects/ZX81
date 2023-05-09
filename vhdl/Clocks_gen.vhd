@@ -38,7 +38,6 @@ entity Clocks_gen is
            vga_clk : out STD_LOGIC;
            clk_3_25m : out STD_LOGIC;
            clk_6_5m : out STD_LOGIC;
-           clk_13m : out STD_LOGIC;
            rst : in std_logic;
            pll_locked : out std_logic);
 end Clocks_gen;
@@ -89,7 +88,6 @@ begin
 
     clk_3_25m <= i_clk_3_25m;
     clk_6_5m <= i_clk_6_5m;
-    clk_13m <= i_clk_13m;
     clk_52m <= i_clk_52m;
 
 end Based_on_IP;
