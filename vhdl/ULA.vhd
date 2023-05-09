@@ -48,7 +48,7 @@ entity ULA is
            i_video_pattern : in std_logic_vector(7 downto 0);
            
            -- ULA data (NOP or I/O: KBD, Tape in,...)
-           o_ula_data : out std_logic_vector(7 downto 0);
+           o_io_data : out std_logic_vector(7 downto 0);
            
            -- Keyboard raws
            i_kbdn : in std_logic_vector (4 downto 0);
@@ -60,8 +60,8 @@ entity ULA is
 
            o_ram_csn : out std_logic;
            o_rom_csn : out std_logic;
-           -- Put ULA data to Z80
-           o_ulan : out std_logic;
+           o_io_read : out std_logic;
+           o_nop_detect : out std_logic;
            
            -- Z80 control signals
            i_rdn : in std_logic;
@@ -94,7 +94,7 @@ architecture Behavioral of ULA is
      
     signal vid_shift_register : std_logic_vector(7 downto 0);
     
-    signal hsyncn_counter : unsigned(7 downto 0);
+    signal hsyncn_counter : integer;
     signal nop_delay : std_logic_vector(2 downto 0);
     
 begin
@@ -143,14 +143,21 @@ begin
 end process;
 
 -- U12
-o_Ap <= char_reg(5 downto 0) & std_logic_vector(char_line_cntr) when i_rdn = '0';
+p_A_prim: process(i_clk_3_25_m)
+begin
+    if rising_edge(i_clk_3_25_m) then
+        if i_rdn = '0' then
+            o_Ap <= char_reg(5 downto 0) & std_logic_vector(char_line_cntr);
+        end if;
+    end if;
+end process;
 
 -- Timing generator
-p_hsync_gen: process (i_clk_3_25_m, i_resetn, vsync)
+p_hsync_gen: process (i_clk_3_25_m, i_resetn, vsync, hsyncn_counter)
 begin
     -- 192 cycles d'horloge à 3,25 MHz
     if i_resetn = '0' or vsync = '1' or hsyncn_counter = FB_PORCH_OFF_DURATION + HSYNC_PULSE_ON_DURATION then
-        hsyncn_counter <= X"00";
+        hsyncn_counter <= 0;
     elsif rising_edge(i_clk_3_25_m) then
         hsyncn_counter <= hsyncn_counter + 1;
     end if;
@@ -176,25 +183,29 @@ hsync <= '1' when hsyncn_counter >= FB_PORCH_OFF_DURATION else '0';
 -------------------------------------------------------
 
 -- VSYNC NMI KBD (U8, U15, U17)
-p_vsync : process(i_iorqn, i_A, i_rdn, i_wrn)
+p_vsync : process(i_clk_6_5_m, i_iorqn, i_A, i_rdn, i_wrn)
 begin
-    -- Clear VSYNC (OUT NN)
-    if (i_iorqn = '0' and i_wrn = '0') or i_resetn = '0' then
-        vsync <= '0';
-    -- Enable VSYNC (IN FE)
-    elsif i_iorqn = '0' and i_A(0) = '0' and i_rdn = '0' then
-        vsync <= '1';
+    if falling_edge(i_clk_6_5_m) then
+        -- Clear VSYNC (OUT NN)
+        if (i_iorqn = '0' and i_wrn = '0') or i_resetn = '0' then
+            vsync <= '0';
+        -- Enable VSYNC (IN FE)
+        elsif i_iorqn = '0' and i_A(0) = '0' and i_rdn = '0' then
+            vsync <= '1';
+        end if;
     end if;
 end process;
 
-p_nmi : process(i_iorqn, i_A, i_rdn, i_wrn)
+p_nmi : process(i_clk_6_5_m, i_iorqn, i_A, i_rdn, i_wrn)
 begin
-    -- Clear NMIn (OUT FD)
-    if (i_iorqn = '0' and i_wrn = '0' and i_A(1) = '0') or i_resetn = '0' then
-        nmionn <= '1';
-    -- Enable NMIn (OUT FE)
-    elsif i_iorqn = '0' and i_wrn = '0' and i_A(0) = '0' then
-        nmionn <= '0';
+    if falling_edge(i_clk_6_5_m) then
+        -- Clear NMIn (OUT FD)
+        if (i_iorqn = '0' and i_wrn = '0' and i_A(1) = '0') or i_resetn = '0' then
+            nmionn <= '1';
+        -- Enable NMIn (OUT FE)
+        elsif i_iorqn = '0' and i_wrn = '0' and i_A(0) = '0' then
+            nmionn <= '0';
+        end if;
     end if;
 end process;
 
@@ -214,14 +225,20 @@ o_waitn <= not i_haltn or nmin;
 o_nmin <= nmin;
 
 -- Lecture entrée clavier (U8)
-kbd_n <= (i_A(0) or i_rdn) or i_iorqn;
-o_ulan <= not(not kbd_n or nop_detect);
-o_ula_data <= i_TAPE_IN & i_USA_UK & '0' & i_kbdn(0) & i_kbdn(1) & i_kbdn(2) & i_kbdn(3) & i_kbdn(4) when kbd_n = '0' else (others => '0');
+o_io_read <= not (i_A(0) or i_rdn or i_iorqn);
+o_nop_detect <= nop_detect;
+o_io_data <= i_TAPE_IN & i_USA_UK & '0' & i_kbdn(0) & i_kbdn(1) & i_kbdn(2) & i_kbdn(3) & i_kbdn(4);
 o_tape_out <= not vsync;
 
 -- NOP detection (U19, U13)
 nop_detect <= '1' when (i_m1n = '0' and i_mreqn = '0' and i_rdn = '0' and i_haltn = '1' and i_A(15 downto 14) = "11" and i_video_pattern(6) = '0') else '0';
-char_reg <= i_video_pattern when nop_detect = '1';
+
+p_char_reg_update: process(i_clk_3_25_m)
+begin
+    if nop_detect = '1' and rising_edge(i_clk_3_25_m) then
+        char_reg <= i_video_pattern;
+    end if;
+end process;
 
 -- Retarde le NOP de 2 cycles de 6,5 MHz pour être synchonisé avec l'instant de rechargement du 
 -- pattern video
