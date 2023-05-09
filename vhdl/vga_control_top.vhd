@@ -150,8 +150,8 @@ architecture Behavioral of vga_control_top is
 	signal vga_core_stb, vga_core_cyc     : std_logic;
 	signal vga_core_ack                   : std_logic;
     
-    signal pixel_line_counter : unsigned(15 downto 0);
-    signal vsync_pulse_duration, frame_line_cntr : unsigned(15 downto 0);
+    signal pixel_line_counter : integer;
+    signal vsync_pulse_duration, frame_line_cntr : integer;
     signal vid_shift_register, ula_vid_data : std_logic_vector(15 downto 0);
     signal vid_mem_wr : std_logic;
     signal horizontal_start, vertical_start, vsync_frame_detect : std_logic;
@@ -185,7 +185,7 @@ architecture Behavioral of vga_control_top is
         -- => active time = 384 lignes (il faut une ligne de moins car sinon, on dépasse la mémoire ???)
         -- => back porch = 30
         -- => front porch = 600 - (2+30+384) = 184 lignes
-        (VTIM_REG_ADDR,x"011D017F", '0'), -- program vertical timing register
+        (VTIM_REG_ADDR,x"013D017F", '0'), -- program vertical timing register
         (HVLEN_REG_ADDR,x"031F020C", '0'), -- program horizontal/vertical length register (800 x 525 pour une resolution de 640 x 480 60 Hz).
         
         -- On n'utilise que 2 couleurs: la première en index 0 et la dernière en index 255 sur la CLUT 0 (CLUT 1 pas utilisée)
@@ -308,7 +308,7 @@ begin
     vid_mem_wr <= '1' when horizontal_start = '1' and vertical_start = '1' else '0';
 
     -- Pixel line counter
-    p_build_vga_data : process(i_CLK_6_5M)
+    p_build_vga_data : process(i_CLK_6_5M, i_RESET, vertical_start)
     begin
         if i_RESET = '1' or vertical_start = '0' then
             vga_pixel_buffer_adr <= (others => '0');
@@ -323,7 +323,7 @@ begin
     begin
         if i_ula_hsync = '1' then
             -- On resette le nombre de pixel depuis le début de la ligne en cas de HSYNC
-            pixel_line_counter <= X"0000";
+            pixel_line_counter <= 0;
         elsif rising_edge(i_CLK_6_5M) then
             pixel_line_counter <= pixel_line_counter + 1;
         end if;
@@ -334,7 +334,7 @@ begin
     p_vga_line_counter: process (i_CLK_6_5M, vsync_frame_detect)
     begin
         if vsync_frame_detect = '1' then
-            frame_line_cntr <= X"0000";
+            frame_line_cntr <= 0;
         -- Sur chaque front descendant de l'horloge 3,25 MHz
         elsif rising_edge(i_CLK_6_5M) then
             ula_hsync0 <= i_ula_hsync;
@@ -348,16 +348,16 @@ begin
     
     vertical_start <= '1' when frame_line_cntr >= FRAME_LINE_START and frame_line_cntr < FRAME_LINE_START + VRES else '0';
     
-    p_vsync_pulse_duration_counter : process(i_CLK_6_5M)
+    p_vsync_pulse_duration_counter : process(i_CLK_6_5M, i_ula_vsync)
     begin
         if i_ula_vsync = '0' then
-            vsync_pulse_duration <= X"0000";
+            vsync_pulse_duration <= 0;
             vsync_frame_detect <= '0';
         -- On compte la durée du pulse de VSYNC pour savoir si c'est uyne vraie synchro trame ou pas
         -- (cas du ZX81 en mode pseudo-hires avec invaders ou pacman)
         elsif rising_edge(i_CLK_6_5M) then
             vsync_pulse_duration <= vsync_pulse_duration + 1;
-            if vsync_pulse_duration >= MIN_VSYNC_PULSE_DURATION then
+            if vsync_pulse_duration >= MIN_VSYNC_PULSE_DURATION  then
                 vsync_frame_detect <= '1';
             end if;
         end if;
