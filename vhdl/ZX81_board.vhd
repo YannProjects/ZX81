@@ -76,10 +76,12 @@ architecture Behavioral of ZX81_board is
     signal cpu_addr, mem_addr_char, mem_addr : std_logic_vector (15 downto 0);
     signal A_prim : std_logic_vector (8 downto 0);
     signal cpu_data_out, cpu_data_in, ram_data, rom_data : std_logic_vector (7 downto 0);
-    signal ula_data, video_pattern_data : std_logic_vector (7 downto 0);
+    signal ula_io_data, video_pattern_data : std_logic_vector (7 downto 0);
     signal cpu_resetn : std_logic;
     signal rom_csn, ram_csn, ula_csn : std_logic;
     signal vsync_0, vsync_1 : std_logic;
+    
+    signal ula_io_read, ula_nop_detect : std_logic;
     
     -- VGA
     signal vga_clock, pll_locked : std_logic;
@@ -176,14 +178,15 @@ architecture Behavioral of ZX81_board is
         i_A => cpu_addr,
         o_Ap => A_prim,
         i_video_pattern => video_pattern_data,
-        o_ula_data => ula_data, 
+        o_io_read => ula_io_read,
+        o_io_data => ula_io_data, 
         i_kbdn => i_KBD_L,
         i_tape_in => tape_in,
         i_usa_uk => '0',
         o_tape_out => o_MIC,
         o_ram_csn => ram_csn,
         o_rom_csn => rom_csn,
-        o_ulan => ula_csn,
+        o_nop_detect => ula_nop_detect,
         
         i_rdn => rdn,
         i_wrn => wrn,
@@ -216,10 +219,12 @@ architecture Behavioral of ZX81_board is
     -- Char address in RAM or video pattern in ROM
     video_pattern_data <= rom_data when (cpu_addr(14) = '0' and rfrshn = '0') else ram_data;
     
-    p_cpu_data_select : process(ram_csn, rom_csn, ula_csn, ram_data, rom_data, ula_data)
+    p_cpu_data_select : process(ram_csn, rom_csn, ula_io_read, ula_nop_detect, ram_data, rom_data, ula_io_data)
     begin
-        if ula_csn = '0' then
-            cpu_data_in <= ula_data;
+        if ula_io_read = '1' then
+            cpu_data_in <= ula_io_data;
+        elsif ula_nop_detect = '1' then
+            cpu_data_in <= (others => '0');
         elsif rom_csn = '0' then
             cpu_data_in <= rom_data;
         elsif ram_csn = '0' then
