@@ -67,7 +67,7 @@ end ZX81_board;
 
 architecture Behavioral of ZX81_board is   
 
-    signal clk_52m, clk_3_25m, clk_6_5m, clk_13m : std_logic;
+    signal clk_52m, clk_3_25m, clk_6_5m : std_logic;
     
     -- Control signal
     signal waitn, nmin : std_logic := '1';
@@ -79,7 +79,7 @@ architecture Behavioral of ZX81_board is
     signal ula_data, video_pattern_data : std_logic_vector (7 downto 0);
     signal cpu_resetn : std_logic;
     signal rom_csn, ram_csn, ula_csn : std_logic;
-    signal vsync_0, vsync_1, vsync_frame_detect : std_logic;
+    signal vsync_0, vsync_1 : std_logic;
     
     -- VGA
     signal vga_clock, pll_locked : std_logic;
@@ -127,7 +127,6 @@ architecture Behavioral of ZX81_board is
         clk_52m => clk_52m,
         clk_3_25m => clk_3_25m,
         clk_6_5m => clk_6_5m,
-        clk_13m => clk_13m,
         vga_clk => vga_clock,
         rst => i_reset,
         pll_locked => pll_locked
@@ -288,12 +287,12 @@ architecture Behavioral of ZX81_board is
 -----------------------------------------------------
 p_vsync_hb : process (i_RESET, clk_3_25m, IORQn)
 begin
-    if (i_RESET = '0') then
+    if (i_RESET = '1') then
         heart_beat <= '0';
         vsync_counter <= VSYNC_COUNTER_PERIOD;
     -- Sur chaque front descendant de l'horloge 6.5 MHz
     elsif rising_edge(clk_3_25m) then
-        vsync_0 <= vsync_frame_detect;
+        vsync_0 <= vsync;
         vsync_1 <= vsync_0;
         -- Compteur de heart beat pour faire clignoter la LED sur le CMOD S7. 
         -- Détection transtion 1 -> 0
