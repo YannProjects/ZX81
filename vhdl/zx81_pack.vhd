@@ -36,10 +36,9 @@ constant HSYNC_PULSE_ON_DURATION : integer := 15; -- @ 3,25 MHz
 --- qui encadre les top lignes)
 constant FB_PORCH_OFF_DURATION : integer := 192; -- @ 6,5 MHz pour la generation du HSYNC de l'ULA
 constant PIXEL_LINE_OFFSET : integer := 32; -- Offset en pixel sur la ligne pour le demarrage de l'affichage VGA
-constant MIN_VSYNC_PULSE_DURATION : integer := 60;
-
 constant FRAME_LINE_START: integer := 46; -- Offset de  lignes de  pixels vers le haut
-constant FRAME_LINE_STOP: integer := FRAME_LINE_START; -- Offset de  lignes de  pixels vers le haut
+
+constant MIN_VSYNC_PULSE_DURATION : integer := 60;
 
 -- ZX81 screen resolution
 constant HRES: integer := 32*8;
