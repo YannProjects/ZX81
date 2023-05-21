@@ -121,7 +121,7 @@ begin
     if i_RESETn = '0' then
         vid_shift_register <= (others => '0');
         vga_line_offset <= 0;
-    elsif falling_edge(i_CLK_13_M) then
+    elsif rising_edge(i_CLK_13_M) then
         -- Sélection de la partie avec MREQn = 0 (cycle T4) durant laquelle il faut recharger le pattern video
         -- Dans le schema original du ZX81, le registre à decalage est recharge en fin de cycle T4 de l'execution en RAM video.
         -- C'est ce qui est reproduit ici en rechargeant le registre en fin de cycle T4 avec les conditions:
@@ -241,33 +241,35 @@ end process;
 
 -- Nouvelle version utilisant des fonctions combinatoires pour
 -- le décodage des adresses.
-p_cpu_data_in : process (i_Cpu_Addr, i_RDn, i_MREQn, i_IORQn, i_RFRSHn, i_D_ram_out, i_D_rom_out, i_TAPE_IN, i_USA_UK, i_KBDn)
+p_cpu_data_in : process (i_CLK_6_5_M, i_Cpu_Addr, i_RDn, i_MREQn, i_IORQn, i_RFRSHn, i_D_ram_out, i_D_rom_out, i_TAPE_IN, i_USA_UK, i_KBDn)
 begin
-    -- MREQn = '0' and RFRSHn = '0' pour tenir compte du mode HiRes où l'on doit pouvoir lire des patterns
-    -- video à partir de la RAM et pas seulement de la ROM.
-    if (i_MREQn = '0' and i_RDn = '0') or (i_MREQn = '0' and i_RFRSHn = '0') then
-        -- Cycle de lecture RAM / ROM
-        case i_Cpu_Addr(15 downto 13) is
-            -- Adressage de la ROM
-            when "000" =>
-                d_cpu_in <= i_D_rom_out;
-            -- Adressage de la RAM 
-            when "001"|"010"|"011"|"100"|"101" =>
-                d_cpu_in <= i_D_ram_out;
-            -- NOP execution ?
-            when "110"|"111" =>
-                -- NOP uniquement si le bit 6 = 0 (sinon c'est une instruction de HALT et on la laisse passer)
-                if i_D_ram_out(6) = '0' then
-                    d_cpu_in <= X"00";
-                else
+    if falling_edge(i_CLK_6_5_M) then
+        -- MREQn = '0' and RFRSHn = '0' pour tenir compte du mode HiRes où l'on doit pouvoir lire des patterns
+        -- video à partir de la RAM et pas seulement de la ROM.
+        if (i_MREQn = '0' and i_RDn = '0') or (i_MREQn = '0' and i_RFRSHn = '0') then
+            -- Cycle de lecture RAM / ROM
+            case i_Cpu_Addr(15 downto 13) is
+                -- Adressage de la ROM
+                when "000" =>
+                    d_cpu_in <= i_D_rom_out;
+                -- Adressage de la RAM 
+                when "001"|"010"|"011"|"100"|"101" =>
                     d_cpu_in <= i_D_ram_out;
-                end if;
-             when others =>
-                    d_cpu_in <= (others => 'X');
-        end case;
-    elsif (i_IORQn = '0' and i_Cpu_Addr(0) = '0' and i_RDn = '0') then
-        -- IO inputs
-        d_cpu_in <= i_TAPE_IN & i_USA_UK & '0' & i_KBDn(0) & i_KBDn(1) & i_KBDn(2) & i_KBDn(3) & i_KBDn(4);
+                -- NOP execution ?
+                when "110"|"111" =>
+                    -- NOP uniquement si le bit 6 = 0 (sinon c'est une instruction de HALT et on la laisse passer)
+                    if i_D_ram_out(6) = '0' then
+                        d_cpu_in <= X"00";
+                    else
+                        d_cpu_in <= i_D_ram_out;
+                    end if;
+                 when others =>
+                        d_cpu_in <= (others => 'X');
+            end case;
+        elsif (i_IORQn = '0' and i_Cpu_Addr(0) = '0' and i_RDn = '0') then
+            -- IO inputs
+            d_cpu_in <= i_TAPE_IN & i_USA_UK & '0' & i_KBDn(0) & i_KBDn(1) & i_KBDn(2) & i_KBDn(3) & i_KBDn(4);
+        end if;
     end if;
 end process;
 
