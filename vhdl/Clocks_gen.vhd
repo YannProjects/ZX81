@@ -38,6 +38,7 @@ entity Clocks_gen is
            vga_clk : out STD_LOGIC;
            clk_3_25m : out STD_LOGIC;
            clk_6_5m : out STD_LOGIC;
+           clk_13m : out STD_LOGIC;
            rst : in std_logic;
            pll_locked : out std_logic);
 end Clocks_gen;
@@ -51,7 +52,7 @@ begin
     -- Composant utilisé pour générer les horloges du ZX81 et du controlleur VGA:
     -- VGA_CLK: 25,1 MHz pour le controlleur VGA
     -- 6,5 MHz: ULA
-    -- 3,25 MHz: Z80
+    -- 3,25 MHz: Z80    
     clk_gen : entity work.clk_wiz_2
     port map (
         main_clk => main_clk,
@@ -60,7 +61,7 @@ begin
         reset => rst,
         locked => pll_locked
     );
-    
+
     -- Code venant de https://forums.xilinx.com/t5/Other-FPGA-Architecture/How-to-divide-a-clock-by-2-with-a-simple-primitive-without-Clock/td-p/783488
     clk_divider_1: BUFR
     generic map ( BUFR_DIVIDE => "4")
@@ -84,10 +85,11 @@ begin
         I => i_clk_6_5m,
         O => i_clk_3_25m,
         CE => '1',
-        CLR => '0');      
+        CLR => '0');
 
     clk_3_25m <= i_clk_3_25m;
     clk_6_5m <= i_clk_6_5m;
+    clk_13m <= i_clk_13m;
     clk_52m <= i_clk_52m;
 
 end Based_on_IP;

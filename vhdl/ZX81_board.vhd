@@ -30,28 +30,27 @@ use work.VGA_control_pack.all;
 use work.zx81_pack.all;
 library UNISIM;
 use UNISIM.VComponents.all;
-use std.textio.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 --use IEEE.NUMERIC_STD.ALL;
 
 entity ZX81_board is
-    Port ( CLK_12M : in STD_LOGIC; -- Main clock from CMOD S7
+    Port ( CLK_12M : in STD_LOGIC; -- Clock from CMOD S7
            -- Sortie "audio" ZX81 - Entrée "audio" PC
-           o_MIC : out STD_LOGIC;
-           i_RESET : in std_logic;
-           i_KBD_L : in STD_LOGIC_vector (4 downto 0);
-           o_KBD_C : out STD_LOGIC_vector (7 downto 0);
+           MIC : out STD_LOGIC;
+           RESET : in std_logic;
+           PUSH_BUTTON : in std_logic;
+           KBD_L : in STD_LOGIC_vector (4 downto 0);
+           KBD_C : out STD_LOGIC_vector (7 downto 0);
            -- Sortie "audio" PC - Entrée "audio" ZX81
-           i_EAR : in STD_LOGIC;
+           EAR : in STD_LOGIC;
+           HSYNC_VGA : out STD_LOGIC;
+           VSYNC_VGA : out STD_LOGIC;
            
-           -- Video
-           o_HSYNC_VGA : out STD_LOGIC;
-           o_VSYNC_VGA : out STD_LOGIC;
-           o_R_VGA_H : out std_logic_vector (2 downto 0);
-           o_G_VGA_H : out std_logic_vector (2 downto 0);
-           o_B_VGA_H : out std_logic_vector (2 downto 0);
+           R_VGA_H : out std_logic_vector (2 downto 0);
+           G_VGA_H : out std_logic_vector (2 downto 0);
+           B_VGA_H : out std_logic_vector (2 downto 0);
            
            -- Signaux de debug
            -- Debug : out std_logic_vector(5 downto 0)
@@ -61,76 +60,84 @@ entity ZX81_board is
            -- LED_2 -> K1 : Non utilisée
            -- LED_3 -> J1 : Non utilisée
            -- LED_4 -> E1 : Non utilisée
-           o_heart_beat : out std_logic
+           Vsync_Heart_Beat : out std_logic;
+           
+           Dbg : out std_logic_vector(7 downto 0)
+          
          );
 end ZX81_board;
 
-architecture Behavioral of ZX81_board is   
+architecture Behavioral of ZX81_board is
 
-    signal clk_52m, clk_3_25m, clk_6_5m : std_logic;
+    component blk_mem_gen_0 IS
+      PORT (
+        clka : IN STD_LOGIC;
+        wea : IN STD_LOGIC;
+        addra : IN STD_LOGIC_VECTOR(RAM_ADDRWIDTH-1 DOWNTO 0);
+        dina : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+        douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
+      );
+    end component;     
+     
+    component blk_mem_gen_1 IS
+      PORT (
+        clka : IN STD_LOGIC;
+        addra : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+        douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
+      );
+    end component;     
     
     -- Control signal
     signal waitn, nmin : std_logic := '1';
     signal m1n, mreqn, iorqn, tape_in : std_logic;
-    signal rdn, wrn, wrram, rfrshn, haltn : std_logic;
-    signal cpu_addr, mem_addr_char, mem_addr : std_logic_vector (15 downto 0);
-    signal A_prim : std_logic_vector (8 downto 0);
-    signal cpu_data_out, cpu_data_in, ram_data, rom_data : std_logic_vector (7 downto 0);
-    signal ula_io_data, video_pattern_data : std_logic_vector (7 downto 0);
-    signal cpu_resetn : std_logic;
-    signal rom_csn, ram_csn, ula_csn : std_logic;
-    signal vsync_0, vsync_1 : std_logic;
-    
-    signal ula_io_read, ula_nop_detect : std_logic;
-    
+    signal rdn, wrn, wrram, rfrshn, haltn, video_pattern_select : std_logic;
+    signal a_cpu, a_vid_pattern, addr : std_logic_vector (15 downto 0);
+    signal d_cpu_out, d_cpu_in, d_ram_out, d_rom_out : std_logic_vector (7 downto 0);
+    signal clk_52m, clk_3_25m, clk_6_5m, clk_13m : std_logic;
+    signal resetn : std_logic;
+    signal kbd_l_swap : std_logic_vector(4 downto 0);
     -- VGA
     signal vga_clock, pll_locked : std_logic;
-    signal vga_addr: std_logic_vector(19 downto 0);
+    signal vga_addr: std_logic_vector(17 downto 0);
     signal vga_data: std_logic_vector(1 downto 0);
     signal vga_wr_cyc : std_logic;
-    signal vga_control_init_done, vga_control_init_done_0 : std_logic;
-    signal hsync, vsync, line_vid_data : std_logic;
+    signal vga_control_init_done, vga_control_init_done_0, vga_control_init_done_1 : std_logic;
     
     signal R_VGA, G_VGA, B_VGA : std_logic_vector(7 downto 0);
     signal BLANK_VGA : std_logic;
-    signal i_hsync, i_vsync : std_logic;
+    signal hsync, vsync : std_logic;
     
-    signal vsync_counter : integer;
-    signal heart_beat : std_logic;
+    -- attribute mark_debug : string;
+    -- attribute mark_debug of KBD_C : signal is "true";
+    -- attribute mark_debug of KBD_L : signal is "true";
+    -- attribute mark_debug of i_wrram : signal is "true";
+    -- attribute mark_debug of i_d_ram_out : signal is "true";
+    -- attribute mark_debug of i_a_cpu : signal is "true";
+    -- attribute mark_debug of i_m1n : signal is "true";
+    -- attribute mark_debug of i_tape_in : signal is "true";
+    -- attribute mark_debug of i_d_cpu_in : signal is "true";
+    -- attribute mark_debug of i_nmin : signal is "true";  
+        
+    -- attribute mark_debug of i_clk_3_25m : signal is "true";
+    -- attribute mark_debug of i_kbd_l_swap : signal is "true";
+    -- attribute mark_debug of i_iorqn : signal is "true";
+    -- attribute mark_debug of i_rdn : signal is "true";
+    -- attribute mark_debug of i_rfrshn : signal is "true";
 
     attribute ASYNC_REG : string;
     attribute ASYNC_REG of vga_control_init_done_0 : signal is "TRUE";
-    
-    -- RAM
-    component blk_mem_gen_0 IS
-    port (
-         clka : IN STD_LOGIC;
-         wea : IN STD_LOGIC;
-         addra : IN STD_LOGIC_VECTOR(RAM_ADDRWIDTH-1 DOWNTO 0);
-         dina : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
-         douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
-    );
-    end component;
-       
-    -- ROM
-    component blk_mem_gen_1 IS
-    port (
-         clka : IN STD_LOGIC;
-         addra : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
-         douta : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
-    );
-    end component;
     
     begin
         
     clk_gen_0 : entity work.Clocks_gen
     port map (
-        main_clk => clk_12M,
+        main_clk => CLK_12M,
         clk_52m => clk_52m,
         clk_3_25m => clk_3_25m,
         clk_6_5m => clk_6_5m,
+        clk_13m => clk_13m,
         vga_clk => vga_clock,
-        rst => i_reset,
+        rst => RESET,
         pll_locked => pll_locked
     );
     
@@ -144,17 +151,16 @@ architecture Behavioral of ZX81_board is
             vga_control_init_done_0 <= vga_control_init_done;
         end if;
     end process;
-    
-    cpu_resetn <= not i_reset and pll_locked and vga_control_init_done_0;
+    resetn <= not RESET and pll_locked and vga_control_init_done_0;
          
     -- Instantiation Z80 basé sur la version MIST-devel (https://github.com/mist-devel/T80)
     cpu1 : entity work.T80se
     port map (
-		RESET_n	=> cpu_resetn,
+		RESET_n	=> resetn,
 	 	CLK_n => clk_3_25m,
 	 	CLKEN => '1',
 	 	WAIT_n => waitn,
-	 	INT_n => cpu_addr(6),
+	 	INT_n => a_cpu(6),
 	 	NMI_n => nmin,
 	 	BUSRQ_n => '1',
 	 	M1_n => m1n,
@@ -164,154 +170,98 @@ architecture Behavioral of ZX81_board is
 	 	WR_n => wrn,
 	 	RFSH_n => rfrshn,
 	 	HALT_n => haltn,
-	 	A => cpu_addr,
-	 	DI => cpu_data_in,
-	 	DO => cpu_data_out
-    );
-
+	 	A => a_cpu,
+	 	DI => d_cpu_in,
+	 	DO => d_cpu_out
+     );
+              
     ula0 : entity work.ULA
     port map ( 
-        i_resetn => cpu_resetn,
-        i_clk_3_25_m => clk_3_25m,
-        i_clk_6_5_m => clk_6_5m,
-        
-        i_A => cpu_addr,
-        o_Ap => A_prim,
-        i_video_pattern => video_pattern_data,
-        o_io_read => ula_io_read,
-        o_io_data => ula_io_data, 
-        i_kbdn => i_KBD_L,
-        i_tape_in => tape_in,
-        i_usa_uk => '0',
-        o_tape_out => o_MIC,
-        o_ram_csn => ram_csn,
-        o_rom_csn => rom_csn,
-        o_nop_detect => ula_nop_detect,
-        
-        i_rdn => rdn,
-        i_wrn => wrn,
-        i_haltn => haltn,
-        i_iorqn => iorqn,
-        i_mreqn => mreqn,
-        i_m1n => m1n,
-        i_rfshn => rfrshn,
-        o_waitn => waitn,
-        o_nmin => nmin,
-        
-        o_vsync => vsync,
-        o_hsync => hsync,
-        o_video_data => line_vid_data
+       i_RESETn => resetn,
+       
+       i_CLK_3_25_M => clk_3_25m,
+       i_CLK_6_5_M => clk_6_5m,
+       i_CLK_13_M => clk_13m,
+       i_Cpu_Addr => a_cpu,
+       o_Mem_Addr => addr, -- CPU and video addresser address bus
+       o_D_cpu_IN => d_cpu_in, -- CPU data bus IN. Output from ULA side
+       i_D_ram_out => d_ram_out, -- RAM output data bus. Input for ULA side
+       i_D_rom_out => d_rom_out, -- ROM ouput data bus. Input for ULA side 
+       
+       o_vga_addr => vga_addr,
+       o_vga_data => vga_data,    
+       o_vga_wr_cyc => vga_wr_cyc, 
+       
+       i_KBDn => kbd_l_swap,
+       i_TAPE_IN => tape_in,
+       i_USA_UK => '0',
+       o_TAPE_OUT => MIC,
+       o_vsync_heart_beat => Vsync_Heart_Beat,
+       i_RDn => rdn,
+       i_WRn => wrn,
+       i_HALTn => haltn,
+       i_IORQn => iorqn,
+       o_NMIn => nmin,
+       i_MREQn => mreqn,
+       i_RFRSHn => rfrshn,
+       i_M1n => m1n,
+       o_WAITn => waitn
     );
-    
-    -- p_write_pattern : process(clk_6_5m)
-    --     file outfile : text open write_mode is "D:\Documents\Projets_HW\ZX81\test_patterns\VGA_test_pattern.txt";
-    --     variable test_pattern : line;  
-    -- begin    
-    --     if rising_edge(clk_6_5m) then
-    --         write(test_pattern, std_logic'image(vsync) & " " & std_logic'image(hsync) & " " & std_logic'image(line_vid_data), right, 1);
-    --         writeline(outfile, test_pattern);
-    --     end if;
-    -- end process;         
-    
-    -- U12 - Read char bitmap during refresh cycle when A14 = 0
-    mem_addr <= mem_addr_char when (cpu_addr(14) = '0' and rfrshn = '0') else cpu_addr;
-    mem_addr_char <= cpu_addr(15 downto 9) & A_prim;
-    -- Char address in RAM or video pattern in ROM
-    video_pattern_data <= rom_data when (cpu_addr(14) = '0' and rfrshn = '0') else ram_data;
-    
-    p_cpu_data_select : process(ram_csn, rom_csn, ula_io_read, ula_nop_detect, ram_data, rom_data, ula_io_data)
-    begin
-        if ula_io_read = '1' then
-            cpu_data_in <= ula_io_data;
-        elsif ula_nop_detect = '1' then
-            cpu_data_in <= (others => '0');
-        elsif rom_csn = '0' then
-            cpu_data_in <= rom_data;
-        elsif ram_csn = '0' then
-            cpu_data_in <= ram_data;
-        else
-            cpu_data_in <= (others => 'X');
-        end if;
-    end process;
     
     -- ROM du ZX81
     rom0 : blk_mem_gen_1
     port map (
-        clka => clk_3_25m,
-        addra => mem_addr (12 downto 0),
-        douta => rom_data
+        -- L'horloge est à 6,5 MHz car les accès aux patterns video en ROM se font en un cycle de 3,5 MHz
+        -- La ROM a un accès synchrone et il faut 2 cycles : 1 pour latcher l'adresse et 1 pour lire la donnée
+        clka => clk_6_5m,
+        addra => addr (12 downto 0),
+        douta => d_rom_out
     );
 
-    -- RAM ZX81 (tuned to 2K ro 16K with RAM_ADDRWIDTH)
     ram1 : blk_mem_gen_0
     port map (
+       addra => addr (RAM_ADDRWIDTH - 1 downto 0),
+       dina => d_cpu_out,
+       douta => d_ram_out,       
        clka => clk_3_25m,
-       addra => mem_addr(RAM_ADDRWIDTH - 1 downto 0),
-       dina => cpu_data_out,
-       douta => ram_data,       
        wea => wrram
     );
     
-    -- Interface to VGA
     vga_control0 : entity work.vga_control_top
-    port map (
-        i_RESET => i_RESET,
-        i_CLK_6_5M => clk_6_5m,
-        i_ula_vid_data => line_vid_data,        
-        i_VGA_CLK => vga_clock,
-        i_CLK_52M => clk_52m,        
-        o_VGA_CONTROL_INIT_DONE => vga_control_init_done,
-        i_ula_hsync => hsync,
-        i_ula_vsync => vsync,
-        -- VGA interface
-        o_HSYNC => o_HSYNC_VGA,
-        o_VSYNC => o_VSYNC_VGA,
-        o_BLANK => BLANK_VGA,
-        o_R => R_VGA,
-        o_G => G_VGA,
-        o_B => B_VGA
+    port map ( 
+        RESET => RESET,
+        CLK_52M => clk_52m,
+        VGA_CLK => vga_clock,
+        VIDEO_ADDR => vga_addr,
+        VIDEO_DATA => vga_data,
+        WR_CYC => vga_wr_cyc,
+        VGA_CONTROL_INIT_DONE => vga_control_init_done,
+        HSYNC => hsync,
+        VSYNC => vsync,
+        BLANK => BLANK_VGA,
+        R => R_VGA,
+        G => G_VGA,
+        B => B_VGA
     );
     
     -- Ajout d'une condition sur le signal WR Ram suite au problème rencontré sur l'instruction en L1A14 (LD      (DE),A)
     -- avec DE qui vaut 0. Je ne sais pas pourquoi vaut 0 dans ce cas. Mais, on reproduit le problème avec MAME.
     -- => Ajout de la condition sur A14 pour valider l'écriture en RAM.
-    wrram <= '1' when (wrn = '0' and mreqn = '0' and cpu_addr(14) = '1' and cpu_addr(15) = '0') else '0';    
+    wrram <= '1' when (wrn = '0' and mreqn = '0' and addr(14) = '1' and addr(15) = '0') else '0';    
 
     -- Les 5 lignes du clavier
-    o_KBD_C <= cpu_addr(15 downto 8);
+    KBD_C <= a_cpu(15 downto 8);
 
-    tape_in <= i_EAR;
+    tape_in <= EAR;
     
     -- On ne garde que 3 bits sur les 8
-    o_R_VGA_H(2 downto 0) <= R_VGA(7 downto 5) when BLANK_VGA = '0' else "000";
-    o_G_VGA_H(2 downto 0) <= G_VGA(7 downto 5) when BLANK_VGA = '0' else "000";
-    o_B_VGA_H(2 downto 0) <= B_VGA(7 downto 5) when BLANK_VGA = '0' else "000";
-
------------------------------------------------------
--- Process pour le heart beat (allumage LED)
------------------------------------------------------
-p_vsync_hb : process (i_RESET, clk_3_25m, IORQn)
-begin
-    if (i_RESET = '1') then
-        heart_beat <= '0';
-        vsync_counter <= VSYNC_COUNTER_PERIOD;
-    -- Sur chaque front descendant de l'horloge 6.5 MHz
-    elsif rising_edge(clk_3_25m) then
-        vsync_0 <= vsync;
-        vsync_1 <= vsync_0;
-        -- Compteur de heart beat pour faire clignoter la LED sur le CMOD S7. 
-        -- Détection transtion 1 -> 0
-        if vsync_1 = '1' and vsync_0 = '0' then
-            vsync_counter <= vsync_counter - 1;
-            if  vsync_counter = 0 then
-                vsync_counter <= VSYNC_COUNTER_PERIOD;
-                heart_beat <= not heart_beat;
-            end if;
-        end if;
-    end if;
+    R_VGA_H(2 downto 0) <= R_VGA(7 downto 5) when BLANK_VGA = '0' else "000";
+    G_VGA_H(2 downto 0) <= G_VGA(7 downto 5) when BLANK_VGA = '0' else "000";
+    B_VGA_H(2 downto 0) <= B_VGA(7 downto 5) when BLANK_VGA = '0' else "000";
     
-    o_heart_beat <= heart_beat;
+    HSYNC_VGA <= hsync;
+    VSYNC_VGA <= vsync;
     
-end process;
-
+    kbd_l_swap <= KBD_L;
+        
 end Behavioral;
